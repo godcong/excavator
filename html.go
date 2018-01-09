@@ -2,7 +2,6 @@ package excavator
 
 import (
 	"bytes"
-	"log"
 	"net/http"
 	"strings"
 
@@ -58,7 +57,6 @@ func GetCharList(url string) map[int]map[string]string {
 
 	for k, v := range sa {
 		saa := DoFix(v)
-		log.Println(saa)
 		addrMap := DecodeChar(strings.NewReader(saa))
 		mlist[k] = addrMap
 
@@ -74,7 +72,6 @@ func GetRootList(url string) map[int]map[string]string {
 
 	for k, v := range sa {
 		saa := DoFix(v)
-		log.Println(saa)
 		addrMap := DecodeRoot(strings.NewReader(saa))
 		mlist[k] = addrMap
 

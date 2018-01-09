@@ -33,7 +33,6 @@ func Get(url string) map[string][]string {
 			}
 			retMap[value] = cl
 		}
-
 	}
 	return retMap
 }
