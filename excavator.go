@@ -9,7 +9,9 @@ func Get(url string) map[string][]string {
 	retMap := make(map[string][]string)
 
 	SetFix(func(s string) string {
-		return strings.Replace(s, "class=font_14", "", -1)
+		s = strings.Replace(s, "class=font_14", "", -1)
+		s = strings.Replace(s, `""`, `"`, -1)
+		return s
 	})
 	TransformOn()
 
@@ -24,6 +26,7 @@ func Get(url string) map[string][]string {
 
 	for _, v := range list {
 		for key, value := range v {
+
 			var cl []string
 			list1 := GetCharList(url + "/" + key)
 			for _, value1 := range list1 {
@@ -32,6 +35,7 @@ func Get(url string) map[string][]string {
 				}
 			}
 			retMap[value] = cl
+
 		}
 
 	}
