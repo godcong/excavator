@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"log"
 	"strings"
 )
 
@@ -23,16 +24,17 @@ func Get(url string) map[string][]string {
 
 	for _, v := range list {
 		for key, value := range v {
-			cl := make([]string, 0)
-			list1 := GetCharList(url + key)
+			var cl []string
+			list1 := GetCharList(url + "/" + key)
 			for _, value1 := range list1 {
 				for _, value2 := range value1 {
 					cl = append(cl, value2)
 				}
-
 			}
 			retMap[value] = cl
 		}
+
 	}
+	log.Println("map:", retMap)
 	return retMap
 }
