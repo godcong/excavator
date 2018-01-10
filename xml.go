@@ -63,7 +63,7 @@ func DecodeRoot(r io.Reader) map[string]string {
 		}
 
 	}
-	if err != nil {
+	if err != nil && err != io.EOF {
 		log.Println("error", err)
 	}
 	return addrMap

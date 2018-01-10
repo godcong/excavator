@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"log"
+	"os"
 	"strings"
 
 	"github.com/godcong/excavator"
@@ -32,25 +32,23 @@ func main() {
 		s = strings.Replace(s, " bgcolor='#F4F5F9'  align=center", "", -1)
 		return s
 	})
-	log.Println(list)
-	//l := excavator.GetCharList("http://xh.5156edu.com/html/908.html")
-	//log.Println(l)
-	//file, _ := os.OpenFile("excavator.txt", os.O_CREATE|os.O_RDWR, os.ModePerm)
-	//for _, v := range list {
-	//	for key, value := range v {
-	//		file.WriteString("部首:" + value)
-	//		file.WriteString("\n")
-	//		list1 := excavator.GetCharList("http://xh.5156edu.com/" + key)
-	//
-	//		for _, value1 := range list1 {
-	//			for _, value2 := range value1 {
-	//				file.WriteString(value2)
-	//				file.WriteString("\n")
-	//			}
-	//
-	//		}
-	//	}
-	//
-	//}
+
+	file, _ := os.OpenFile("excavator.txt", os.O_CREATE|os.O_RDWR, os.ModePerm)
+	for _, v := range list {
+		for key, value := range v {
+			file.WriteString("----------部首:" + value + "----------")
+			file.WriteString("\n")
+			list1 := excavator.GetCharList(local + "/" + key)
+
+			for _, value1 := range list1 {
+				for _, value2 := range value1 {
+					file.WriteString(value2)
+					file.WriteString("\n")
+				}
+
+			}
+		}
+
+	}
 
 }

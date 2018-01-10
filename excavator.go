@@ -1,7 +1,6 @@
 package excavator
 
 import (
-	"log"
 	"strings"
 )
 
@@ -39,6 +38,9 @@ func Get(url string) map[string][]string {
 		}
 
 	}
-	log.Println("map:", retMap)
 	return retMap
+}
+
+func GetFivePhase(url string) {
+
 }
