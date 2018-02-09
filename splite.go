@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func StringSplite(base, sta, end string) []string {
+func StringSplite(base, sta, end string, keep bool) []string {
 	sa := make([]string, 0)
 	size := len(base)
 	for i := 0; i < size; {
@@ -12,12 +12,20 @@ func StringSplite(base, sta, end string) []string {
 		if s < 0 {
 			break
 		}
-		base = base[s:]
+		if !keep {
+			base = base[s+len(sta):]
+		} else {
+			base = base[s:]
+		}
+
 		e := strings.Index(base, end)
 		if e < 0 {
 			break
 		}
-		e = e + len(end)
+		if keep {
+			e = e + len(end)
+		}
+
 		sa = append(sa, base[0:e])
 
 		i += e

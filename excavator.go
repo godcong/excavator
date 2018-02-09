@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"log"
 	"strings"
 )
 
@@ -25,7 +26,6 @@ func Get(url string) map[string][]string {
 
 	for _, v := range list {
 		for key, value := range v {
-
 			var cl []string
 			list1 := GetCharList(url + "/" + key)
 			for _, value1 := range list1 {
@@ -41,6 +41,45 @@ func Get(url string) map[string][]string {
 	return retMap
 }
 
-func GetFivePhase(url string) {
+func GetKangXi(url string)[]CharDetail {
+	var ret []CharDetail
+	TransformOff()
 
+	SetFix(func(s string) string {
+		s = strings.Replace(s, `<td align=middle width="10%" bgcolor=#F0E4E1`, "<td", -1)
+		return s
+	})
+
+	//http://tool.httpcn.com/KangXi/BuShou.html
+	//goquery.NewDocument("http://tool.httpcn.com/KangXi/BuShou.html")
+	list := GetRootList(url + "/KangXi/BuShou.html")
+
+	SetFix(func(s string) string {
+		s = strings.Replace(s, "<tr bgcolor=#ffffff>", "<tr>", -1)
+
+		s = strings.Replace(s, `<td align="center" bgcolor="#f7f1f0">`, "<td>", -1)
+		s = strings.Replace(s, `<font color=red size=4>`, "<font>", -1)
+		s = strings.Replace(s, `<a title=点击显示注释 href=`, `<a href="`, -1)
+		s = strings.Replace(s, `><font`, `"><font`, -1)
+		return s
+	})
+
+	for _, v := range list {
+		for key := range v {
+			//var cl []string
+			list1 := GetFileterCharList(url + "/" + key)
+			//TransformOn()
+			for _, v1 := range list1 {
+				for k := range v1 {
+					//cl = append(cl, value2)
+					d := GetCharDetail(url+k)
+					log.Println(d)
+					if d.Char!=""{
+						ret = append(ret,d)
+					}
+				}
+			}
+		}
+	}
+	return ret
 }
