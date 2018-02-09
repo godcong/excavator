@@ -128,13 +128,13 @@ func GetCharDetail(url string) CharDetail {
 		return CharDetail{}
 	}
 	if len(hz)>0{
-		t = hz[0]
+		c = hz[0]
 	}
 	wx := StringSplite(s, `汉字五行：`, "　", false)
 	if len(wx)>0{
-		c = wx[0]
+		t = wx[0]
 	}
-	fj := StringSplite(s, `首尾分解查字</span> ]：`, ")", false)
+	fj := StringSplite(s, `首尾分解查字</span> ]：`, "(", false)
 	if len(fj)>0{
 		r = fj[0]
 	}

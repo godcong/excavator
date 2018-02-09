@@ -83,7 +83,6 @@ func GetKangXi(url string) []CharDetail {
 }
 
 func UpdateKangXi(url string,f func(CharDetail))  {
-	var ret []CharDetail
 	TransformOff()
 
 	SetFix(func(s string) string {
@@ -121,5 +120,4 @@ func UpdateKangXi(url string,f func(CharDetail))  {
 			}
 		}
 	}
-	return ret
 }
