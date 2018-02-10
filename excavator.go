@@ -1,10 +1,11 @@
 package excavator
 
 import (
+	"strconv"
 	"strings"
 )
 
-func Get(url string) map[string][]string {
+func GetDictionary(url string) map[string][]string {
 	retMap := make(map[string][]string)
 
 	SetFix(func(s string) string {
@@ -19,7 +20,8 @@ func Get(url string) map[string][]string {
 	SetFix(func(s string) string {
 		s = strings.Replace(s, " bgcolor=#ffffff ", "", -1)
 		s = strings.Replace(s, " class=font_14", "", -1)
-		s = strings.Replace(s, " bgcolor='#F4F5F9'  align=center", "", -1)
+		s = strings.Replace(s, " bgcolor='#f4f5f9' ", "", -1)
+		s = strings.Replace(s, " align=center", "", -1)
 		return s
 	})
 
@@ -40,6 +42,53 @@ func Get(url string) map[string][]string {
 	return retMap
 }
 
+func UpdateDictionary(url string, f func(detail CharDetail)) {
+	SetFix(func(s string) string {
+		s = strings.Replace(s, "class=font_14", "", -1)
+		s = strings.Replace(s, `""`, `"`, -1)
+		return s
+	})
+	TransformOn()
+
+	list := GetRootList(url + "/bs.html")
+
+	SetFix(func(s string) string {
+		s = strings.Replace(s, " bgcolor=#ffffff ", "", -1)
+		s = strings.Replace(s, " class=font_14", "", -1)
+		s = strings.Replace(s, " bgcolor='#f4f5f9' ", "", -1)
+		s = strings.Replace(s, " align=center", "", -1)
+		return s
+	})
+
+	for _, v := range list {
+		for key, value := range v {
+			list1 := GetCharList(url + "/" + key)
+			for _, value1 := range list1 {
+				for _, value2 := range value1 {
+					//cl = append(cl, value2)
+					s := strings.Split(value2, "|")
+					if len(s) > 2 {
+						strokes, _ := strconv.Atoi(s[0])
+						c := CharDetail{
+							Char:           s[1],
+							NameType:       "",
+							NameRoot:       "",
+							Pinyin:         s[2],
+							Radical:        value,
+							SimpleStrokes:  strokes,
+							ScienceStrokes: 0,
+						}
+						f(c)
+					}
+				}
+			}
+			//retMap[value] = cl
+
+		}
+
+	}
+}
+
 func GetKangXi(url string) []CharDetail {
 	var ret []CharDetail
 	TransformOff()
@@ -49,8 +98,6 @@ func GetKangXi(url string) []CharDetail {
 		return s
 	})
 
-	//http://tool.httpcn.com/KangXi/BuShou.html
-	//goquery.NewDocument("http://tool.httpcn.com/KangXi/BuShou.html")
 	list := GetRootList(url + "/KangXi/BuShou.html")
 
 	SetFix(func(s string) string {
@@ -65,9 +112,7 @@ func GetKangXi(url string) []CharDetail {
 
 	for _, v := range list {
 		for key := range v {
-			//var cl []string
 			list1 := GetFileterCharList(url + "/" + key)
-			//TransformOn()
 			for _, v1 := range list1 {
 				for k := range v1 {
 					//cl = append(cl, value2)
@@ -82,7 +127,7 @@ func GetKangXi(url string) []CharDetail {
 	return ret
 }
 
-func UpdateKangXi(url string,f func(CharDetail))  {
+func UpdateKangXi(url string, f func(CharDetail)) {
 	TransformOff()
 
 	SetFix(func(s string) string {
@@ -90,8 +135,6 @@ func UpdateKangXi(url string,f func(CharDetail))  {
 		return s
 	})
 
-	//http://tool.httpcn.com/KangXi/BuShou.html
-	//goquery.NewDocument("http://tool.httpcn.com/KangXi/BuShou.html")
 	list := GetRootList(url + "/KangXi/BuShou.html")
 
 	SetFix(func(s string) string {
@@ -106,9 +149,7 @@ func UpdateKangXi(url string,f func(CharDetail))  {
 
 	for _, v := range list {
 		for key := range v {
-			//var cl []string
 			list1 := GetFileterCharList(url + "/" + key)
-			//TransformOn()
 			for _, v1 := range list1 {
 				for k := range v1 {
 					//cl = append(cl, value2)

@@ -2,7 +2,6 @@ package excavator
 
 import (
 	"bytes"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,6 +9,16 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
+
+type CharDetail struct {
+	Char           string
+	NameType       string
+	NameRoot       string
+	Pinyin         string
+	Radical        string
+	SimpleStrokes  int
+	ScienceStrokes int
+}
 
 var trans = false
 
@@ -56,8 +65,8 @@ func GetCharList(url string) map[int]map[string]string {
 	mlist := make(map[int]map[string]string)
 	s := GetBodyFromUrl(url)
 	s = strings.ToLower(s)
-	sa := StringSplite(s, "<tr bgcolor", "</tr>", true)
-	log.Println(sa)
+	sa := StringSplite(s, "<tr bgcolor=#ffffff", "</tr>", true)
+
 	for k, v := range sa {
 		saa := DoFix(v)
 		addrMap := DecodeChar(strings.NewReader(saa))
@@ -110,37 +119,30 @@ func GetFileterCharList(url string) map[int]map[string]string {
 	return mlist
 }
 
-type CharDetail struct {
-	Char           string
-	NameType       string
-	NameRoot       string
-	ScienceStrokes int
-}
-
 func GetCharDetail(url string) CharDetail {
-	var c,t,r string
+	var c, t, r string
 	var b int
 	s := GetBodyFromUrl(url)
 	s = strings.ToLower(s)
 
 	hz := StringSplite(s, `『`, "』", false)
-	if len(hz) == 0{
+	if len(hz) == 0 {
 		return CharDetail{}
 	}
-	if len(hz)>0{
+	if len(hz) > 0 {
 		c = hz[0]
 	}
 	wx := StringSplite(s, `汉字五行：`, "　", false)
-	if len(wx)>0{
+	if len(wx) > 0 {
 		t = wx[0]
 	}
 	fj := StringSplite(s, `首尾分解查字</span> ]：`, "(", false)
-	if len(fj)>0{
+	if len(fj) > 0 {
 		r = fj[0]
 	}
 	bh := StringSplite(s, `康熙笔画：`, "；", false)
-	if len(bh)>0{
-		b,_ = strconv.Atoi(bh[0])
+	if len(bh) > 0 {
+		b, _ = strconv.Atoi(bh[0])
 	}
 	return CharDetail{
 		Char: c, NameType: t, NameRoot: r, ScienceStrokes: b,
