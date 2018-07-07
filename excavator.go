@@ -3,17 +3,17 @@ package excavator
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-//GetRootList run get root
-func GetRootList(url string) {
-	doc, err := ParseDocument(url)
+//getRootList run get root
+func getRootList(r *Root) {
+	doc, err := parseDocument(r.URL)
 	if err != nil {
 		panic(err)
 	}
-	//root := NewRoot()
 
 	doc.Find("table tbody").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
@@ -27,19 +27,29 @@ func GetRootList(url string) {
 			href, b := selection.Find("a").Attr("href")
 			ch := selection.Text()
 			if b {
-				fmt.Println("log", stroke,ch, href, b)
-				//root.Radicals
+				fmt.Println("log", stroke, ch, href, b)
+				r.Add(&Radical{
+					Strokes: strconv.Itoa(i),
+					Name:    ch,
+					URL:     href,
+				})
 			}
-
 		})
-
-		//})
-
 	})
 }
 
+func getRedicalList(r *Root) {
+	if r.HasNext() {
+
+	}
+}
+
+func getCharacterList(r *Root) {
+
+}
+
 //ParseDocument get the url result body
-func ParseDocument(url string) (*goquery.Document, error) {
+func parseDocument(url string) (*goquery.Document, error) {
 	// Request the HTML page.
 	res, err := http.Get(url)
 	if err != nil {

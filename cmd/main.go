@@ -15,5 +15,6 @@ func main() {
 	local := *url
 	suffix := "/KangXi/BuShou.html"
 	m := local + suffix
-	excavator.GetRootList(m)
+	root := excavator.NewRoot(m)
+	root.GetList(m)
 }
