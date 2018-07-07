@@ -1,164 +1,59 @@
 package excavator
 
 import (
-	"strconv"
-	"strings"
+	"fmt"
+	"net/http"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
-func GetDictionary(url string) map[string][]string {
-	retMap := make(map[string][]string)
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, "class=font_14", "", -1)
-		s = strings.Replace(s, `""`, `"`, -1)
-		return s
-	})
-	TransformOn()
-
-	list := GetRootList(url + "/bs.html")
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, " bgcolor=#ffffff ", "", -1)
-		s = strings.Replace(s, " class=font_14", "", -1)
-		s = strings.Replace(s, " bgcolor='#f4f5f9' ", "", -1)
-		s = strings.Replace(s, " align=center", "", -1)
-		return s
-	})
-
-	for _, v := range list {
-		for key, value := range v {
-			var cl []string
-			list1 := GetCharList(url + "/" + key)
-			for _, value1 := range list1 {
-				for _, value2 := range value1 {
-					cl = append(cl, value2)
-				}
-			}
-			retMap[value] = cl
-
-		}
-
+//GetRootList run get root
+func GetRootList(url string) {
+	doc, err := ParseDocument(url)
+	if err != nil {
+		panic(err)
 	}
-	return retMap
+	//root := NewRoot()
+
+	doc.Find("table tbody").Each(func(i int, s *goquery.Selection) {
+		// For each item found, get the band and title
+		stroke := i
+		//s.Find("td").Each(func(i int, selection *goquery.Selection) {
+		s.Find("tr td").Each(func(i1 int, selection *goquery.Selection) {
+			if i == 0 {
+				return
+			}
+
+			href, b := selection.Find("a").Attr("href")
+			ch := selection.Text()
+			if b {
+				fmt.Println("log", stroke,ch, href, b)
+				//root.Radicals
+			}
+
+		})
+
+		//})
+
+	})
 }
 
-func UpdateDictionary(url string, f func(detail CharDetail)) {
-	SetFix(func(s string) string {
-		s = strings.Replace(s, "class=font_14", "", -1)
-		s = strings.Replace(s, `""`, `"`, -1)
-		return s
-	})
-	TransformOn()
-
-	list := GetRootList(url + "/bs.html")
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, " bgcolor=#ffffff ", "", -1)
-		s = strings.Replace(s, " class=font_14", "", -1)
-		s = strings.Replace(s, " bgcolor='#f4f5f9' ", "", -1)
-		s = strings.Replace(s, " align=center", "", -1)
-		return s
-	})
-
-	for _, v := range list {
-		for key, value := range v {
-			list1 := GetCharList(url + "/" + key)
-			for _, value1 := range list1 {
-				for _, value2 := range value1 {
-					//cl = append(cl, value2)
-					s := strings.Split(value2, "|")
-					if len(s) > 2 {
-						strokes, _ := strconv.Atoi(s[0])
-						c := CharDetail{
-							Char:           s[1],
-							NameType:       "",
-							NameRoot:       "",
-							Pinyin:         s[2],
-							Radical:        value,
-							SimpleStrokes:  strokes,
-							ScienceStrokes: 0,
-						}
-						f(c)
-					}
-				}
-			}
-			//retMap[value] = cl
-
-		}
-
+//ParseDocument get the url result body
+func ParseDocument(url string) (*goquery.Document, error) {
+	// Request the HTML page.
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
-}
-
-func GetKangXi(url string) []CharDetail {
-	var ret []CharDetail
-	TransformOff()
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, `<td align=middle width="10%" bgcolor=#F0E4E1`, "<td", -1)
-		return s
-	})
-
-	list := GetRootList(url + "/KangXi/BuShou.html")
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, "<tr bgcolor=#ffffff>", "<tr>", -1)
-
-		s = strings.Replace(s, `<td align="center" bgcolor="#f7f1f0">`, "<td>", -1)
-		s = strings.Replace(s, `<font color=red size=4>`, "<font>", -1)
-		s = strings.Replace(s, `<a title=点击显示注释 href=`, `<a href="`, -1)
-		s = strings.Replace(s, `><font`, `"><font`, -1)
-		return s
-	})
-
-	for _, v := range list {
-		for key := range v {
-			list1 := GetFileterCharList(url + "/" + key)
-			for _, v1 := range list1 {
-				for k := range v1 {
-					//cl = append(cl, value2)
-					d := GetCharDetail(url + k)
-					if d.Char != "" {
-						ret = append(ret, d)
-					}
-				}
-			}
-		}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
 	}
-	return ret
-}
 
-func UpdateKangXi(url string, f func(CharDetail)) {
-	TransformOff()
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, `<td align=middle width="10%" bgcolor=#F0E4E1`, "<td", -1)
-		return s
-	})
-
-	list := GetRootList(url + "/KangXi/BuShou.html")
-
-	SetFix(func(s string) string {
-		s = strings.Replace(s, "<tr bgcolor=#ffffff>", "<tr>", -1)
-
-		s = strings.Replace(s, `<td align="center" bgcolor="#f7f1f0">`, "<td>", -1)
-		s = strings.Replace(s, `<font color=red size=4>`, "<font>", -1)
-		s = strings.Replace(s, `<a title=点击显示注释 href=`, `<a href="`, -1)
-		s = strings.Replace(s, `><font`, `"><font`, -1)
-		return s
-	})
-
-	for _, v := range list {
-		for key := range v {
-			list1 := GetFileterCharList(url + "/" + key)
-			for _, v1 := range list1 {
-				for k := range v1 {
-					//cl = append(cl, value2)
-					d := GetCharDetail(url + k)
-					if d.Char != "" {
-						f(d)
-					}
-				}
-			}
-		}
+	// Load the HTML document
+	body, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		return nil, err
 	}
+	return body, nil
 }
