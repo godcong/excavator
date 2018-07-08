@@ -15,12 +15,12 @@ type Radical struct {
 }
 
 type Character struct {
-	Character            string //字符
-	Pinyin               string //拼音
-	Radical              string //部首
-	RadicalStrokes       int    //部首笔画
-	KangxiStrokes        int    //康熙笔画数
-	Phonetic             string //注音
+	Character      string //字符
+	Pinyin         string //拼音
+	Radical        string //部首
+	RadicalStrokes int    //部首笔画
+	KangxiStrokes  int    //康熙笔画数
+	Phonetic       string //注音
 	Folk
 }
 
@@ -32,26 +32,22 @@ type Folk struct {
 }
 
 type Structure struct {
-
 }
 
 type Explain struct {
-
 }
 
 type Rhyme struct {
-
 }
 
 type Index struct {
-
 }
 
 //NewRoot create an root
 func NewRoot(url string) *Root {
 	return &Root{
 		iterator: 0,
-		Radicals: make([]*Radical, 100),
+		Radicals: make([]*Radical,0),
 		URL:      url,
 	}
 }
@@ -68,9 +64,13 @@ func (r *Root) HasNext() bool {
 
 //Next get next
 func (r *Root) Next() *Radical {
+	defer func() {
+		r.iterator++
+	}()
 	if r.iterator < len(r.Radicals) {
 		return r.Radicals[r.iterator]
 	}
+
 	return nil
 }
 
@@ -81,5 +81,6 @@ func (r *Root) Reset() {
 
 //GetList get an list from web
 func (root *Root) GetList(s string) {
-
+	getRootList(root, s)
+	getRedicalList(root)
 }

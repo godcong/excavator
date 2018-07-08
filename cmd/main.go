@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/godcong/excavator"
 )
@@ -14,7 +15,7 @@ func main() {
 
 	local := *url
 	suffix := "/KangXi/BuShou.html"
-	m := local + suffix
-	root := excavator.NewRoot(m)
-	root.GetList(m)
+	log.SetFlags(log.Llongfile)
+	root := excavator.NewRoot(local)
+	root.GetList(suffix)
 }

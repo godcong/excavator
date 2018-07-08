@@ -2,6 +2,7 @@ package excavator
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -9,8 +10,8 @@ import (
 )
 
 //getRootList run get root
-func getRootList(r *Root) {
-	doc, err := parseDocument(r.URL)
+func getRootList(r *Root, suffix string) {
+	doc, err := parseDocument(r.URL + suffix)
 	if err != nil {
 		panic(err)
 	}
@@ -27,9 +28,8 @@ func getRootList(r *Root) {
 			href, b := selection.Find("a").Attr("href")
 			ch := selection.Text()
 			if b {
-				fmt.Println("log", stroke, ch, href, b)
 				r.Add(&Radical{
-					Strokes: strconv.Itoa(i),
+					Strokes: strconv.Itoa(stroke),
 					Name:    ch,
 					URL:     href,
 				})
@@ -40,6 +40,21 @@ func getRootList(r *Root) {
 
 func getRedicalList(r *Root) {
 	if r.HasNext() {
+		rad := r.Next()
+		url := r.URL + rad.URL
+		doc, err := parseDocument(url)
+		if err != nil {
+			panic(err)
+		}
+		doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
+			selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
+				html, err := selection.Html()
+				//ch1
+				//ch2
+				log.Println("index", i, html,err)
+			})
+		})
+
 
 	}
 }
