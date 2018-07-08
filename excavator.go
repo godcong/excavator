@@ -38,28 +38,58 @@ func getRootList(r *Root, suffix string) {
 	})
 }
 
-func getRedicalList(r *Root) {
-	if r.HasNext() {
-		rad := r.Next()
-		url := r.URL + rad.URL
-		doc, err := parseDocument(url)
-		if err != nil {
-			panic(err)
-		}
-		doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
-			selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
-				html, err := selection.Html()
-				//ch1
-				//ch2
-				log.Println("index", i, html,err)
-			})
-		})
-
-
+func getRedicalList(r *Root, radical *Radical) {
+	url := r.URL + radical.URL
+	doc, err := parseDocument(url)
+	if err != nil {
+		panic(err)
 	}
+	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
+		selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
+
+			if i1 == 0 {
+				return
+			}
+			ch := make([]string, 5)
+			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
+				html, _ := selection.Html()
+				switch i2 % 4 {
+				case 1:
+					ch[0] = html
+				case 2:
+					ch[1] = html
+				case 3:
+					ch[2] = html
+				case 0:
+					ch[3] = selection.Find("a").Text()
+					href, b := selection.Find("a").Attr("href")
+					if b {
+						ch[4] = href
+						radical.Add(&Character{
+							URL:            ch[4],
+							Character:      ch[3],
+							Pinyin:         ch[0],
+							Radical:        ch[1],
+							RadicalStrokes: radical.Strokes,
+							KangxiStrokes:  ch[2],
+							Phonetic:       "",
+							Folk:           Folk{},
+						})
+					}
+				}
+			})
+
+		})
+	})
 }
 
-func getCharacterList(r *Root) {
+func getCharacterList(r *Root, c *Character) {
+	url := r.URL + c.URL
+	doc, err := parseDocument(url)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(doc.Html())
 
 }
 
