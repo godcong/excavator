@@ -4,11 +4,6 @@ import (
 	"log"
 )
 
-type iterator struct {
-	data  []interface{}
-	index int
-}
-
 //RootRadical result root list
 type Root struct {
 	iterator
@@ -100,29 +95,3 @@ func (r *Radical) Iterator(f func(character *Character)) {
 	}
 }
 
-//HasNext check next
-func (i *iterator) HasNext() bool {
-	return i.index < len(i.data)
-}
-
-//Next get next
-func (i *iterator) Next() interface{} {
-	defer func() {
-		i.index++
-	}()
-	if i.index < len(i.data) {
-		return i.data[i.index]
-	}
-
-	return nil
-}
-
-//Reset reset index
-func (i *iterator) Reset() {
-	i.index = 0
-}
-
-//Add add radical
-func (i *iterator) Add(v interface{}) {
-	i.data = append(i.data, v)
-}
