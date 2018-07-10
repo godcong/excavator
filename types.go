@@ -75,11 +75,12 @@ func (root *Root) GetList(s string) {
 	//wg := sync.WaitGroup{}
 	root.Iterator(func(radical *Radical) {
 		log.Println(radical)
-		getRedicalList(root,radical)
+		getRedicalList(root, radical)
 	})
 	root.Iterator(func(radical *Radical) {
 		radical.Iterator(func(character *Character) {
-			getCharacterList(root,character)
+			log.Println(*character)
+			getCharacterList(root, character)
 		})
 
 	})
@@ -94,4 +95,3 @@ func (r *Radical) Iterator(f func(character *Character)) {
 		f(r.Next().(*Character))
 	}
 }
-

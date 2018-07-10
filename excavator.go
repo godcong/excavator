@@ -91,6 +91,27 @@ func getCharacterList(r *Root, c *Character) {
 	}
 	log.Println(doc.Html())
 
+	doc.Find(".pinyin").Each(func(i int, selection *goquery.Selection) {
+		text := selection.ReplaceWith("script").Text()
+		//拼音
+		if i == 0 {
+			c.Pinyin = text
+		} else
+		//注音
+		if i == 1 {
+			c.Phonetic = text
+		} else
+		//无
+		{
+
+		}
+	})
+
+	//TODO
+	log.Println(doc.Find(".text16").Each(func(i int, selection *goquery.Selection) {
+		log.Println(selection.Html())
+	}))
+
 }
 
 //ParseDocument get the url result body
