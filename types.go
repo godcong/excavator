@@ -1,8 +1,6 @@
 package excavator
 
-import (
-	"log"
-)
+import "log"
 
 //RootRadical result root list
 type Root struct {
@@ -50,7 +48,6 @@ type Structure struct {
 
 //音韵参考
 type Explain struct {
-
 }
 
 //索引参考
@@ -58,7 +55,6 @@ type Rhyme struct {
 	GuangYun  string //广　韵
 	Mandarin  string //国　语
 	Cantonese string //粤　语
-
 }
 
 type Index struct {
@@ -84,7 +80,7 @@ func (r *Root) Add(rd *Radical) {
 
 func (r *Root) Iterator(f func(radical *Radical)) {
 	r.Reset()
-	if r.HasNext() {
+	for r.HasNext() {
 		f(r.Next().(*Radical))
 	}
 }
@@ -92,15 +88,16 @@ func (r *Root) Iterator(f func(radical *Radical)) {
 //GetList get an list from web
 func (root *Root) GetList(s string) {
 	getRootList(root, s)
+	log.Println(root.Size())
 	//wg := sync.WaitGroup{}
 	root.Iterator(func(radical *Radical) {
-		log.Println(radical)
 		getRedicalList(root, radical)
+		log.Println(*radical)
 	})
 	root.Iterator(func(radical *Radical) {
 		radical.Iterator(func(character *Character) {
-			log.Println(*character)
 			getCharacterList(root, character)
+			log.Println(*character)
 		})
 
 	})
@@ -111,7 +108,7 @@ func (r *Radical) Add(character *Character) {
 }
 func (r *Radical) Iterator(f func(character *Character)) {
 	r.Reset()
-	if r.HasNext() {
+	for r.HasNext() {
 		f(r.Next().(*Character))
 	}
 }

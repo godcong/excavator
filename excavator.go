@@ -49,7 +49,6 @@ func getRedicalList(r *Root, radical *Radical) {
 	}
 	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
 		selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
-
 			if i1 == 0 {
 				return
 			}
@@ -89,37 +88,34 @@ func getRedicalList(r *Root, radical *Radical) {
 }
 
 func saveRadical(c *Character, v string) bool {
-	log.Println(v)
 	c.Radical = v
 	return true
 }
 
 func saveRadicalStrokes(c *Character, v string) bool {
-	log.Println(v)
+
 	c.RadicalStrokes = v
 	return true
 }
 
 func saveTotalStrokes(c *Character, v string) bool {
-	log.Println(v)
+
 	c.TotalStrokes = v
 	return true
 }
 
 func saveKangXiStrokes(c *Character, v string) bool {
-	log.Println(v)
 	c.KangxiStrokes = v
 	return true
 }
 
 func savePinyin(c *Character, v string) bool {
-	log.Println(v)
+
 	c.Pinyin = v
 	return true
 }
 
 func savePhonetic(c *Character, v string) bool {
-	log.Println(v)
 	c.Phonetic = v
 	return true
 }
@@ -199,7 +195,6 @@ func getCharacterList(r *Root, c *Character) {
 	if err != nil {
 		panic(err)
 	}
-	log.Println(doc.Html())
 	docCopy := doc.Clone()
 
 	//处理笔画

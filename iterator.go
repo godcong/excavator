@@ -49,7 +49,7 @@ func (i *iterator) Size() int {
 //Iterator an default iterator
 func (i *iterator) Iterator(f IteratorFunc) error {
 	i.Reset()
-	if i.HasNext() {
+	for i.HasNext() {
 		if err := f(i.Next()); err != nil {
 			return err
 		}
