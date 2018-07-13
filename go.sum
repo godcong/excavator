@@ -6,3 +6,5 @@ golang.org/x/net v0.0.0-20180218175443-cbe0f9307d01/go.mod h1:mL1N/T3taQHkDXs73r
 golang.org/x/net v0.0.0-20180709044923-6f138e0f6071 h1:A9kHlD7ePlLU+BAXORh0mo8A2FBfrHcZ230mWTAxdoE=
 golang.org/x/net v0.0.0-20180709044923-6f138e0f6071/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net/html v0.0.0-20180709044923-6f138e0f6071/go.mod h1:G7mAYYxgmS0lVkHyy2hEOLQCFB0DlQFTMLWggykrydY=
+gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce h1:wmRuJ8tXFdksskgr+BGXUCjUDqCJKx7dRaQNdmG1fIo=
+gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce/go.mod h1:yeKp02qBN3iKW1OzL3MGk2IdtZzaj7SFntXj72NppTA=

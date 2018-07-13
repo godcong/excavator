@@ -13,7 +13,7 @@ import (
 type CharacterAssign func(c *Character, s string) bool
 
 //getRootList run get root
-func getRootList(r *Root, suffix string) {
+func getRootList(r *Root, suffix string) *Root {
 	doc, err := parseDocument(r.URL + suffix)
 	if err != nil {
 		panic(err)
@@ -33,15 +33,16 @@ func getRootList(r *Root, suffix string) {
 			if b {
 				r.Add(&Radical{
 					Strokes: strconv.Itoa(stroke),
-					Name:    ch,
+					Name:    strings.TrimSpace(ch),
 					URL:     href,
 				})
 			}
 		})
 	})
+	return r
 }
 
-func getRedicalList(r *Root, radical *Radical) {
+func getRedicalList(r *Root, radical *Radical) *Radical {
 	url := r.URL + radical.URL
 	doc, err := parseDocument(url)
 	if err != nil {
@@ -55,6 +56,7 @@ func getRedicalList(r *Root, radical *Radical) {
 			ch := make([]string, 5)
 			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
 				html, _ := selection.Html()
+				html = strings.TrimSpace(html)
 				switch i2 % 4 {
 				case 1:
 					ch[0] = html
@@ -85,6 +87,7 @@ func getRedicalList(r *Root, radical *Radical) {
 
 		})
 	})
+	return radical
 }
 
 func saveRadical(c *Character, v string) bool {
@@ -189,12 +192,13 @@ var sMap = map[string]CharacterAssign{
 	"辞　海":    dummySave,
 }
 
-func getCharacterList(r *Root, c *Character) {
+func getCharacterList(r *Root, c *Character) *Character {
 	url := r.URL + c.URL
 	doc, err := parseDocument(url)
 	if err != nil {
 		panic(err)
 	}
+	log.Println(doc.Html())
 	docCopy := doc.Clone()
 
 	//处理笔画
@@ -232,8 +236,7 @@ func getCharacterList(r *Root, c *Character) {
 		})
 
 	})
-	log.Println(*c)
-
+	return c
 }
 
 //ParseDocument get the url result body

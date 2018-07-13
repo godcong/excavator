@@ -7,8 +7,10 @@ import (
 	"github.com/godcong/excavator"
 )
 
-func TestIterator_Add(t *testing.T) {
-	iter := excavator.NewIterator()
-	iter.Add(8)
-	log.Println(iter)
+func TestRadical_Iterator(t *testing.T) {
+	root := excavator.Self()
+	radical := root.SelfRadical("丨")
+	log.Println(radical)
+	c := radical.SelfCharacters()
+	log.Println(c)
 }
