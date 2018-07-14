@@ -17,6 +17,7 @@ type CharacterAssign func(c *Character, s string) bool
 func getRootList(r *Root, suffix string) *Root {
 	doc, err := parseDocument(r.URL + suffix)
 	if err != nil {
+		log.Println(r.URL + suffix)
 		panic(err)
 	}
 
@@ -33,10 +34,13 @@ func getRootList(r *Root, suffix string) *Root {
 			ch := selection.Text()
 			if b {
 				r.Add(&Radical{
-					Strokes: strconv.Itoa(stroke),
-					Name:    strings.TrimSpace(ch),
-					URL:     href,
+					root:     r,
+					iterator: iterator{},
+					Strokes:  strconv.Itoa(stroke),
+					Name:     strings.TrimSpace(ch),
+					URL:      href,
 				})
+
 			}
 		})
 	})
@@ -47,6 +51,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 	url := r.URL + radical.URL
 	doc, err := parseDocument(url)
 	if err != nil {
+		log.Println(url)
 		panic(err)
 	}
 	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
@@ -57,8 +62,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 			ch := make([]string, 5)
 			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
 				html, _ := selection.Html()
-				html = strings.TrimSpace(html)
-				html = strings.Trim(html, "\n")
+				html = trim(html)
 				switch i2 % 4 {
 				case 1:
 					ch[0] = html
@@ -76,12 +80,15 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 							Character:      ch[3],
 							Pinyin:         ch[0],
 							Radical:        ch[1],
-							RadicalStrokes: radical.Strokes,
+							RadicalStrokes: trim(radical.Strokes),
 							TotalStrokes:   "",
 							KangxiStrokes:  ch[2],
 							Phonetic:       "",
 							Folk:           Folk{},
 							Structure:      Structure{},
+							Explain:        Explain{},
+							Rhyme:          Rhyme{},
+							Index:          Index{},
 						})
 					}
 				}
@@ -93,36 +100,27 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 }
 
 func saveRadical(c *Character, v string) bool {
-	c.Radical = v
-	return true
+	return trimReplace(&c.Radical, v)
 }
 
 func saveRadicalStrokes(c *Character, v string) bool {
-
-	c.RadicalStrokes = v
-	return true
+	return trimReplace(&c.RadicalStrokes, v)
 }
 
 func saveTotalStrokes(c *Character, v string) bool {
-
-	c.TotalStrokes = v
-	return true
+	return trimReplace(&c.TotalStrokes, v)
 }
 
 func saveKangXiStrokes(c *Character, v string) bool {
-	c.KangxiStrokes = v
-	return true
+	return trimReplace(&c.KangxiStrokes, v)
 }
 
 func savePinyin(c *Character, v string) bool {
-
-	c.Pinyin = v
-	return true
+	return trimReplace(&c.Pinyin, v)
 }
 
 func savePhonetic(c *Character, v string) bool {
-	c.Phonetic = v
-	return true
+	return trimReplace(&c.Phonetic, v)
 }
 
 func dummySave(c *Character, v string) bool {
@@ -188,13 +186,13 @@ func folk(c *Character, text string) bool {
 
 			switch v1[0] {
 			case "是否为常用字":
-				c.CommonlyCharacters = v1[1]
+				c.CommonlyCharacters = trim(v1[1])
 			case "姓名学":
-				c.NameScience = v1[1]
+				c.NameScience = trim(v1[1])
 			case "汉字五行":
-				c.FiveElementCharacter = v1[1]
+				c.FiveElementCharacter = trim(v1[1])
 			case "吉凶寓意":
-				c.GodBadMoral = v1[1]
+				c.GodBadMoral = trim(v1[1])
 			}
 		}
 	}
@@ -203,7 +201,7 @@ func folk(c *Character, text string) bool {
 }
 
 func trimReplace(source *string, s string) bool {
-	*source = strings.TrimSpace(strings.Replace(s, "]：", "", -1))
+	*source = trim(strings.Replace(s, "]：", "", -1))
 	return true
 }
 
@@ -282,6 +280,7 @@ func getCharacterList(r *Root, c *Character) *Character {
 	url := r.URL + c.URL
 	doc, err := parseDocument(url)
 	if err != nil {
+		log.Println(url)
 		panic(err)
 	}
 	//处理笔画
@@ -346,4 +345,11 @@ func parseDocument(url string) (*goquery.Document, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+func trim(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.Replace(s, "　", "", -1)
+	s = strings.Replace(s, "\n", "", -1)
+	return s
 }
