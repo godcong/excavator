@@ -19,6 +19,7 @@ func Dial() *mgo.Session {
 	if err != nil {
 		panic(err)
 	}
+
 	credential := &mgo.Credential{
 		Username:    "root",
 		Password:    "v2RgzSuIaBlx",

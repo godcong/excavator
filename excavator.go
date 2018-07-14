@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -57,6 +58,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
 				html, _ := selection.Html()
 				html = strings.TrimSpace(html)
+				html = strings.Trim(html, "\n")
 				switch i2 % 4 {
 				case 1:
 					ch[0] = html
@@ -146,50 +148,134 @@ func characterAssignFunc(list map[string]CharacterAssign, text string) Character
 	return nil
 }
 
-func folk(c *Character, text string) bool {
-	s := strings.Split(text, "：")
-	if strings.Index(text, "是否为常用字") >= 0 {
-		if len(s) >= 2 {
-			c.Folk.CommonlyCharacters = s[1]
+func indexFilter(text string, subs []string) []int {
+	var idxs []int
+	for _, v := range subs {
+		if i := strings.Index(text, v); i >= 0 {
+			idxs = append(idxs, i)
 		}
-
-		return true
-	} else if strings.Index(text, "姓名学") >= 0 {
-		if len(s) >= 2 {
-			c.Folk.NameScience = s[1]
-		}
-		return true
 	}
-	return false
+	sort.Ints(idxs)
+	return idxs
+}
+
+func folk(c *Character, text string) bool {
+	subs := []string{"是否为常用字", "姓名学", "汉字五行", "吉凶寓意"}
+	var rlts []string
+	idxs := indexFilter(text, subs)
+
+	switch len(idxs) {
+	case 4:
+		rlts = append(rlts, strings.TrimSpace(text[idxs[0]:idxs[1]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[1]:idxs[2]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[2]:idxs[3]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[3]:]))
+	case 3:
+		rlts = append(rlts, strings.TrimSpace(text[idxs[0]:idxs[1]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[1]:idxs[2]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[2]:]))
+	case 2:
+		rlts = append(rlts, strings.TrimSpace(text[idxs[0]:idxs[1]]))
+		rlts = append(rlts, strings.TrimSpace(text[idxs[1]:]))
+	case 1:
+		rlts = append(rlts, strings.TrimSpace(text[idxs[0]:]))
+	case 0:
+		return false
+	}
+	for _, v := range rlts {
+		v1 := strings.Split(v, "：")
+		if len(v1) >= 2 {
+
+			switch v1[0] {
+			case "是否为常用字":
+				c.CommonlyCharacters = v1[1]
+			case "姓名学":
+				c.NameScience = v1[1]
+			case "汉字五行":
+				c.FiveElementCharacter = v1[1]
+			case "吉凶寓意":
+				c.GodBadMoral = v1[1]
+			}
+		}
+	}
+
+	return true
+}
+
+func trimReplace(source *string, s string) bool {
+	*source = strings.TrimSpace(strings.Replace(s, "]：", "", -1))
+	return true
 }
 
 func decompositionSearch(c *Character, v string) bool {
-	c.DecompositionSearch = strings.Replace(v, "]：", "", -1)
-	return true
+	return trimReplace(&c.DecompositionSearch, v)
 }
 
 func strokeNumber(c *Character, v string) bool {
-	c.StrokeNumber = strings.Replace(v, "]：", "", -1)
-	return true
+	return trimReplace(&c.StrokeNumber, v)
 }
 func strokeReadWrite(c *Character, v string) bool {
-	c.StrokeReadWrite = strings.Replace(v, "]：", "", -1)
-	return true
+	return trimReplace(&c.StrokeReadWrite, v)
+}
+
+//guangYun 广　韵
+func guangYun(c *Character, v string) bool {
+	return trimReplace(&c.GuangYun, v)
+}
+
+//国　语
+func mandarin(c *Character, v string) bool {
+	return trimReplace(&c.Mandarin, v)
+}
+
+////粤　语
+func cantonese(c *Character, v string) bool {
+	return trimReplace(&c.Cantonese, v)
+}
+
+//古文字诂林
+func ancientWrite(c *Character, v string) bool {
+	return trimReplace(&c.AncientWrite, v)
+}
+
+//故训彙纂
+func hometownTrain(c *Character, v string) bool {
+	return trimReplace(&c.HometownTrain, v)
+}
+
+//说文解字
+func explain(c *Character, v string) bool {
+	return trimReplace(&c.Index.Explain, v)
+}
+
+//康熙字典
+func kangxiDictionary(c *Character, v string) bool {
+	return trimReplace(&c.KangxiDictionary, v)
+}
+
+//汉语字典
+func chineseDictionary(c *Character, v string) bool {
+	return trimReplace(&c.ChineseDictionary, v)
+}
+
+//辞　海  
+func cihai(c *Character, v string) bool {
+	return trimReplace(&c.Cihai, v)
 }
 
 var sMap = map[string]CharacterAssign{
 	"首尾分解查字": decompositionSearch,
 	"笔顺编号":   strokeNumber,
 	"笔顺读写":   strokeReadWrite,
-	"广　韵":    dummySave,
-	"国　语":    dummySave,
-	"粤　语":    dummySave,
-	"古文字诂林":  dummySave,
-	"故训彙纂":   dummySave,
-	"说文解字":   dummySave,
-	"康熙字典":   dummySave,
-	"汉语字典":   dummySave,
-	"辞　海":    dummySave,
+	"广　韵":    guangYun,
+	"国　语":    mandarin,
+	"粤　语":    cantonese,
+	"古文字诂林":  ancientWrite,
+	"故训彙纂":   hometownTrain,
+	"说文解字":   explain,
+	"康熙字典":   kangxiDictionary,
+	"汉语字典":   chineseDictionary,
+	"辞　海":    cihai,
 }
 
 func getCharacterList(r *Root, c *Character) *Character {
@@ -198,9 +284,6 @@ func getCharacterList(r *Root, c *Character) *Character {
 	if err != nil {
 		panic(err)
 	}
-	log.Println(doc.Html())
-	docCopy := doc.Clone()
-
 	//处理笔画
 	f := dummySave
 	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, selection *goquery.Selection) {
@@ -217,7 +300,13 @@ func getCharacterList(r *Root, c *Character) *Character {
 
 		})
 	})
+	kxExplain := doc.Clone()
+	kxExplain.Find(".content16").Each(func(i int, selection *goquery.Selection) {
+		c.Explain.Intro, _ = selection.Find("strong").Html()
+		c.Explain.Detail = selection.Text()
+	})
 
+	docCopy := doc.Clone()
 	docCopy.Find(".text16").Each(func(i int, selection *goquery.Selection) {
 		selection.Contents().Each(func(i int, selection *goquery.Selection) {
 			text := selection.Text()

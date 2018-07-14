@@ -1,8 +1,8 @@
 package excavator
 
 import (
+	"flag"
 	"fmt"
-	"log"
 )
 
 type CharacterFunc func(character *Character) error
@@ -11,8 +11,8 @@ type RadicalFunc func(radical *Radical) error
 //RootRadical result root list
 type Root struct {
 	iterator
-	//Radicals []*Radical
-	URL string
+	URL    string
+	Suffix string
 }
 
 //Radical
@@ -35,6 +35,9 @@ type Character struct {
 	Phonetic       string //注音
 	Folk
 	Structure
+	Explain
+	Rhyme
+	Index
 }
 
 //民俗参考
@@ -52,17 +55,20 @@ type Structure struct {
 	StrokeReadWrite     string //笔顺读写
 }
 
-//音韵参考
+//Explain 康熙字典解释
 type Explain struct {
+	Intro  string //简介
+	Detail string //详情
 }
 
-//索引参考
+//Rhyme 音韵参考
 type Rhyme struct {
 	GuangYun  string //广　韵
 	Mandarin  string //国　语
 	Cantonese string //粤　语
 }
 
+//Index 索引参考
 type Index struct {
 	AncientWrite      string //古文字诂林
 	HometownTrain     string //故训彙纂
@@ -74,9 +80,13 @@ type Index struct {
 
 var root *Root
 
+var url = flag.String("url", "http://tool.httpcn.com", "catch the web url")
+var suffix = flag.String("suffix", "/KangXi/BuShou.html", "catch suffix")
+
 func init() {
-	root = NewRoot("http://tool.httpcn.com")
-	root.Self("/KangXi/BuShou.html")
+	flag.Parse()
+	root = NewRoot(*url, *suffix)
+	root.Self()
 }
 
 func Self() *Root {
@@ -92,9 +102,10 @@ func SeflRadicals() []*Radical {
 }
 
 //NewRoot create an root
-func NewRoot(url string) *Root {
+func NewRoot(url string, suffix string) *Root {
 	return &Root{
-		URL: url,
+		URL:    url,
+		Suffix: suffix,
 	}
 }
 
@@ -112,22 +123,21 @@ func (r *Root) Iterator(f RadicalFunc) {
 	}
 }
 
-func (root *Root) Self(s string) *Root {
-	return getRootList(root, s)
+func (root *Root) Self() *Root {
+	return getRootList(root, root.Suffix)
 }
 
 func (root *Root) SelfRadical(name string) *Radical {
-	var radical *Radical
+	var r *Radical
 	root.Iterator(func(radical *Radical) error {
-		log.Println(radical.Name)
 		if radical.Name == name {
-			radical = getRedicalList(root, radical)
+			r = getRedicalList(root, radical)
 			return fmt.Errorf("%s%s", " radical found:", radical.Name)
 
 		}
 		return nil
 	})
-	return radical
+	return r
 }
 
 func (root *Root) SelfRadicals() []*Radical {
@@ -140,12 +150,24 @@ func (root *Root) SelfRadicals() []*Radical {
 }
 
 //GetList get an list from web
-func (root *Root) GetList(s string) []*Character {
+func (root *Root) GetList() []*Character {
 	var cs []*Character
-	root.Self(s)
+	root.Self()
 	rs := root.SelfRadicals()
 	for _, r := range rs {
 		cs = append(cs, r.SelfCharacters()...)
+	}
+	return cs
+}
+
+func (root *Root) ListProcess(f func(c *Character)) []*Character {
+	var cs []*Character
+	root.Self()
+	rs := root.SelfRadicals()
+	for _, r := range rs {
+		for _, v := range r.SelfCharacters() {
+			f(v)
+		}
 	}
 	return cs
 }
