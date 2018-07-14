@@ -10,14 +10,19 @@ import (
 
 func TestRadical_Iterator(t *testing.T) {
 	log.SetFlags(log.Lshortfile)
-	root := excavator.Self()
-	radical := root.SelfRadical("耳")
+	root := excavator.NewRoot("http://tool.httpcn.com","/KangXi/BuShou.html")
+	root.Self()
+	radical := root.SelfRadical("丿")
 	log.Println(radical)
 	if radical == nil {
 		return
 	}
-	c := radical.SelfCharacter("耿")
-	log.Println(c)
+	//log.Println(radical.SelfCharacter("乊"))
+	radical.Iterator(func(character *excavator.Character) error {
+		log.Println(character)
+		return nil
+	})
+
 
 }
 

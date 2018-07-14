@@ -52,7 +52,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 	doc, err := parseDocument(url)
 	if err != nil {
 		log.Println(url)
-		panic(err)
+		return radical
 	}
 	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
 		selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
@@ -281,7 +281,7 @@ func getCharacterList(r *Root, c *Character) *Character {
 	doc, err := parseDocument(url)
 	if err != nil {
 		log.Println(url)
-		panic(err)
+		return c
 	}
 	//处理笔画
 	f := dummySave

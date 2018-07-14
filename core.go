@@ -19,6 +19,7 @@ type Radical struct {
 	root *Root
 	iterator
 	Strokes string
+	Pinyin  string
 	Name    string
 	URL     string
 	//Character []*Character
