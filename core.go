@@ -2,6 +2,8 @@ package excavator
 
 import (
 	"fmt"
+	"log"
+	"sync"
 )
 
 type CharacterFunc func(character *Character) error
@@ -10,6 +12,7 @@ type RadicalFunc func(radical *Radical) error
 //RootRadical result root list
 type Root struct {
 	iterator
+	wg     sync.WaitGroup
 	URL    string
 	Suffix string
 }
@@ -18,12 +21,16 @@ type Root struct {
 type Radical struct {
 	root *Root
 	iterator
+	RadicalCharacter
+}
+
+type RadicalCharacter struct {
 	Strokes string
 	Pinyin  string
 	Name    string
 	URL     string
-	//Character []*Character
 }
+
 
 type Character struct {
 	URL            string //汉字地址
@@ -79,34 +86,16 @@ type Index struct {
 	Cihai             string //辞　海  
 }
 
-//var root *Root
-
-//var url = flag.String("url", "http://tool.httpcn.com", "catch the web url")
-//var suffix = flag.String("suffix", "/KangXi/BuShou.html", "catch suffix")
-//
-//func init() {
-//	flag.Parse()
-//	root = NewRoot(*url, *suffix)
-//}
-
-//func Self() *Root {
-//	return getRootList(root, root.Suffix)
-//}
-//
-//func SelfRadical(name string) *Radical {
-//	return root.SelfRadical(name)
-//}
-//
-//func SeflRadicals() []*Radical {
-//	return root.SelfRadicals()
-//}
-
 //NewRoot create an root
 func NewRoot(url string, suffix string) *Root {
 	return &Root{
 		URL:    url,
 		Suffix: suffix,
 	}
+}
+
+func (r *Root) WaitForDone() {
+	r.wg.Wait()
 }
 
 //Add add radical
@@ -124,8 +113,32 @@ func (r *Root) Iterator(f RadicalFunc) {
 	}
 }
 
+//func (r *Root) ThreadIterator(f RadicalFunc) {
+//	r.Reset()
+//	wg := sync.WaitGroup{}
+//	for r.HasNext() {
+//		radical := r.Next().(*Radical)
+//		wg.Add(1)
+//		go func(group *sync.WaitGroup) {
+//			defer group.Done()
+//			if err := f(getRedicalList(r, radical)); err != nil {
+//				panic(err)
+//			}
+//		}(&wg)
+//	}
+//	wg.Wait()
+//}
+
 func (root *Root) Self() *Root {
 	return getRootList(root, root.Suffix)
+}
+
+func (root *Root) IteratorSelf(f RadicalFunc) {
+	log.Println(root.iterator.Size())
+	root.iterator.Iterator(func(v interface{}) error {
+		v1 := v.(*Radical)
+		return f(v1)
+	})
 }
 
 func (root *Root) SelfRadical(name string) *Radical {
@@ -175,6 +188,7 @@ func (root *Root) ListProcess(f func(c *Character)) []*Character {
 func (r *Radical) Add(character *Character) {
 	r.iterator.Add(character)
 }
+
 func (r *Radical) Iterator(f CharacterFunc) {
 	r.Reset()
 	for r.HasNext() {
@@ -184,6 +198,22 @@ func (r *Radical) Iterator(f CharacterFunc) {
 		}
 	}
 }
+
+func (r *Radical) ThreadIterator(f CharacterFunc) {
+	wg := sync.WaitGroup{}
+	for r.HasNext() {
+		character := r.Next().(*Character)
+		wg.Add(1)
+		go func(group *sync.WaitGroup) {
+			defer group.Done()
+			if err := f(getCharacterList(r.root, character)); err != nil {
+				panic(err)
+			}
+		}(&wg)
+	}
+	wg.Wait()
+}
+
 func (r *Radical) SetRoot(root *Root) {
 	r.root = root
 }

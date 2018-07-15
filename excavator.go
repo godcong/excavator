@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-)
+	)
 
 type CharacterAssign func(c *Character, s string) bool
 
@@ -22,9 +22,7 @@ func getRootList(r *Root, suffix string) *Root {
 	}
 
 	doc.Find("table tbody").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
 		stroke := i
-		//s.Find("td").Each(func(i int, selection *goquery.Selection) {
 		s.Find("tr td").Each(func(i1 int, selection *goquery.Selection) {
 			if i == 0 {
 				return
@@ -33,14 +31,16 @@ func getRootList(r *Root, suffix string) *Root {
 			href, b := selection.Find("a").Attr("href")
 			ch := selection.Text()
 			if b {
-				r.Add(&Radical{
-					root:     r,
-					iterator: iterator{},
-					Strokes:  strconv.Itoa(stroke),
-					Name:     strings.TrimSpace(ch),
-					URL:      href,
-				})
-
+				radical := &Radical{
+					root:             r,
+					iterator:         iterator{},
+					RadicalCharacter: RadicalCharacter{
+						Strokes:  strconv.Itoa(stroke),
+						Name:     trim(ch),
+						URL:      href,
+					},
+				}
+				r.Add(radical)
 			}
 		})
 	})
@@ -54,6 +54,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 		log.Println(url)
 		return radical
 	}
+
 	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
 		selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
 			if i1 == 0 {
@@ -63,6 +64,7 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
 				html, _ := selection.Html()
 				html = trim(html)
+				add := false
 				switch i2 % 4 {
 				case 1:
 					ch[0] = html
@@ -70,27 +72,35 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 					ch[1] = html
 				case 3:
 					ch[2] = html
+					add = true
 				case 0:
 					ch[3] = selection.Find("a").Text()
 					href, b := selection.Find("a").Attr("href")
 					if b {
 						ch[4] = href
-						radical.Add(&Character{
-							URL:            ch[4],
-							Character:      ch[3],
-							Pinyin:         ch[0],
-							Radical:        ch[1],
-							RadicalStrokes: trim(radical.Strokes),
-							TotalStrokes:   "",
-							KangxiStrokes:  ch[2],
-							Phonetic:       "",
-							Folk:           Folk{},
-							Structure:      Structure{},
-							Explain:        Explain{},
-							Rhyme:          Rhyme{},
-							Index:          Index{},
-						})
 					}
+				}
+
+				if add {
+					if ch[3] == "" {
+						log.Println(doc.Html())
+					}
+					radical.Add(&Character{
+						URL:            ch[4],
+						Character:      ch[3],
+						Pinyin:         ch[0],
+						Radical:        ch[1],
+						RadicalStrokes: trim(radical.Strokes),
+						TotalStrokes:   "",
+						KangxiStrokes:  ch[2],
+						Phonetic:       "",
+						Folk:           Folk{},
+						Structure:      Structure{},
+						Explain:        Explain{},
+						Rhyme:          Rhyme{},
+						Index:          Index{},
+					})
+					ch = make([]string, 5)
 				}
 			})
 
@@ -126,6 +136,10 @@ func savePhonetic(c *Character, v string) bool {
 func dummySave(c *Character, v string) bool {
 	log.Println(v)
 	return true
+}
+
+func characterSave(c *Character, v string) bool {
+	return trimReplace(&c.Character, v)
 }
 
 var caMap = map[string]CharacterAssign{
@@ -276,27 +290,39 @@ var sMap = map[string]CharacterAssign{
 	"辞　海":    cihai,
 }
 
+func warnLog(s string, text string) {
+	if s == "/Html/KangXi/40/KORNCQKOAZRNXVDA.shtml" {
+		log.Println(text)
+		return
+	}
+	if s == "/Html/KangXi/24/PWKOUYTBTBUYCAZE.shtml" {
+		log.Println(text)
+		return
+	}
+
+}
+
 func getCharacterList(r *Root, c *Character) *Character {
 	url := r.URL + c.URL
 	doc, err := parseDocument(url)
 	if err != nil {
-		log.Println(url)
+		log.Println(url, err)
 		return c
 	}
+
+	h1, _ := doc.Html()
+	warnLog(c.URL, h1)
 	//处理笔画
-	f := dummySave
+	f := characterSave
 	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, selection *goquery.Selection) {
 		selection.Contents().Each(func(i int, selection *goquery.Selection) {
 			text := selection.Text()
-
 			if f != nil {
 				if b := f(c, text); b {
 					f = nil
 				}
 			}
-
 			f = characterAssignFunc(caMap, text)
-
 		})
 	})
 	kxExplain := doc.Clone()
