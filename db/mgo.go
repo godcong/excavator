@@ -16,15 +16,15 @@ func init() {
 }
 
 var pool sync.Pool
+var collections = make(map[string]*mgo.Collection)
 
-func DB() *mgo.Collection {
-	return session.DB("fate").C("data")
+func DB(cname string) *mgo.Collection {
+	if v, b := collections[cname]; b {
+		return v
+	}
+	collections[cname] = session.DB("fate").C(cname)
+	return collections[cname]
 }
-
-func RD() *mgo.Collection {
-	return session.DB("fate").C("radical")
-}
-
 
 func Dial() *mgo.Session {
 	session, err := mgo.Dial("localhost")
@@ -56,14 +56,14 @@ func PoolGetInsert(ctx context.Context) {
 		case <-ctx.Done():
 			for {
 				if v := pool.Get(); v != nil {
-					DB().Insert(v.(*excavator.Character))
+					DB("character").Insert(v.(*excavator.Character))
 				} else {
 					return
 				}
 			}
 		default:
 			if v := pool.Get(); v != nil {
-				DB().Insert(v.(*excavator.Character))
+				DB("character").Insert(v.(*excavator.Character))
 				continue
 			}
 			time.Sleep(10 * time.Second)

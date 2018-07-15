@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/godcong/excavator"
-	"github.com/godcong/excavator/db"
 )
 
 func main() {
@@ -19,10 +18,7 @@ func main() {
 	root.Self()
 	root.IteratorSelf(func(radical *excavator.Radical) error {
 		log.Println(radical)
-		err := db.RD().Insert(&radical.RadicalCharacter)
-		if err != nil {
-			log.Println(err)
-		}
+
 		return nil
 	})
 	//root.Iterator(func(radical *excavator.Radical) error {

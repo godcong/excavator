@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	)
+)
 
 type CharacterAssign func(c *Character, s string) bool
 
@@ -31,24 +31,21 @@ func getRootList(r *Root, suffix string) *Root {
 			href, b := selection.Find("a").Attr("href")
 			ch := selection.Text()
 			if b {
-				radical := &Radical{
-					root:             r,
-					iterator:         iterator{},
-					RadicalCharacter: RadicalCharacter{
-						Strokes:  strconv.Itoa(stroke),
-						Name:     trim(ch),
-						URL:      href,
-					},
+				rc := &RootCharacter{
+					Strokes: strconv.Itoa(stroke),
+					Name:    trim(ch),
+					URL:     href,
 				}
-				r.Add(radical)
+				r.Add(rc)
 			}
 		})
 	})
 	return r
 }
 
-func getRedicalList(r *Root, radical *Radical) *Radical {
-	url := r.URL + radical.URL
+func getRedicalList(r *Root, rc *RootCharacter) *Radical {
+	radical := new(Radical)
+	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
 		log.Println(url)
@@ -85,21 +82,16 @@ func getRedicalList(r *Root, radical *Radical) *Radical {
 					if ch[3] == "" {
 						log.Println(doc.Html())
 					}
-					radical.Add(&Character{
-						URL:            ch[4],
-						Character:      ch[3],
-						Pinyin:         ch[0],
-						Radical:        ch[1],
-						RadicalStrokes: trim(radical.Strokes),
-						TotalStrokes:   "",
-						KangxiStrokes:  ch[2],
-						Phonetic:       "",
-						Folk:           Folk{},
-						Structure:      Structure{},
-						Explain:        Explain{},
-						Rhyme:          Rhyme{},
-						Index:          Index{},
-					})
+
+					radicalCharacter := &RadicalCharacter{
+						RootCharacter: rc,
+						Strokes:       ch[2],
+						Pinyin:        ch[0],
+						Character:     ch[3],
+						URL:           ch[4],
+					}
+
+					radical.Add(radicalCharacter)
 					ch = make([]string, 5)
 				}
 			})
