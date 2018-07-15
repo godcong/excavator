@@ -53,12 +53,12 @@ func getRedicalList(r *Root, rc *RootCharacter) *Radical {
 	}
 
 	doc.Find("table tbody").Each(func(i int, selection *goquery.Selection) {
-		selection.Find("tr").Each(func(i1 int, selection *goquery.Selection) {
+		selection.Find("tr").Each(func(i1 int, selectiontr *goquery.Selection) {
 			if i1 == 0 {
 				return
 			}
 			ch := make([]string, 5)
-			selection.Find("td").Each(func(i2 int, selection *goquery.Selection) {
+			selectiontr.Find("td").Each(func(i2 int, selection *goquery.Selection) {
 				html, _ := selection.Html()
 				html = trim(html)
 				add := false
@@ -80,7 +80,8 @@ func getRedicalList(r *Root, rc *RootCharacter) *Radical {
 
 				if add {
 					if ch[3] == "" {
-						log.Println(doc.Html())
+						log.Println(selectiontr.Html())
+						return
 					}
 
 					radicalCharacter := &RadicalCharacter{
@@ -90,7 +91,6 @@ func getRedicalList(r *Root, rc *RootCharacter) *Radical {
 						Character:     ch[3],
 						URL:           ch[4],
 					}
-
 					radical.Add(radicalCharacter)
 					ch = make([]string, 5)
 				}
@@ -294,16 +294,30 @@ func warnLog(s string, text string) {
 
 }
 
-func getCharacterList(r *Root, c *Character) *Character {
-	url := r.URL + c.URL
+func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
+	c := new(Character)
+	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
-		log.Println(url, err)
+		return &Character{
+			Character:      rc.Character,
+			Pinyin:         rc.Pinyin,
+			Radical:        "",
+			RadicalStrokes: "",
+			TotalStrokes:   rc.Strokes,
+			KangxiStrokes:  "",
+			Phonetic:       "",
+			Folk:           Folk{},
+			Structure:      Structure{},
+			Explain:        Explain{},
+			Rhyme:          Rhyme{},
+			Index:          Index{},
+		}
 		return c
 	}
 
 	h1, _ := doc.Html()
-	warnLog(c.URL, h1)
+	warnLog(rc.URL, h1)
 	//处理笔画
 	f := characterSave
 	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, selection *goquery.Selection) {

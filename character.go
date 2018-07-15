@@ -4,7 +4,7 @@ type CharacterFunc func(character *Character) error
 
 //Character 字符
 type Character struct {
-	URL            string //汉字地址
+	//URL            string //汉字地址
 	Character      string //字符
 	Pinyin         string //拼音
 	Radical        string //部首

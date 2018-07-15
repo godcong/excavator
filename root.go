@@ -1,13 +1,13 @@
 package excavator
 
-type RootFunc func(radical *RootCharacter) error
+import "log"
+
+type RootFunc func(rc *RootCharacter) error
 
 //RootRadical result root list
 type Root struct {
 	beforeIterator RootFunc
 	iterator
-	afterIterator RootFunc
-	//wg     sync.WaitGroup
 	URL    string
 	Suffix string
 }
@@ -35,23 +35,30 @@ func (root *Root) Self() *Root {
 	return getRootList(root, root.Suffix)
 }
 
-func (root *Root) Iterator(f RootFunc) {
+func (root *Root) IteratorFunc(f RootFunc) []*Radical {
+	var rad []*Radical
 	root.Reset()
 	for root.HasNext() {
 		rc := root.Next().(*RootCharacter)
 		if root.beforeIterator != nil {
 			if err := root.beforeIterator(rc); err != nil {
-				panic(err)
+				log.Println(err)
+				continue
 			}
 		}
+		rad = append(rad, getRedicalList(root, rc))
 		if err := f(rc); err != nil {
-			panic(err)
+			log.Panicln(err)
+			continue
 		}
-		if root.afterIterator != nil {
-			if err := root.afterIterator(rc); err != nil {
-				panic(err)
-			}
-		}
-
 	}
+	return rad
+}
+
+func (root *Root) Radical(character *RootCharacter) *Radical {
+	return getRedicalList(root, character)
+}
+
+func (root *Root) SetBefore(r RootFunc) {
+	root.beforeIterator = r
 }
