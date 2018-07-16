@@ -131,6 +131,8 @@ func dummySave(c *Character, v string) bool {
 }
 
 func characterSave(c *Character, v string) bool {
+	v = strings.Replace(v, "『", "", -1)
+	v = strings.Replace(v, "』", "", -1)
 	return trimReplace(&c.Character, v)
 }
 
@@ -207,6 +209,9 @@ func folk(c *Character, text string) bool {
 }
 
 func trimReplace(source *string, s string) bool {
+	if s == "" {
+		return false
+	}
 	*source = trim(strings.Replace(s, "]：", "", -1))
 	return true
 }
@@ -299,6 +304,7 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
+		log.Println(err)
 		return &Character{
 			Character:      rc.Character,
 			Pinyin:         rc.Pinyin,
@@ -320,13 +326,16 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 	warnLog(rc.URL, h1)
 	//处理笔画
 	f := characterSave
-	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, selection *goquery.Selection) {
-		selection.Contents().Each(func(i int, selection *goquery.Selection) {
+	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, s1 *goquery.Selection) {
+
+		s1.Contents().Each(func(i int, selection *goquery.Selection) {
 			text := selection.Text()
 			if f != nil {
 				if b := f(c, text); b {
 					f = nil
 				}
+				log.Println(text)
+				log.Println(s1.Html())
 			}
 			f = characterAssignFunc(caMap, text)
 		})

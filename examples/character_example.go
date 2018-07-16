@@ -1,10 +1,7 @@
-package main
+package examples
 
 import (
-	"context"
-	"io"
 	"log"
-	"os"
 	"runtime"
 
 	"github.com/godcong/excavator"
@@ -12,29 +9,25 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func main() {
+//ExampleCharacter to add characters
+func ExampleCharacter() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	max := 10
-	logSet()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	go db.PoolInsertLoop(ctx)
 
 	var rcs []excavator.RadicalCharacter
 	err := db.DB("radical").Find(bson.M{}).All(&rcs)
 	if err != nil {
 
 	}
-
 	root := excavator.NewRoot("http://tool.httpcn.com", "/KangXi/BuShou.html")
 	var radical excavator.Radical
 	radical.SetRoot(root)
-	ch := make(chan int, max)
+	ch := make(chan bool, max)
 	size := len(rcs)
 	idx := 0
 	for i := 0; i < max; i++ {
 		//log.Println("thread:", idx)
-		go threadLoop(idx, &radical, &rcs[idx], ch)
+		go threadLoop(&radical, &rcs[idx], ch)
 		idx++
 	}
 	for {
@@ -44,42 +37,30 @@ func main() {
 
 		select {
 		case v := <-ch:
-			if v != -1 {
+			if !v {
 				log.Println("wrong id:", idx, rcs[idx])
 			}
 			//log.Println("thread:", idx)
-			go threadLoop(idx, &radical, &rcs[idx], ch)
+			go threadLoop(&radical, &rcs[idx], ch)
 			idx++
 		default:
 
 		}
 
 	}
-
 }
 
-func threadLoop(idx int, radical *excavator.Radical, rc *excavator.RadicalCharacter, ch chan<- int) {
+func threadLoop(radical *excavator.Radical, rc *excavator.RadicalCharacter, ch chan<- bool) {
 	c := radical.Character(rc)
 	if c.Character == "" {
-		log.Println(*c)
-		ch <- idx
+		ch <- false
 		return
 	}
 	err := db.InsertIfNotExist("character", c)
 	if err != nil {
-		ch <- idx
+		ch <- false
 		log.Println(err)
 		return
 	}
-	ch <- -1
-}
-
-func logSet() {
-	log.SetFlags(log.Lshortfile)
-	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_APPEND|os.O_SYNC|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	out := io.MultiWriter(f, os.Stdout)
-	log.SetOutput(out)
+	ch <- true
 }

@@ -12,5 +12,4 @@ func TestInsertRootFromJson(t *testing.T) {
 
 func TestInsertRadicalFromJson(t *testing.T) {
 	db.InsertRadicalFromJson("radical.json")
-
 }

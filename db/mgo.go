@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -71,14 +72,17 @@ func PoolInsertLoop(ctx context.Context) {
 		case <-ctx.Done():
 			for {
 				if v := pool.Get(); v != nil {
-					DB("character").Insert(v.(*excavator.Character))
+					log.Println("insert")
+					InsertIfNotExist("character", v.(*excavator.Character))
 				} else {
 					return
 				}
 			}
 		default:
 			if v := pool.Get(); v != nil {
-				DB("character").Insert(v.(*excavator.Character))
+				log.Println("insert")
+				InsertIfNotExist("character", v.(*excavator.Character))
+				//DB("character").Insert(v.(*excavator.Character))
 				continue
 			}
 			time.Sleep(10 * time.Second)
@@ -98,7 +102,7 @@ func InsertRootFromJson(name string) {
 	if err != nil {
 		panic(err)
 	}
-
+	log.Println("size:", len(rcs))
 	for idx := range rcs {
 		InsertIfNotExist("root", &rcs[idx])
 	}
@@ -117,6 +121,7 @@ func InsertRadicalFromJson(name string) {
 		panic(err)
 	}
 
+	log.Println("size:", len(rcs))
 	for idx := range rcs {
 		InsertIfNotExist("radical", &rcs[idx])
 	}
