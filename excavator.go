@@ -118,6 +118,7 @@ func saveKangXiStrokes(c *Character, v string) bool {
 }
 
 func savePinyin(c *Character, v string) bool {
+	v = strings.Replace(v, "　", ",", -1)
 	return trimReplace(&c.Pinyin, v)
 }
 
@@ -287,17 +288,6 @@ var sMap = map[string]CharacterAssign{
 	"辞　海":    cihai,
 }
 
-func warnLog(s string, text string) {
-	if s == "/Html/KangXi/40/KORNCQKOAZRNXVDA.shtml" {
-		log.Println(text)
-		return
-	}
-	if s == "/Html/KangXi/24/PWKOUYTBTBUYCAZE.shtml" {
-		log.Println(text)
-		return
-	}
-
-}
 
 func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 	c := new(Character)
@@ -322,8 +312,6 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 		return c
 	}
 
-	h1, _ := doc.Html()
-	warnLog(rc.URL, h1)
 	//处理笔画
 	f := characterSave
 	doc.Find("tbody tr .text15").ReplaceWith("script").Each(func(i int, s1 *goquery.Selection) {
@@ -334,8 +322,8 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 				if b := f(c, text); b {
 					f = nil
 				}
-				log.Println(text)
-				log.Println(s1.Html())
+				//log.Println(text)
+				//log.Println(s1.Html())
 			}
 			f = characterAssignFunc(caMap, text)
 		})

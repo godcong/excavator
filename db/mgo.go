@@ -90,7 +90,7 @@ func PoolInsertLoop(ctx context.Context) {
 	}
 }
 
-func InsertRootFromJson(name string) {
+func InsertRootFromJson(name string, db string) {
 	var rcs []*excavator.RootCharacter
 	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
 	if err != nil {
@@ -104,11 +104,11 @@ func InsertRootFromJson(name string) {
 	}
 	log.Println("size:", len(rcs))
 	for idx := range rcs {
-		InsertIfNotExist("root", &rcs[idx])
+		InsertIfNotExist(db, &rcs[idx])
 	}
 
 }
-func InsertRadicalFromJson(name string) {
+func InsertRadicalFromJson(name string, db string) {
 	var rcs []*excavator.RadicalCharacter
 	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
 	if err != nil {
@@ -123,7 +123,7 @@ func InsertRadicalFromJson(name string) {
 
 	log.Println("size:", len(rcs))
 	for idx := range rcs {
-		InsertIfNotExist("radical", &rcs[idx])
+		InsertIfNotExist(db, &rcs[idx])
 	}
 
 }

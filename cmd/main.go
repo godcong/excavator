@@ -43,11 +43,8 @@ func main() {
 		}
 
 		select {
-		case v := <-ch:
-			if v != -1 {
-				log.Println("wrong id:", idx, rcs[idx])
-			}
-			//log.Println("thread:", idx)
+		case <-ch:
+			log.Println("thread:", idx)
 			go threadLoop(idx, &radical, &rcs[idx], ch)
 			idx++
 		default:
@@ -61,13 +58,13 @@ func main() {
 func threadLoop(idx int, radical *excavator.Radical, rc *excavator.RadicalCharacter, ch chan<- int) {
 	c := radical.Character(rc)
 	if c.Character == "" {
-		log.Println(*c)
+		db.InsertIfNotExist("radicalwrong", rc)
 		ch <- idx
 		return
 	}
 	err := db.InsertIfNotExist("character", c)
 	if err != nil {
-		ch <- idx
+		ch <- -1
 		log.Println(err)
 		return
 	}

@@ -7,9 +7,9 @@ import (
 )
 
 func TestInsertRootFromJson(t *testing.T) {
-	db.InsertRootFromJson("root.json")
+	db.InsertRootFromJson("root.json", "root")
 }
 
 func TestInsertRadicalFromJson(t *testing.T) {
-	db.InsertRadicalFromJson("radical.json")
+	db.InsertRadicalFromJson("radical.json","radical2")
 }
