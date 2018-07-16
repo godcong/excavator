@@ -13,9 +13,9 @@ type Root struct {
 }
 
 type RootCharacter struct {
-	Strokes string
-	Name    string
-	URL     string
+	Strokes string `json:"strokes"`
+	Name    string `json:"name"`
+	URL     string `json:"url"`
 }
 
 //NewRoot create an root

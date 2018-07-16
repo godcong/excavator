@@ -12,11 +12,11 @@ type Radical struct {
 }
 
 type RadicalCharacter struct {
-	*RootCharacter
-	Strokes   string
-	Pinyin    string
-	Character string
-	URL       string
+	*RootCharacter `json:"rootcharacter"`
+	Strokes   string `json:"strokes"`
+	Pinyin    string `json:"pinyin"`
+	Character string `json:"character"`
+	URL       string `json:"url"`
 }
 
 func (r *Radical) Add(rc *RadicalCharacter) {

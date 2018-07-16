@@ -1,7 +1,10 @@
 package db
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
+	"os"
 	"sync"
 	"time"
 
@@ -42,15 +45,27 @@ func Dial() *mgo.Session {
 	return session
 }
 
+func InsertIfNotExist(name string, v interface{}) error {
+	count, err := DB(name).Find(v).Count()
+	if err != nil || count != 0 {
+		return err
+	}
+	err = DB(name).Insert(v)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Close() {
 	session.Close()
 }
 
-func Insert(v interface{}) {
+func PoolInsertAdd(v interface{}) {
 	pool.Put(v)
 }
 
-func PoolGetInsert(ctx context.Context) {
+func PoolInsertLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -69,4 +84,41 @@ func PoolGetInsert(ctx context.Context) {
 			time.Sleep(10 * time.Second)
 		}
 	}
+}
+
+func InsertRootFromJson(name string) {
+	var rcs []*excavator.RootCharacter
+	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(file)
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&rcs)
+	if err != nil {
+		panic(err)
+	}
+
+	for idx := range rcs {
+		InsertIfNotExist("root", &rcs[idx])
+	}
+
+}
+func InsertRadicalFromJson(name string) {
+	var rcs []*excavator.RadicalCharacter
+	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(file)
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&rcs)
+	if err != nil {
+		panic(err)
+	}
+
+	for idx := range rcs {
+		InsertIfNotExist("radical", &rcs[idx])
+	}
+
 }
