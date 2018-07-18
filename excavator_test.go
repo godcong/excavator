@@ -11,10 +11,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func TestRadical_Iterator(t *testing.T) {
-
-}
-
 func TestRadical_Add(t *testing.T) {
 	text := "汉字五行：土　是否为常用字：否"
 	s := strings.SplitAfter(text, "：")
