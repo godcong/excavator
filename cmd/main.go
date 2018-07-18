@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"io"
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/godcong/excavator"
 	"github.com/godcong/excavator/db"
@@ -13,12 +13,12 @@ import (
 )
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	max := 10
+	max := runtime.NumCPU() * 2
+	runtime.GOMAXPROCS(max)
+
 	logSet()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	go db.PoolInsertLoop(ctx)
+	//ctx, cancel := context.WithCancel(context.Background())
+	//defer cancel()
 
 	var rcs []excavator.RadicalCharacter
 	err := db.DB("radical").Find(bson.M{}).All(&rcs)
@@ -43,28 +43,40 @@ func main() {
 		}
 
 		select {
-		case <-ch:
-			log.Println("thread:", idx)
-			go threadLoop(idx, &radical, &rcs[idx], ch)
-			idx++
+		case v := <-ch:
+			if v != -1 {
+				log.Println("wrong id:", idx, rcs[idx])
+			}
+			if idx <= 20891 {
+
+				go threadLoop(idx, &radical, &rcs[idx], ch)
+				time.Sleep(3 * time.Second)
+				idx++
+			}
+		case <-time.After(10 * time.Second):
+			break
 		default:
 
 		}
-
 	}
+
+	//db.PoolInsertLoop(ctx)
 
 }
 
 func threadLoop(idx int, radical *excavator.Radical, rc *excavator.RadicalCharacter, ch chan<- int) {
 	c := radical.Character(rc)
 	if c.Character == "" {
-		db.InsertIfNotExist("radicalwrong", rc)
+		log.Println(*c)
 		ch <- idx
 		return
 	}
-	err := db.InsertIfNotExist("character", c)
+	err := db.DB("character").Insert(c)
+	//InsertIfNotExist("character", c)
+
+	//db.PoolInsertAdd(c)
 	if err != nil {
-		ch <- -1
+		ch <- idx
 		log.Println(err)
 		return
 	}

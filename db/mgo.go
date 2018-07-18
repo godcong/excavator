@@ -51,6 +51,7 @@ func InsertIfNotExist(name string, v interface{}) error {
 	if err != nil || count != 0 {
 		return err
 	}
+
 	err = DB(name).Insert(v)
 	if err != nil {
 		return err
@@ -73,7 +74,8 @@ func PoolInsertLoop(ctx context.Context) {
 			for {
 				if v := pool.Get(); v != nil {
 					log.Println("insert")
-					InsertIfNotExist("character", v.(*excavator.Character))
+					err := InsertIfNotExist("character", v.(*excavator.Character))
+					log.Println(err)
 				} else {
 					return
 				}
@@ -81,7 +83,8 @@ func PoolInsertLoop(ctx context.Context) {
 		default:
 			if v := pool.Get(); v != nil {
 				log.Println("insert")
-				InsertIfNotExist("character", v.(*excavator.Character))
+				err := InsertIfNotExist("character", v.(*excavator.Character))
+				log.Println(err)
 				//DB("character").Insert(v.(*excavator.Character))
 				continue
 			}

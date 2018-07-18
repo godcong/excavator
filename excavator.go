@@ -294,7 +294,7 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
-		log.Println(err)
+		log.Println(err, url)
 		return &Character{
 			Character:      rc.Character,
 			Pinyin:         rc.Pinyin,
