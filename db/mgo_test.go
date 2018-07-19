@@ -11,5 +11,9 @@ func TestInsertRootFromJson(t *testing.T) {
 }
 
 func TestInsertRadicalFromJson(t *testing.T) {
-	db.InsertRadicalFromJson("radical.json","radical2")
+	db.InsertRadicalFromJson("radical.json", "radical2")
+}
+
+func TestInsertFromJson(t *testing.T) {
+	db.InsertFromJson("wuxing.json", &db.WuXing{})
 }
