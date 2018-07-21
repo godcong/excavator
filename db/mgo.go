@@ -133,7 +133,7 @@ func InsertRadicalFromJson(name string, db string) {
 
 }
 
-func InsertFromJson(name string, v interface{}) {
+func InsertFromJson(file string, v interface{}) {
 	//TODO:
 }
 
