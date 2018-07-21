@@ -134,24 +134,7 @@ func InsertRadicalFromJson(name string, db string) {
 }
 
 func InsertFromJson(name string, v interface{}) {
-	dbName := getInterfaceName(v)
-	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	r := bufio.NewReader(file)
-	dec := json.NewDecoder(r)
-
 	//TODO:
-	token, err := dec.Token()
-	err = dec.Decode(&rcs)
-	if err != nil {
-		panic(err)
-	}
-	for idx := range rcs {
-		InsertIfNotExist(dbName, &rcs[idx])
-	}
-
 }
 
 func getInterfaceName(v interface{}) string {
