@@ -17,3 +17,11 @@ func TestInsertRadicalFromJson(t *testing.T) {
 func TestInsertFromJson(t *testing.T) {
 	db.InsertFromJson("wuxing.json", &db.WuXing{})
 }
+
+func TestInsertWuXingFromJson(t *testing.T) {
+	db.InsertWuXingFromJson("wuxing.json", "wuxing")
+}
+
+func TestInserDaYanFromJson(t *testing.T) {
+	db.InserDaYanFromJson("dayan.json", "dayan")
+}

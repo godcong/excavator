@@ -133,6 +133,46 @@ func InsertRadicalFromJson(name string, db string) {
 
 }
 
+func InsertWuXingFromJson(name string, db string) {
+	var wxs []*WuXing
+	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(file)
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&wxs)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println("size:", len(wxs))
+	for idx := range wxs {
+		InsertIfNotExist(db, &wxs[idx])
+	}
+
+}
+
+func InserDaYanFromJson(name string, db string) {
+	var objs []*DaYan
+	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(file)
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&objs)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println("size:", len(objs))
+	for idx := range objs {
+		InsertIfNotExist(db, &objs[idx])
+	}
+
+}
+
 func InsertFromJson(file string, v interface{}) {
 	//TODO:
 }
@@ -146,3 +186,5 @@ func getInterfaceName(v interface{}) string {
 	}
 	return ""
 }
+
+
