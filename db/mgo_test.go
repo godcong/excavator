@@ -22,6 +22,6 @@ func TestInsertWuXingFromJson(t *testing.T) {
 	db.InsertWuXingFromJson("wuxing.json", "wuxing")
 }
 
-func TestInserDaYanFromJson(t *testing.T) {
-	db.InserDaYanFromJson("dayan.json", "dayan")
+func TestInsertDaYanFromJson(t *testing.T) {
+	db.InsertDaYanFromJson("dayan.json", "dayan")
 }

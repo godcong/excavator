@@ -153,7 +153,7 @@ func InsertWuXingFromJson(name string, db string) {
 
 }
 
-func InserDaYanFromJson(name string, db string) {
+func InsertDaYanFromJson(name string, db string) {
 	var objs []*DaYan
 	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
 	if err != nil {
