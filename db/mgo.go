@@ -187,4 +187,22 @@ func getInterfaceName(v interface{}) string {
 	return ""
 }
 
+func InsertCharacterFromJson(name string, db string) {
+	var objs []*Character
+	file, err := os.OpenFile(name, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	r := bufio.NewReader(file)
+	dec := json.NewDecoder(r)
+	err = dec.Decode(&objs)
+	if err != nil {
+		panic(err)
+	}
 
+	log.Println("size:", len(objs))
+	for idx := range objs {
+		DB(db).Insert(&objs[idx])
+	}
+
+}
