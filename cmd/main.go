@@ -48,7 +48,6 @@ func main() {
 				log.Println("wrong id:", idx, rcs[idx])
 			}
 			if idx <= 20891 {
-
 				go threadLoop(idx, &radical, &rcs[idx], ch)
 				time.Sleep(3 * time.Second)
 				idx++

@@ -13,6 +13,7 @@ import (
 
 	"github.com/godcong/excavator"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var session *mgo.Session
@@ -193,6 +194,7 @@ func InsertCharacterFromJson(name string, db string) {
 	if err != nil {
 		panic(err)
 	}
+	defer file.Close()
 	r := bufio.NewReader(file)
 	dec := json.NewDecoder(r)
 	err = dec.Decode(&objs)
@@ -204,5 +206,20 @@ func InsertCharacterFromJson(name string, db string) {
 	for idx := range objs {
 		DB(db).Insert(&objs[idx])
 	}
+}
 
+//UpdateCommonly UpdateCommonly
+func UpdateCommonly(v string) {
+	var char Character
+	log.Println(v, char)
+	err := DB("character").Find(bson.M{"character": v}).One(&char)
+	if err != nil {
+		log.Println("top", err)
+		return
+	}
+	err = DB("character").Update(bson.M{"character": v}, bson.M{"is_commonly": true})
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }

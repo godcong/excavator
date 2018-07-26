@@ -32,6 +32,7 @@ type Iterable interface {
 //Character 字符
 type Character struct {
 	//URL            string //汉字地址
+	IsCommonly     bool   `bson:"is_commonly"`     //是否为常用字
 	Character      string `bson:"character"`       //字符
 	Pinyin         string `bson:"pinyin"`          //拼音
 	Radical        string `bson:"radical"`         //部首

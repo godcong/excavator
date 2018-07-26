@@ -3,6 +3,7 @@ package db_test
 import (
 	"testing"
 
+	"github.com/godcong/excavator"
 	"github.com/godcong/excavator/db"
 )
 
@@ -28,4 +29,12 @@ func TestInsertDaYanFromJson(t *testing.T) {
 
 func TestInsertCharacterFromJson(t *testing.T) {
 	db.InsertCharacterFromJson("character.json", "character")
+}
+
+func TestUpdateCommonly(t *testing.T) {
+	chars := excavator.CommonlyTop("http://www.zdic.net/z/zb/cc1.htm")
+	for _, v := range chars {
+		db.UpdateCommonly(v)
+	}
+
 }
