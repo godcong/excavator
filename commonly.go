@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/globalsign/mgo/bson"
 )
 
 type CommonlyCharacter struct {

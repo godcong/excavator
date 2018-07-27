@@ -1,6 +1,6 @@
 package db
 
-import "gopkg.in/mgo.v2/bson"
+import "github.com/globalsign/mgo/bson"
 
 type IteratorFunc func(v interface{}) error
 

@@ -1,6 +1,6 @@
 package excavator
 
-import "gopkg.in/mgo.v2/bson"
+import "github.com/globalsign/mgo/bson"
 
 type FateCharacter struct {
 	ID                   bson.ObjectId `bson:"_id,omitempty"`          //id

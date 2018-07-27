@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/globalsign/mgo"
 	"github.com/godcong/excavator"
-	"gopkg.in/mgo.v2"
 )
 
 var session *mgo.Session

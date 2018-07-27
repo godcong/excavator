@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/godcong/excavator"
 	"github.com/godcong/excavator/db"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func main() {
