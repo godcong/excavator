@@ -209,14 +209,15 @@ func InsertCharacterFromJson(name string, db string) {
 }
 
 //UpdateCommonly UpdateCommonly
-func UpdateCommonly(v string) {
+func UpdateCommonly(v *excavator.CommonlyCharacter) {
 	var char Character
-	log.Println(v, char)
+
 	err := DB("character").Find(bson.M{"character": v}).One(&char)
 	if err != nil {
-		log.Println("top", err)
+		log.Println("top", err, v)
 		return
 	}
+	log.Println(char)
 	err = DB("character").Update(bson.M{"character": v}, bson.M{"is_commonly": true})
 	if err != nil {
 		log.Println(err)
