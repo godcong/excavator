@@ -35,3 +35,8 @@ func CommonlyTop(url string) []*CommonlyCharacter {
 	})
 	return chars
 }
+
+//CommonlyBase
+func CommonlyBase(character *CommonlyCharacter) {
+
+}
