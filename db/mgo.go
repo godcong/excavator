@@ -13,7 +13,6 @@ import (
 
 	"github.com/godcong/excavator"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var session *mgo.Session
@@ -210,15 +209,7 @@ func InsertCharacterFromJson(name string, db string) {
 
 //UpdateCommonly UpdateCommonly
 func UpdateCommonly(v *excavator.CommonlyCharacter) {
-	var char Character
-
-	err := DB("character").Find(bson.M{"character": v}).One(&char)
-	if err != nil {
-		log.Println("top", err, v)
-		return
-	}
-	log.Println(char)
-	err = DB("character").Update(bson.M{"character": v}, bson.M{"is_commonly": true})
+	err := DB("commonly").Insert(v)
 	if err != nil {
 		log.Println(err)
 		return
