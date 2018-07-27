@@ -7,9 +7,10 @@ import (
 )
 
 type CommonlyCharacter struct {
-	Character string
-	Link      string
-	Title     string
+	ID        bson.ObjectId `bson:"_id,omitempty"`
+	Character string        `bson:"character"`
+	Link      string        `bson:"link"`
+	Title     string        `bson:"title"`
 }
 
 //CommonlyTop
