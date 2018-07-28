@@ -37,6 +37,9 @@ func CommonlyTop(url string) []*CommonlyCharacter {
 }
 
 //CommonlyBase
-func CommonlyBase(character *CommonlyCharacter) {
-
+func CommonlyBase(url string, character *CommonlyCharacter) {
+	//TODO:fill the base character data
+	url = url + character.Link
+	html, _ := parseDocument(url)
+	log.Println(html)
 }
