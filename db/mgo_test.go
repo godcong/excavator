@@ -34,7 +34,8 @@ func TestInsertCharacterFromJson(t *testing.T) {
 func TestUpdateCommonly(t *testing.T) {
 	chars := excavator.CommonlyTop("http://www.zdic.net/z/zb/cc1.htm")
 	for _, v := range chars {
-		db.UpdateCommonly(v)
+		excavator.CommonlyBase("http://www.zdic.net", v)
+		break
 	}
 
 }

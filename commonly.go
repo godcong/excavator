@@ -41,5 +41,8 @@ func CommonlyBase(url string, character *CommonlyCharacter) {
 	//TODO:fill the base character data
 	url = url + character.Link
 	html, _ := parseDocument(url)
-	log.Println(html)
+	log.Println(html.Html())
+	html.Find("tab").Each(func(i int, s1 *goquery.Selection) {
+		log.Println(s1.Html())
+	})
 }
