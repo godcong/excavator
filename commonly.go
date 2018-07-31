@@ -1,7 +1,9 @@
 package excavator
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/globalsign/mgo/bson"
@@ -12,6 +14,12 @@ type CommonlyCharacter struct {
 	Character string        `bson:"character"`
 	Link      string        `bson:"link"`
 	Title     string        `bson:"title"`
+}
+
+type BaseCharacter struct {
+	ID        bson.ObjectId `bson:"_id,omitempty"`
+	Character string
+	Data      map[string]string
 }
 
 //CommonlyTop
@@ -37,12 +45,26 @@ func CommonlyTop(url string) []*CommonlyCharacter {
 }
 
 //CommonlyBase
-func CommonlyBase(url string, character *CommonlyCharacter) {
-	//TODO:fill the base character data
+func CommonlyBase(url string, character *CommonlyCharacter) *BaseCharacter {
 	url = url + character.Link
-	html, _ := parseDocument(url)
-	log.Println(html.Html())
-	html.Find("tab").Each(func(i int, s1 *goquery.Selection) {
-		log.Println(s1.Html())
+	html, err := parseDocument(url)
+	bc := BaseCharacter{
+		Character: character.Character,
+		Data:      make(map[string]string),
+	}
+	if err != nil {
+		return &bc
+	}
+
+	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
+		fmt.Println(s1.Html())
+		k := strings.TrimSpace(s1.Text())
+		v, b := s1.Find("a").Attr("href")
+		if b {
+			bc.Data[k] = v
+		} else {
+			bc.Data[k] = character.Link
+		}
 	})
+	return &bc
 }
