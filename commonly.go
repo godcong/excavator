@@ -18,6 +18,7 @@ type CommonlyCharacter struct {
 
 type BaseCharacter struct {
 	ID        bson.ObjectId `bson:"_id,omitempty"`
+	NeedFix   bool          `bson:"need_fix"`
 	Character string
 	Data      map[string]string
 }
@@ -50,6 +51,7 @@ func CommonlyBase(url string, character *CommonlyCharacter) *BaseCharacter {
 	html, err := parseDocument(url)
 	bc := BaseCharacter{
 		Character: character.Character,
+		NeedFix:   true,
 		Data:      make(map[string]string),
 	}
 	if err != nil {

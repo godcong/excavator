@@ -35,10 +35,9 @@ func TestUpdateCommonly(t *testing.T) {
 	//chars := excavator.CommonlyTop("http://www.zdic.net/z/zb/cc1.htm")
 	chars := excavator.CommonlyTop("http://www.zdic.net/z/zb/cc2.htm")
 
-
 	for _, v := range chars {
-		//bc := excavator.CommonlyBase("http://www.zdic.net", v)
-		db.DB("commonly").Insert(v)
+		bc := excavator.CommonlyBase("http://www.zdic.net", v)
+		db.DB("base").Insert(bc)
 	}
 
 }
