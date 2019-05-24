@@ -2,7 +2,9 @@ package excavator
 
 import (
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -354,23 +356,38 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 }
 
 //ParseDocument get the url result body
-func parseDocument(url string) (*goquery.Document, error) {
-	// Request the HTML page.
-	res, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
-	}
+func parseDocument(url string) (doc *goquery.Document, e error) {
+	var reader io.Reader
+	hash := MD5(url)
+	if !CheckExist(hash) {
+		// Request the HTML page.
+		res, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer res.Body.Close()
+		if res.StatusCode != 200 {
+			return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
+		}
+		reader = res.Body
+		file, e := os.OpenFile(GetPath(hash), os.O_CREATE|os.O_SYNC|os.O_RDWR, os.ModePerm)
+		if e != nil {
+			return nil, e
 
-	// Load the HTML document
-	body, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		return nil, err
+		}
+		written, e := io.Copy(file, reader)
+		if e != nil {
+			return nil, e
+		}
+		log.Infof("read %s | %d ", hash, written)
+		_ = file.Close()
 	}
-	return body, nil
+	reader, e = os.Open(GetPath(hash))
+	if e != nil {
+		return nil, e
+	}
+	// Load the HTML document
+	return goquery.NewDocumentFromReader(reader)
 }
 
 func trim(s string) string {

@@ -14,6 +14,7 @@ func MainRun(url string) error {
 	chars := CommonlyTop(url)
 
 	fmt.Println("start total:", len(chars))
+	return nil
 	for idx, v := range chars {
 		bc := CommonlyBase("http://www.zdic.net", v)
 		//db.DB("base").Insert(bc)
