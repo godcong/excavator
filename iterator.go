@@ -100,5 +100,4 @@ func (iter *iterator) ThreadIterator(f IteratorFunc) error {
 			}
 		}
 	}
-	return nil
 }

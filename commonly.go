@@ -2,7 +2,6 @@ package excavator
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -37,7 +36,7 @@ func CommonlyTop(url string) []*CommonlyCharacter {
 				Link:      link,
 				Title:     title,
 			}
-			log.Printf("%+v", cc)
+			log.Infof("%+v", cc)
 			chars = append(chars, &cc)
 
 		})

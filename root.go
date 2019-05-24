@@ -1,7 +1,4 @@
 package excavator
-
-import "log"
-
 type RootFunc func(rc *RootCharacter) error
 
 //RootRadical result root list
@@ -42,13 +39,13 @@ func (root *Root) IteratorFunc(f RootFunc) []*Radical {
 		rc := root.Next().(*RootCharacter)
 		if root.beforeIterator != nil {
 			if err := root.beforeIterator(rc); err != nil {
-				log.Println(err)
+				log.Panic(err)
 				continue
 			}
 		}
 		rad = append(rad, getRedicalList(root, rc))
 		if err := f(rc); err != nil {
-			log.Panicln(err)
+			log.Panic(err)
 			continue
 		}
 	}

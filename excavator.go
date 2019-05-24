@@ -2,7 +2,6 @@ package excavator
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -17,7 +16,7 @@ type CharacterAssign func(c *Character, s string) bool
 func getRootList(r *Root, suffix string) *Root {
 	doc, err := parseDocument(r.URL + suffix)
 	if err != nil {
-		log.Println(r.URL + suffix)
+		log.Info(r.URL + suffix)
 		panic(err)
 	}
 
@@ -48,7 +47,7 @@ func getRedicalList(r *Root, rc *RootCharacter) *Radical {
 	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
-		log.Println(url)
+		log.Info(url)
 		return radical
 	}
 
@@ -80,7 +79,7 @@ func getRedicalList(r *Root, rc *RootCharacter) *Radical {
 
 				if add {
 					if ch[3] == "" {
-						log.Println(selectiontr.Html())
+						log.Info(selectiontr.Html())
 						return
 					}
 
@@ -127,7 +126,7 @@ func savePhonetic(c *Character, v string) bool {
 }
 
 func dummySave(c *Character, v string) bool {
-	log.Println(v)
+	log.Info(v)
 	return true
 }
 
@@ -288,13 +287,12 @@ var sMap = map[string]CharacterAssign{
 	"辞　海":    cihai,
 }
 
-
 func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 	c := new(Character)
 	url := r.URL + rc.URL
 	doc, err := parseDocument(url)
 	if err != nil {
-		log.Println(err, url)
+		log.Info(err, url)
 		return &Character{
 			Character:      rc.Character,
 			Pinyin:         rc.Pinyin,
@@ -309,7 +307,6 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 			Rhyme:          Rhyme{},
 			Index:          Index{},
 		}
-		return c
 	}
 
 	//处理笔画
