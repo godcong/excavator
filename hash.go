@@ -11,7 +11,7 @@ var tmpDir = "tmp"
 
 func CheckExist(s string) bool {
 	_, e := os.Open(GetPath(s))
-	return os.IsExist(e)
+	return e == nil || os.IsExist(e)
 }
 
 func GetPath(s string) string {
