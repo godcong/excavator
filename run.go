@@ -6,7 +6,7 @@ import (
 	"github.com/godcong/go-trait"
 )
 
-var log = trait.InitGlobalZapSugar()
+var log = trait.InitGlobalZapSugar().With("package", "excavator")
 
 func MainRun(url string) error {
 	//"http://www.zdic.net/z/zb/cc1.htm"
