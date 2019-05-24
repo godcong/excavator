@@ -359,6 +359,7 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 func parseDocument(url string) (doc *goquery.Document, e error) {
 	var reader io.Reader
 	hash := MD5(url)
+	log.Info("hash:%s,url:%s", hash, url)
 	if !CheckExist(hash) {
 		// Request the HTML page.
 		res, err := http.Get(url)

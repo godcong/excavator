@@ -29,7 +29,6 @@ func CommonlyTop(url string) []*CommonlyCharacter {
 	if e != nil {
 		return nil
 	}
-	return nil
 	html.Find(".bs_index3").Each(func(i int, s1 *goquery.Selection) {
 		s1.Find("li").Each(func(i int, s2 *goquery.Selection) {
 			a := s2.Find("a").Text()
