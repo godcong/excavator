@@ -10,9 +10,9 @@ var log = trait.InitGlobalZapSugar()
 
 func MainRun(url string) error {
 	//"http://www.zdic.net/z/zb/cc1.htm"
-	log.Info(url)
-	return nil
+	url = "http://www.zdic.net/z/zb/cc1.htm"
 	chars := CommonlyTop(url)
+
 	fmt.Println("start total:", len(chars))
 	for idx, v := range chars {
 		bc := CommonlyBase("http://www.zdic.net", v)
