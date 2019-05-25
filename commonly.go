@@ -24,8 +24,8 @@ type BaseCharacter struct {
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
 //RootCYZ
-func RootCYZ(url string, cb TopCallback) error {
-	url = strings.Join([]string{url, "z/zb/cc1.htm"}, "/")
+func RootCYZ(host string, cb TopCallback) error {
+	url := strings.Join([]string{host, "z/zb/cc1.htm"}, "/")
 	html, e := parseDocument(url)
 	if e != nil {
 		return e
@@ -41,7 +41,7 @@ func RootCYZ(url string, cb TopCallback) error {
 				Pinyin:    strings.Split(pinyin, ","),
 			}
 			log.Infof("%+v", cc)
-			cb(url, &cc)
+			cb(host, &cc)
 		})
 	})
 	return nil
@@ -50,7 +50,10 @@ func RootCYZ(url string, cb TopCallback) error {
 //CommonlyBase
 func CommonlyBase(url string, character *RootRadicalCharacter) {
 	url = url + character.Link
-	html, _ := parseDocument(url)
+	html, e := parseDocument(url)
+	if e != nil {
+		return
+	}
 	//bc := StandardCharacter{
 	//	Character: character.Character,
 	//	NeedFix:   true,
