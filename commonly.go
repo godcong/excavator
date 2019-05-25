@@ -1,11 +1,9 @@
 package excavator
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/globalsign/mgo/bson"
 )
 
 type RootRadicalCharacter struct {
@@ -15,8 +13,7 @@ type RootRadicalCharacter struct {
 }
 
 type BaseCharacter struct {
-	ID        bson.ObjectId `bson:"_id,omitempty"`
-	NeedFix   bool          `bson:"need_fix"`
+	NeedFix   bool
 	Character string
 	Data      map[string]string
 }
@@ -52,26 +49,24 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 	url = url + character.Link
 	html, e := parseDocument(url)
 	if e != nil {
+		log.Errorf("%s error with:%s", e, url)
 		return
 	}
-	//bc := StandardCharacter{
-	//	Character: character.Character,
-	//	NeedFix:   true,
-	//	Data:      make(map[string]string),
-	//}
-	//if err != nil {
-	//	return &bc
-	//}
+	bc := StandardCharacter{
+		Character: character.Character,
+		NeedFix:   true,
+		Data:      make(map[string]string),
+	}
 
 	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
-		fmt.Println(s1.Html())
-		//k := strings.TrimSpace(s1.Text())
-		//v, b := s1.Find("a").Attr("href")
-		//if b {
-		//	bc.Data[k] = v
-		//} else {
-		//	bc.Data[k] = character.Link
-		//}
+		log.Info(s1.Html())
+		k := strings.TrimSpace(s1.Text())
+		v, b := s1.Find("a").Attr("href")
+		if b {
+			bc.Data[k] = v
+		} else {
+			bc.Data[k] = character.Link
+		}
 	})
 	//return &bc
 }
