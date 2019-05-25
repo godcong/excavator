@@ -43,7 +43,7 @@ func CommonlyTop(url string, cb TopCallback) error {
 			cb(url, &cc)
 		})
 	})
-	return
+	return nil
 }
 
 //CommonlyBase
