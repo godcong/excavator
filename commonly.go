@@ -8,11 +8,10 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-type CommonlyCharacter struct {
-	ID        bson.ObjectId `bson:"_id,omitempty"`
-	Character string        `bson:"character"`
-	Link      string        `bson:"link"`
-	Title     string        `bson:"title"`
+type RootRadicalCharacter struct {
+	Character string   `json:"character"`
+	Link      string   `json:"link"`
+	Pinyin    []string `json:"pinyin"`
 }
 
 type BaseCharacter struct {
@@ -22,53 +21,53 @@ type BaseCharacter struct {
 	Data      map[string]string
 }
 
+type TopCallback func(url string, ch *RootRadicalCharacter)
+
 //CommonlyTop
-func CommonlyTop(url string) []*CommonlyCharacter {
-	var chars []*CommonlyCharacter
+func CommonlyTop(url string, cb TopCallback) error {
 	html, e := parseDocument(url)
 	if e != nil {
-		return nil
+		return e
 	}
 	html.Find(".bs_index3").Each(func(i int, s1 *goquery.Selection) {
 		s1.Find("li").Each(func(i int, s2 *goquery.Selection) {
 			a := s2.Find("a").Text()
 			link, _ := s2.Find("a").Attr("href")
-			title, _ := s2.Find("a").Attr("title")
-			cc := CommonlyCharacter{
+			pinyin, _ := s2.Find("a").Attr("title")
+			cc := RootRadicalCharacter{
 				Character: a,
 				Link:      link,
-				Title:     title,
+				Pinyin:    strings.Split(pinyin, ","),
 			}
 			log.Infof("%+v", cc)
-			chars = append(chars, &cc)
-
+			cb(url, &cc)
 		})
 	})
-	return chars
+	return
 }
 
 //CommonlyBase
-func CommonlyBase(url string, character *CommonlyCharacter) *BaseCharacter {
+func CommonlyBase(url string, character *RootRadicalCharacter) {
 	url = url + character.Link
-	html, err := parseDocument(url)
-	bc := BaseCharacter{
-		Character: character.Character,
-		NeedFix:   true,
-		Data:      make(map[string]string),
-	}
-	if err != nil {
-		return &bc
-	}
+	html, _ := parseDocument(url)
+	//bc := StandardCharacter{
+	//	Character: character.Character,
+	//	NeedFix:   true,
+	//	Data:      make(map[string]string),
+	//}
+	//if err != nil {
+	//	return &bc
+	//}
 
 	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
 		fmt.Println(s1.Html())
-		k := strings.TrimSpace(s1.Text())
-		v, b := s1.Find("a").Attr("href")
-		if b {
-			bc.Data[k] = v
-		} else {
-			bc.Data[k] = character.Link
-		}
+		//k := strings.TrimSpace(s1.Text())
+		//v, b := s1.Find("a").Attr("href")
+		//if b {
+		//	bc.Data[k] = v
+		//} else {
+		//	bc.Data[k] = character.Link
+		//}
 	})
-	return &bc
+	//return &bc
 }

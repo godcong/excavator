@@ -1,4 +1,11 @@
 package excavator
+
+import (
+	"github.com/godcong/go-trait"
+)
+
+var log = trait.InitGlobalZapSugar().With("package", "excavator")
+
 type RootFunc func(rc *RootCharacter) error
 
 //RootRadical result root list
