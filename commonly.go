@@ -23,8 +23,9 @@ type BaseCharacter struct {
 
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
-//CommonlyTop
-func CommonlyTop(url string, cb TopCallback) error {
+//RootCYZ
+func RootCYZ(url string, cb TopCallback) error {
+	url = strings.Join([]string{url, "z/zb/cc1.htm"}, "/")
 	html, e := parseDocument(url)
 	if e != nil {
 		return e

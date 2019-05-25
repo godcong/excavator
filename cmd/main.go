@@ -17,9 +17,9 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	host := rootCmd.PersistentFlags().StringP("host", "H", "http://localhost", "set the root url path")
+	host := rootCmd.PersistentFlags().StringP("host", "H", "http://www.zdic.net", "set the root url path")
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		if err := excavator.CommonlyTop(*host, excavator.CommonlyBase); err != nil {
+		if err := excavator.RootCYZ(*host, excavator.CommonlyBase); err != nil {
 			panic(err)
 		}
 	}
