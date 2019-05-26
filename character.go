@@ -2,11 +2,11 @@ package excavator
 
 type CharacterFunc func(character *Character) error
 
-
 type RootRadicalCharacter struct {
-	Character string   `json:"character"`
-	Link      string   `json:"link"`
-	Pinyin    []string `json:"pinyin"`
+	Class     string   `json:"class"`     //分类
+	Character string   `json:"character"` //字符
+	Link      string   `json:"link"`      //链接
+	Pinyin    []string `json:"pinyin"`    //拼音
 }
 
 //BasicExplanation 基本解释
@@ -19,9 +19,7 @@ type DetailedExplanation struct {
 
 //KangxiDictionary 康熙字典
 type KangxiDictionary struct {
-
 }
-
 
 //StandardCharacter 标准字符
 type StandardCharacter struct {
@@ -49,7 +47,6 @@ type Character struct {
 	Folk
 	Structure
 	Explain
-	Rhyme
 	Index
 }
 
