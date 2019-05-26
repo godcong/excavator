@@ -2,6 +2,40 @@ package excavator
 
 type CharacterFunc func(character *Character) error
 
+
+type RootRadicalCharacter struct {
+	Character string   `json:"character"`
+	Link      string   `json:"link"`
+	Pinyin    []string `json:"pinyin"`
+}
+
+//BasicExplanation 基本解释
+type BasicExplanation struct {
+}
+
+//DetailedExplanation  详细解释
+type DetailedExplanation struct {
+}
+
+//KangxiDictionary 康熙字典
+type KangxiDictionary struct {
+
+}
+
+
+//StandardCharacter 标准字符
+type StandardCharacter struct {
+	Radical             string
+	BasicExplanation    BasicExplanation
+	DetailedExplanation string
+}
+
+type BaseCharacter struct {
+	NeedFix   bool
+	Character string
+	Data      map[string]string
+}
+
 //Character 字符
 type Character struct {
 	//URL            string //汉字地址
@@ -34,14 +68,14 @@ type Structure struct {
 	StrokeReadWrite     string //笔顺读写
 }
 
-//Explain 康熙字典解释
+//Explain 说文解字
 type Explain struct {
 	Intro  string //简介
 	Detail string //详情
 }
 
-//Rhyme 音韵参考
-type Rhyme struct {
+//PhoneticDialect 音韵方言
+type PhoneticDialect struct {
 	GuangYun  string //广　韵
 	Mandarin  string //国　语
 	Cantonese string //粤　语

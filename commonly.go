@@ -6,21 +6,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type RootRadicalCharacter struct {
-	Character string   `json:"character"`
-	Link      string   `json:"link"`
-	Pinyin    []string `json:"pinyin"`
-}
-
-type BaseCharacter struct {
-	NeedFix   bool
-	Character string
-	Data      map[string]string
-}
 
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
-//RootCYZ
+//RootCYZ 常用字
 func RootCYZ(host string, cb TopCallback) error {
 	url := strings.Join([]string{host, "z/zb/cc1.htm"}, "/")
 	html, e := parseDocument(url)
