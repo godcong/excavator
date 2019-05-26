@@ -231,17 +231,20 @@ func strokeReadWrite(c *Character, v string) bool {
 
 //guangYun 广　韵
 func guangYun(c *Character, v string) bool {
-	return trimReplace(&c.GuangYun, v)
+	//return trimReplace(&c.GuangYun, v)
+	return true
 }
 
 //国　语
 func mandarin(c *Character, v string) bool {
-	return trimReplace(&c.Mandarin, v)
+	//return trimReplace(&c.Mandarin, v)
+	return true
 }
 
 ////粤　语
 func cantonese(c *Character, v string) bool {
-	return trimReplace(&c.Cantonese, v)
+	//return trimReplace(&c.Cantonese, v)
+	return true
 }
 
 //古文字诂林
@@ -306,7 +309,6 @@ func getCharacterList(r *Root, rc *RadicalCharacter) *Character {
 			Folk:           Folk{},
 			Structure:      Structure{},
 			Explain:        Explain{},
-			Rhyme:          Rhyme{},
 			Index:          Index{},
 		}
 	}

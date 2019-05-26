@@ -42,7 +42,8 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 		return
 	}
 	bc := StandardCharacter{
-		Radical: character.Character,
+		Radical:         character.Character,
+		CharacterDetail: map[string]string{},
 	}
 
 	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
@@ -57,5 +58,5 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 		//other
 		bc.CharacterDetail[k] = v
 	})
-	//return &bc
+	log.Infof("character detail:%+v", bc)
 }
