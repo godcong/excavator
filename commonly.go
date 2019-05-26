@@ -6,7 +6,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
 //RootCYZ 常用字
@@ -22,6 +21,7 @@ func RootCYZ(host string, cb TopCallback) error {
 			link, _ := s2.Find("a").Attr("href")
 			pinyin, _ := s2.Find("a").Attr("title")
 			cc := RootRadicalCharacter{
+				Class:     "CYZ",
 				Character: a,
 				Link:      link,
 				Pinyin:    strings.Split(pinyin, ","),
@@ -42,20 +42,20 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 		return
 	}
 	bc := StandardCharacter{
-		Character: character.Character,
-		NeedFix:   true,
-		Data:      make(map[string]string),
+		Radical: character.Character,
 	}
 
 	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
 		log.Info(s1.Html())
 		k := strings.TrimSpace(s1.Text())
 		v, b := s1.Find("a").Attr("href")
-		if b {
-			bc.Data[k] = v
-		} else {
-			bc.Data[k] = character.Link
+		if !b || k == "基本解释" {
+			//基本解释
+			bc.CharacterDetail[k] = character.Link
+			return
 		}
+		//other
+		bc.CharacterDetail[k] = v
 	})
 	//return &bc
 }

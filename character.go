@@ -11,21 +11,26 @@ type RootRadicalCharacter struct {
 
 //BasicExplanation 基本解释
 type BasicExplanation struct {
+
 }
 
 //DetailedExplanation  详细解释
 type DetailedExplanation struct {
+
 }
 
 //KangxiDictionary 康熙字典
 type KangxiDictionary struct {
+
 }
 
 //StandardCharacter 标准字符
 type StandardCharacter struct {
 	Radical             string
 	BasicExplanation    BasicExplanation
-	DetailedExplanation string
+	DetailedExplanation DetailedExplanation
+	KangxiDictionary    KangxiDictionary
+	CharacterDetail     map[string]string
 }
 
 type BaseCharacter struct {
