@@ -4,7 +4,7 @@ import (
 	"github.com/godcong/go-trait"
 )
 
-var log = trait.InitGlobalZapSugar().With("package", "excavator")
+var log = trait.NewZapSugar()
 
 type RootFunc func(rc *RootCharacter) error
 
