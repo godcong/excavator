@@ -34,6 +34,18 @@ func RootRegular(host string, cb TopCallback) error {
 	return nil
 }
 
+// DataTypeBlock ...
+var DataTypeBlock = []string{
+	"基本解释",
+	"详细解释",
+	"國語詞典",
+	"康熙字典",
+	"说文解字",
+	"音韵方言",
+	"字源字形",
+	"网友讨论",
+}
+
 //CommonlyBase ...
 func CommonlyBase(url string, character *RootRadicalCharacter) {
 	url = url + character.Link
@@ -47,17 +59,19 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 		CharacterDetail: map[string]string{},
 	}
 
-	html.Find(".tab").Each(func(i int, s1 *goquery.Selection) {
-		log.Info(s1.Html())
-		k := strings.TrimSpace(s1.Text())
-		v, b := s1.Find("a").Attr("href")
-		if !b || k == "基本解释" {
-			//基本解释
-			bc.CharacterDetail[k] = character.Link
-			return
-		}
-		//other
-		bc.CharacterDetail[k] = v
+	html.Find("div[data-type-block]").Each(func(i int, s1 *goquery.Selection) {
+		//DataTypeBlock
+		log.Info(s1.Attr("data-type-block"))
+		//log.Info(s1.Text())
+		//k := strings.TrimSpace(s1.Text())
+		//v, b := s1.Find("data-type-block").Attr("href")
+		//if !b || k == "基本解释" {
+		//	//基本解释
+		//	bc.CharacterDetail[k] = character.Link
+		//	return
+		//}
+		////other
+		//bc.CharacterDetail[k] = v
 	})
 	log.Infof("character detail:%+v", bc)
 }
