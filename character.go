@@ -1,11 +1,14 @@
 package excavator
 
+// CharacterFunc ...
 type CharacterFunc func(character *Character) error
 
-const ClassRegular int = iota //常用字
+// ClassRegular ...
+const ClassRegular int = iota
 
+// RootRadicalCharacter ...
 type RootRadicalCharacter struct {
-	Class     int   `json:"class"`     //分类
+	Class     int      `json:"class"`     //分类
 	Character string   `json:"character"` //字符
 	Link      string   `json:"link"`      //链接
 	Pinyin    []string `json:"pinyin"`    //拼音
@@ -32,6 +35,7 @@ type StandardCharacter struct {
 	CharacterDetail     map[string]string
 }
 
+// BaseCharacter ...
 type BaseCharacter struct {
 	NeedFix   bool
 	Character string
@@ -54,7 +58,7 @@ type Character struct {
 	Index
 }
 
-//Folk民俗参考
+//Folk 民俗参考
 type Folk struct {
 	CommonlyCharacters   string //是否为常用字
 	NameScience          string //姓名学
@@ -89,5 +93,5 @@ type Index struct {
 	Explain           string //说文解字
 	KangxiDictionary  string //康熙字典
 	ChineseDictionary string //汉语字典
-	Cihai             string //辞　海  
+	Cihai             string //辞　海
 }

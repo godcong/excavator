@@ -6,6 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// TopCallback ...
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
 //RootRegular 常用字
@@ -21,7 +22,7 @@ func RootRegular(host string, cb TopCallback) error {
 			link, _ := s2.Find("a").Attr("href")
 			pinyin, _ := s2.Find("a").Attr("title")
 			cc := RootRadicalCharacter{
-				Class:    ClassRegular,
+				Class:     ClassRegular,
 				Character: a,
 				Link:      link,
 				Pinyin:    strings.Split(pinyin, ","),
@@ -33,7 +34,7 @@ func RootRegular(host string, cb TopCallback) error {
 	return nil
 }
 
-//CommonlyBase
+//CommonlyBase ...
 func CommonlyBase(url string, character *RootRadicalCharacter) {
 	url = url + character.Link
 	html, e := parseDocument(url)

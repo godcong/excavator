@@ -1,5 +1,6 @@
 package excavator
 
+// IteratorFunc ...
 type IteratorFunc func(v interface{}) error
 
 type iterator struct {
@@ -8,7 +9,21 @@ type iterator struct {
 	index int
 }
 
-func NewIterator() *iterator {
+// Iterator ...
+type Iterator interface {
+	HasNext() bool
+	Next() interface{}
+	Reset()
+	Add(v interface{})
+	Size() int
+	IteratorFunc(f IteratorFunc) error
+	Iterator() Iterator
+	ThreadIterator(f IteratorFunc) error
+	Data() []interface{}
+}
+
+// NewIterator ...
+func NewIterator() Iterator {
 	return &iterator{
 		Max:   3,
 		data:  nil,
@@ -17,54 +32,56 @@ func NewIterator() *iterator {
 }
 
 //HasNext check next
-func (i *iterator) HasNext() bool {
-	return i.index < len(i.data)
+func (iter *iterator) HasNext() bool {
+	return iter.index < len(iter.data)
 }
 
 //Next get next
-func (i *iterator) Next() interface{} {
+func (iter *iterator) Next() interface{} {
 	defer func() {
-		i.index++
+		iter.index++
 	}()
-	if i.index < len(i.data) {
-		return i.data[i.index]
+	if iter.index < len(iter.data) {
+		return iter.data[iter.index]
 	}
 
 	return nil
 }
 
 //Reset reset index
-func (i *iterator) Reset() {
-	i.index = 0
+func (iter *iterator) Reset() {
+	iter.index = 0
 }
 
 //Add add radical
-func (i *iterator) Add(v interface{}) {
-	i.data = append(i.data, v)
+func (iter *iterator) Add(v interface{}) {
+	iter.data = append(iter.data, v)
 }
 
 //Size iterator data size
-func (i *iterator) Size() int {
-	return len(i.data)
+func (iter *iterator) Size() int {
+	return len(iter.data)
 }
 
 //Iterator an default iterator
-func (i *iterator) IteratorFunc(f IteratorFunc) error {
-	i.Reset()
-	for i.HasNext() {
-		if err := f(i.Next()); err != nil {
+func (iter *iterator) IteratorFunc(f IteratorFunc) error {
+	iter.Reset()
+	for iter.HasNext() {
+		if err := f(iter.Next()); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (i *iterator) Iterator() *iterator {
-	return i
+// Iterator ...
+func (iter *iterator) Iterator() Iterator {
+	return iter
 }
 
-func (i *iterator) Data() []interface{} {
-	return i.data
+// Data ...
+func (iter *iterator) Data() []interface{} {
+	return iter.data
 }
 
 func process(iter *iterator, f IteratorFunc, cb chan bool) bool {
@@ -82,6 +99,7 @@ func process(iter *iterator, f IteratorFunc, cb chan bool) bool {
 	return false
 }
 
+// ThreadIterator ...
 func (iter *iterator) ThreadIterator(f IteratorFunc) error {
 	cb := make(chan bool, iter.Max)
 	defer close(cb)

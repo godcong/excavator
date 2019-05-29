@@ -6,9 +6,10 @@ import (
 
 var log = trait.NewZapSugar()
 
+// RootFunc ...
 type RootFunc func(rc *RootCharacter) error
 
-//RootRadical result root list
+//Root result root list
 type Root struct {
 	beforeIterator RootFunc
 	iterator
@@ -16,6 +17,7 @@ type Root struct {
 	Suffix string
 }
 
+// RootCharacter ...
 type RootCharacter struct {
 	Strokes string `json:"strokes"`
 	Name    string `json:"name"`
@@ -35,22 +37,24 @@ func (r *Root) Add(rd *RootCharacter) {
 	r.iterator.Add(rd)
 }
 
-func (root *Root) Self() *Root {
-	return getRootList(root, root.Suffix)
+// Self ...
+func (r *Root) Self() *Root {
+	return getRootList(r, r.Suffix)
 }
 
-func (root *Root) IteratorFunc(f RootFunc) []*Radical {
+// IteratorFunc ...
+func (r *Root) IteratorFunc(f RootFunc) []*Radical {
 	var rad []*Radical
-	root.Reset()
-	for root.HasNext() {
-		rc := root.Next().(*RootCharacter)
-		if root.beforeIterator != nil {
-			if err := root.beforeIterator(rc); err != nil {
+	r.Reset()
+	for r.HasNext() {
+		rc := r.Next().(*RootCharacter)
+		if r.beforeIterator != nil {
+			if err := r.beforeIterator(rc); err != nil {
 				log.Panic(err)
 				continue
 			}
 		}
-		rad = append(rad, getRedicalList(root, rc))
+		rad = append(rad, getRedicalList(r, rc))
 		if err := f(rc); err != nil {
 			log.Panic(err)
 			continue
@@ -59,10 +63,12 @@ func (root *Root) IteratorFunc(f RootFunc) []*Radical {
 	return rad
 }
 
-func (root *Root) Radical(character *RootCharacter) *Radical {
-	return getRedicalList(root, character)
+// Radical ...
+func (r *Root) Radical(character *RootCharacter) *Radical {
+	return getRedicalList(r, character)
 }
 
-func (root *Root) SetBefore(r RootFunc) {
-	root.beforeIterator = r
+// SetBefore ...
+func (r *Root) SetBefore(rf RootFunc) {
+	r.beforeIterator = rf
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// CharacterAssign ...
 type CharacterAssign func(c *Character, s string) bool
 
 //getRootList run get root
@@ -272,7 +273,7 @@ func chineseDictionary(c *Character, v string) bool {
 	return trimReplace(&c.ChineseDictionary, v)
 }
 
-//辞　海  
+//辞　海
 func cihai(c *Character, v string) bool {
 	return trimReplace(&c.Cihai, v)
 }
