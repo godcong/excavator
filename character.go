@@ -2,8 +2,10 @@ package excavator
 
 type CharacterFunc func(character *Character) error
 
+const ClassRegular int = iota //常用字
+
 type RootRadicalCharacter struct {
-	Class     string   `json:"class"`     //分类
+	Class     int   `json:"class"`     //分类
 	Character string   `json:"character"` //字符
 	Link      string   `json:"link"`      //链接
 	Pinyin    []string `json:"pinyin"`    //拼音
@@ -11,17 +13,14 @@ type RootRadicalCharacter struct {
 
 //BasicExplanation 基本解释
 type BasicExplanation struct {
-
 }
 
 //DetailedExplanation  详细解释
 type DetailedExplanation struct {
-
 }
 
 //KangxiDictionary 康熙字典
 type KangxiDictionary struct {
-
 }
 
 //StandardCharacter 标准字符

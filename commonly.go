@@ -8,8 +8,8 @@ import (
 
 type TopCallback func(url string, ch *RootRadicalCharacter)
 
-//RootCYZ 常用字
-func RootCYZ(host string, cb TopCallback) error {
+//RootRegular 常用字
+func RootRegular(host string, cb TopCallback) error {
 	url := strings.Join([]string{host, "z/zb/cc1.htm"}, "/")
 	html, e := parseDocument(url)
 	if e != nil {
@@ -21,7 +21,7 @@ func RootCYZ(host string, cb TopCallback) error {
 			link, _ := s2.Find("a").Attr("href")
 			pinyin, _ := s2.Find("a").Attr("title")
 			cc := RootRadicalCharacter{
-				Class:     "CYZ",
+				Class:    ClassRegular,
 				Character: a,
 				Link:      link,
 				Pinyin:    strings.Split(pinyin, ","),
