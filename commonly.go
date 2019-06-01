@@ -34,16 +34,20 @@ func RootRegular(host string, cb TopCallback) error {
 	return nil
 }
 
+func dummyLog(i int, selection *goquery.Selection) {
+	log.With("index", i).Info(selection.Text())
+}
+
 // DataTypeBlock ...
-var DataTypeBlock = []string{
-	"基本解释",
-	"详细解释",
-	"國語詞典",
-	"康熙字典",
-	"说文解字",
-	"音韵方言",
-	"字源字形",
-	"网友讨论",
+var DataTypeBlock = map[string]func(i int, selection *goquery.Selection){
+	"基本解释": dummyLog,
+	"详细解释": dummyLog,
+	"國語詞典": dummyLog,
+	"康熙字典": dummyLog,
+	"说文解字": dummyLog,
+	"音韵方言": dummyLog,
+	"字源字形": dummyLog,
+	"网友讨论": dummyLog,
 }
 
 //CommonlyBase ...
@@ -61,7 +65,17 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 
 	html.Find("div[data-type-block]").Each(func(i int, s1 *goquery.Selection) {
 		//DataTypeBlock
-		log.Info(s1.Attr("data-type-block"))
+		dtb, _ := s1.Attr("data-type-block")
+		t := s1.Find("span .dicpy").Text()
+		log.Info(t)
+
+		s1.Find("ol li").Each(func(i int, selection *goquery.Selection) {
+			if fn, b := DataTypeBlock[dtb]; b {
+				fn(i, selection)
+			}
+
+		})
+
 		//log.Info(s1.Text())
 		//k := strings.TrimSpace(s1.Text())
 		//v, b := s1.Find("data-type-block").Attr("href")
