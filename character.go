@@ -16,6 +16,8 @@ type RootRadicalCharacter struct {
 
 //BasicExplanation 基本解释
 type BasicExplanation struct {
+	BasicMeaning string
+	OtherMeaning []string
 }
 
 //DetailedExplanation  详细解释

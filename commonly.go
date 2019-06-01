@@ -38,9 +38,15 @@ func dummyLog(i int, selection *goquery.Selection) {
 	log.With("index", i).Info(selection.Text())
 }
 
+func basicExplanation(i int, selection *goquery.Selection) {
+	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
+		log.With("index", i).Info(selection.Text())
+	})
+}
+
 // DataTypeBlock ...
 var DataTypeBlock = map[string]func(i int, selection *goquery.Selection){
-	"基本解释": dummyLog,
+	"基本解释": basicExplanation,
 	"详细解释": dummyLog,
 	"國語詞典": dummyLog,
 	"康熙字典": dummyLog,
@@ -64,17 +70,14 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 	}
 
 	html.Find("div[data-type-block]").Each(func(i int, s1 *goquery.Selection) {
-		//DataTypeBlock
-		dtb, _ := s1.Attr("data-type-block")
-		t := s1.Find("span .dicpy").Text()
-		log.Info(t)
-
-		s1.Find("ol li").Each(func(i int, selection *goquery.Selection) {
-			if fn, b := DataTypeBlock[dtb]; b {
-				fn(i, selection)
-			}
-
-		})
+		log.Info(s1.Html())
+		dtb, b := s1.Attr("data-type-block")
+		if !b {
+			return
+		}
+		if fn, b := DataTypeBlock[dtb]; b {
+			fn(i, s1)
+		}
 
 		//log.Info(s1.Text())
 		//k := strings.TrimSpace(s1.Text())
