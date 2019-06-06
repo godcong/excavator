@@ -38,12 +38,22 @@ func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err er
 	log.With("index", i).Info(selection.Text())
 	return nil
 }
+func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
+	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
+		log.With("index", i).Info(selection.Text())
+		ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Text())
+	})
+	//selection.Find()
+	log.Infof("%+v", ex)
+	return nil
+}
 
 func basicExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
 	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
 		log.With("index", i).Info(selection.Text())
 		ex.BasicExplanation.BasicMeaning = append(ex.BasicExplanation.BasicMeaning, selection.Text())
 	})
+	//selection.Find()
 	log.Infof("%+v", ex)
 	return nil
 }
@@ -54,7 +64,7 @@ type ProcessFunc func(*StandardCharacter, int, *goquery.Selection) error
 // DataTypeBlock ...
 var DataTypeBlock = map[string]ProcessFunc{
 	"基本解释": basicExplanation,
-	"详细解释": dummyLog,
+	"详细解释": detailedExplanation,
 	"國語詞典": dummyLog,
 	"康熙字典": dummyLog,
 	"说文解字": dummyLog,
@@ -77,7 +87,8 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 	}
 
 	html.Find("div[data-type-block]").Each(func(i int, s1 *goquery.Selection) {
-		log.Info(s1.Html())
+		log.Debug(s1.Html())
+
 		dtb, b := s1.Attr("data-type-block")
 		if !b {
 			return

@@ -2,9 +2,15 @@ package excavator
 
 import (
 	"github.com/godcong/go-trait"
+	"go.uber.org/zap"
 )
 
 var log = trait.NewZapSugar()
+
+// Debug ...
+func Debug() {
+	log = zap.NewExample().Sugar()
+}
 
 // RootFunc ...
 type RootFunc func(rc *RootCharacter) error

@@ -22,6 +22,13 @@ type BasicExplanation struct {
 
 //DetailedExplanation  详细解释
 type DetailedExplanation struct {
+	Character       string   `json:"character"`
+	Pinyin          string   `json:"pinyin"`
+	DetailedMeaning []string `json:"detailed_meaning"`
+}
+
+// MandarinDictionary 国语辞典
+type MandarinDictionary struct {
 }
 
 //KangxiDictionary 康熙字典
