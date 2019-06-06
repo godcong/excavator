@@ -16,6 +16,8 @@ type RootRadicalCharacter struct {
 
 //BasicExplanation 基本解释
 type BasicExplanation struct {
+	Pinyin       string   `json:"pinyin"`   //拼音
+	Phonetic     string   `json:"phonetic"` //注音
 	BasicMeaning []string `xorm:"json basic_meaning" json:"basic_meaning"`
 	OtherMeaning []string
 }

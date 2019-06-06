@@ -39,22 +39,41 @@ func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err er
 	return nil
 }
 func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
-	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
-		log.With("index", i).Info(selection.Text())
-		ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Text())
+	selection.Find("div[class~=xnr]").Each(func(i int, selection *goquery.Selection) {
+		ex.DetailedExplanation.Pinyin = selection.Find("span[class=dicpy]").Text()
+		selection.Find("p").Each(func(i int, selection *goquery.Selection) {
+
+			log.Debug("child", selection.ChildrenFiltered("span[class=cino]").Text())
+			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Find("span[class=cino]").Parent().Text())
+			//selection.Find("span[class=cino]").Each(func(i int, selection *goquery.Selection) {
+			//	ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Parent().Text())
+			//})
+		})
 	})
+
+	//ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Text())
+	//})
 	//selection.Find()
-	log.Infof("%+v", ex)
+	log.Infof("%+v", ex.DetailedExplanation)
 	return nil
 }
 
 func basicExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
-	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
-		log.With("index", i).Info(selection.Text())
-		ex.BasicExplanation.BasicMeaning = append(ex.BasicExplanation.BasicMeaning, selection.Text())
+	selection.Find("div[class~=jnr]").Each(func(i int, selection *goquery.Selection) {
+		log.With("basicExplanation", "jnr").Debug(selection.Text())
+		py := selection.Find("span[class=dicpy]").Text()
+		s := strings.Split(py, " ")
+		ex.BasicExplanation.Pinyin = strings.TrimSpace(s[0])
+		ex.BasicExplanation.Phonetic = strings.TrimSpace(s[len(s)-1])
+		log.With("basicExplanation", "pinyin").Debug(ex.BasicExplanation.Pinyin, ",", ex.BasicExplanation.Phonetic)
+		selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
+			log.With("index", i).Info(selection.Text())
+			ex.BasicExplanation.BasicMeaning = append(ex.BasicExplanation.BasicMeaning, selection.Text())
+		})
 	})
+
 	//selection.Find()
-	log.Infof("%+v", ex)
+	log.Infof("%+v", ex.BasicExplanation)
 	return nil
 }
 

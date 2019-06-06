@@ -9,7 +9,7 @@ var log = trait.NewZapSugar()
 
 // Debug ...
 func Debug() {
-	log = zap.NewExample().Sugar()
+	log = zap.NewExample(zap.AddCaller()).Sugar()
 }
 
 // RootFunc ...
