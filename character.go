@@ -16,7 +16,7 @@ type RootRadicalCharacter struct {
 
 //BasicExplanation 基本解释
 type BasicExplanation struct {
-	BasicMeaning string
+	BasicMeaning []string `xorm:"json basic_meaning" json:"basic_meaning"`
 	OtherMeaning []string
 }
 

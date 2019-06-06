@@ -34,18 +34,25 @@ func RootRegular(host string, cb TopCallback) error {
 	return nil
 }
 
-func dummyLog(i int, selection *goquery.Selection) {
+func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err error) {
 	log.With("index", i).Info(selection.Text())
+	return nil
 }
 
-func basicExplanation(i int, selection *goquery.Selection) {
+func basicExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
 	selection.Find("ol li").Each(func(i int, selection *goquery.Selection) {
 		log.With("index", i).Info(selection.Text())
+		ex.BasicExplanation.BasicMeaning = append(ex.BasicExplanation.BasicMeaning, selection.Text())
 	})
+	log.Infof("%+v", ex)
+	return nil
 }
 
+// ProcessFunc ...
+type ProcessFunc func(*StandardCharacter, int, *goquery.Selection) error
+
 // DataTypeBlock ...
-var DataTypeBlock = map[string]func(i int, selection *goquery.Selection){
+var DataTypeBlock = map[string]ProcessFunc{
 	"基本解释": basicExplanation,
 	"详细解释": dummyLog,
 	"國語詞典": dummyLog,
@@ -76,7 +83,8 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 			return
 		}
 		if fn, b := DataTypeBlock[dtb]; b {
-			fn(i, s1)
+			e := fn(&bc, i, s1)
+			log.Error(e)
 		}
 
 		//log.Info(s1.Text())
