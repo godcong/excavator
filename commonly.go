@@ -114,7 +114,11 @@ func CommonlyBase(url string, character *RootRadicalCharacter) {
 		}
 		if fn, b := DataTypeBlock[dtb]; b {
 			e := fn(&bc, i, s1)
-			log.Error(e)
+			if e != nil {
+				log.Error(e)
+				return
+			}
+
 		}
 
 		//log.Info(s1.Text())
