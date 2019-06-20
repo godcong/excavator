@@ -46,7 +46,7 @@ func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Select
 
 			log.Debug("child", selection.ChildrenFiltered("span[class=cino]").Text())
 			tx := selection.Find("span[class=cino]").Parent().Text()
-			reg := regexp.MustCompile(`[(\w)*]`)
+			reg := regexp.MustCompile(`[[][\w; ]*[]]`)
 			tx = reg.ReplaceAllString(tx, "")
 			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, tx)
 			//selection.Find("span[class=cino]").Each(func(i int, selection *goquery.Selection) {
