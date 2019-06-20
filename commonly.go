@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -44,7 +45,10 @@ func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Select
 		selection.Find("p").Each(func(i int, selection *goquery.Selection) {
 
 			log.Debug("child", selection.ChildrenFiltered("span[class=cino]").Text())
-			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Find("span[class=cino]").Parent().Text())
+			tx := selection.Find("span[class=cino]").Parent().Text()
+			reg := regexp.MustCompile(`[(\w)*]`)
+			tx = reg.ReplaceAllString(tx, "")
+			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, tx)
 			//selection.Find("span[class=cino]").Each(func(i int, selection *goquery.Selection) {
 			//	ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Parent().Text())
 			//})
