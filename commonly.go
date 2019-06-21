@@ -43,6 +43,12 @@ func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err er
 func mandarinDictionary(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
 	selection.Find("div[class=gycd]").Each(func(i int, selection *goquery.Selection) {
 		log.Info("child", selection.Text())
+		selection.Find("div[class=pz]").Each(func(i int, selection *goquery.Selection) {
+			log.Info("child", selection.Text())
+		})
+		selection.Find("div[class=gycd-item]").Each(func(i int, selection *goquery.Selection) {
+			log.Info("child", selection.Text())
+		})
 	})
 	return nil
 }
