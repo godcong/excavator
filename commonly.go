@@ -39,10 +39,17 @@ func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err er
 	log.With("index", i).Info(selection.Text())
 	return nil
 }
+
+func mandarinDictionary(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
+	selection.Find("div[class=gycd]").Each(func(i int, selection *goquery.Selection) {
+		log.Info("child", selection.Text())
+	})
+	return nil
+}
 func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
 	selection.Find("div[class~=xnr]").Each(func(i int, selection *goquery.Selection) {
 		ex.DetailedExplanation.Pinyin = selection.Find("span[class=dicpy]").Text()
-		selection.Find("p").Each(func(i int, selection *goquery.Selection) {
+		selection.Find("hr[class=dichr]").Next().Each(func(i int, selection *goquery.Selection) {
 
 			log.Debug("child", selection.Find("span[class=cino]").Text())
 			cino := selection.Find("span[class=cino]").Parent().Text()
@@ -88,7 +95,7 @@ type ProcessFunc func(*StandardCharacter, int, *goquery.Selection) error
 var DataTypeBlock = map[string]ProcessFunc{
 	"基本解释": basicExplanation,
 	"详细解释": detailedExplanation,
-	"國語詞典": dummyLog,
+	"國語詞典": mandarinDictionary,
 	"康熙字典": dummyLog,
 	"说文解字": dummyLog,
 	"音韵方言": dummyLog,

@@ -31,6 +31,7 @@ type DetailedExplanation struct {
 
 // MandarinDictionary 国语辞典
 type MandarinDictionary struct {
+	PartOfSpeech string `json:"part_of_speech"`
 }
 
 //KangxiDictionary 康熙字典
@@ -42,6 +43,7 @@ type StandardCharacter struct {
 	Radical             string
 	BasicExplanation    BasicExplanation
 	DetailedExplanation DetailedExplanation
+	MandarinDictionary  MandarinDictionary
 	KangxiDictionary    KangxiDictionary
 	CharacterDetail     map[string]string
 }
