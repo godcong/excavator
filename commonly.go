@@ -44,7 +44,7 @@ func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Select
 		ex.DetailedExplanation.Pinyin = selection.Find("span[class=dicpy]").Text()
 		selection.Find("p").Each(func(i int, selection *goquery.Selection) {
 
-			log.Debug("child", selection.ChildrenFiltered("span[class=cino]").Text())
+			log.Debug("child", selection.Find("span[class=cino]").Text())
 			cino := selection.Find("span[class=cino]").Parent().Text()
 			reg := regexp.MustCompile(`[[][\w; ]*[]]`)
 			//TODO:
