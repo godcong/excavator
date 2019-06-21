@@ -45,14 +45,13 @@ func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Select
 		selection.Find("p").Each(func(i int, selection *goquery.Selection) {
 
 			log.Debug("child", selection.ChildrenFiltered("span[class=cino]").Text())
-			tx := selection.Find("span[class=cino]").Parent().Text()
+			cino := selection.Find("span[class=cino]").Parent().Text()
 			reg := regexp.MustCompile(`[[][\w; ]*[]]`)
 			//TODO:
-			tx = reg.ReplaceAllString(tx, "")
-			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, tx)
-			//selection.Find("span[class=cino]").Each(func(i int, selection *goquery.Selection) {
-			//	ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, selection.Parent().Text())
-			//})
+			cino = reg.ReplaceAllString(cino, "")
+			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, cino)
+			dic := selection.Find("span[class=diczx1]").Parent().Text()
+			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, dic)
 		})
 	})
 
