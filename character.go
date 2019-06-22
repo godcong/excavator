@@ -29,9 +29,16 @@ type DetailedExplanation struct {
 	DetailedMeaning []string `json:"detailed_meaning"`
 }
 
+// MandarinDictionaryExplanation ...
+type MandarinDictionaryExplanation struct {
+	PartOfSpeech string   //词性
+	Pinyin       string   //拼音
+	Phonetic     string   //注音
+	Explanation  []string //解释
+}
+
 // MandarinDictionary 国语辞典
 type MandarinDictionary struct {
-	PartOfSpeech string `json:"part_of_speech"`
 }
 
 //KangxiDictionary 康熙字典
