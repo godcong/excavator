@@ -54,7 +54,6 @@ func mandarinDictionary(ex *StandardCharacter, i int, selection *goquery.Selecti
 					explan.Pinyin = selection.Text()
 				}
 			})
-			ex.MandarinDictionary.Explanation = append(ex.MandarinDictionary.Explanation, explan)
 		})
 		selection.Find("div[class=gycd-item]").Each(func(i int, selection *goquery.Selection) {
 			explan.PartOfSpeech = selection.Find("span[class=gc_cx]").Text()
