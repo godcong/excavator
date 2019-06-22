@@ -1,7 +1,6 @@
 package excavator
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -69,18 +68,16 @@ func mandarinDictionary(ex *StandardCharacter, i int, selection *goquery.Selecti
 	return nil
 }
 func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
+	var explan DetailedExplanation
 	selection.Find("div[class~=xnr]").Each(func(i int, selection *goquery.Selection) {
-		ex.DetailedExplanation.Pinyin = selection.Find("span[class=dicpy]").Text()
-		selection.Find("hr[class=dichr]").Next().Each(func(i int, selection *goquery.Selection) {
 
-			log.Debug("child", selection.Find("span[class=cino]").Text())
+		selection.Find("hr[class=dichr]").Next().Each(func(i int, selection *goquery.Selection) {
+			explan.Pinyin = selection.Find("span[class=dicpy]").Text()
 			cino := selection.Find("span[class=cino]").Parent().Text()
-			reg := regexp.MustCompile(`[[][\w; ]*[]]`)
-			//TODO:
-			cino = reg.ReplaceAllString(cino, "")
-			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, cino)
+			//TODO:FIX
+			explan.DetailedMeaning = append(explan.DetailedMeaning, cino)
 			dic := selection.Find("span[class=diczx1]").Parent().Text()
-			ex.DetailedExplanation.DetailedMeaning = append(ex.DetailedExplanation.DetailedMeaning, dic)
+			explan.DetailedMeaning = append(explan.DetailedMeaning, dic)
 		})
 	})
 
