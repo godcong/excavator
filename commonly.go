@@ -41,18 +41,32 @@ func dummyLog(c *StandardCharacter, i int, selection *goquery.Selection) (err er
 }
 
 func mandarinDictionary(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
+
 	selection.Find("div[class=gycd]").Each(func(i int, selection *goquery.Selection) {
+		var explan MandarinExplanation
 		selection.Find("div[class=pz]").Each(func(i int, selection *goquery.Selection) {
-			log.Info()
+			log.Info(selection.Text())
 			selection.Find("rt").Each(func(i int, selection *goquery.Selection) {
-				ex.MandarinDictionary.PartOfSpeech
+				switch i {
+				case 0:
+					explan.Phonetic = selection.Text()
+				case 1:
+					explan.Pinyin = selection.Text()
+				}
 			})
-			py := strings.Split(selection.Text(), " ")
+			ex.MandarinDictionary.Explanation = append(ex.MandarinDictionary.Explanation, explan)
 		})
 		selection.Find("div[class=gycd-item]").Each(func(i int, selection *goquery.Selection) {
-			log.Info(selection.Text())
+			explan.PartOfSpeech = selection.Find("span[class=gc_cx]").Text()
+			selection.Find("li").Each(func(i int, selection *goquery.Selection) {
+				explan.Explanation = append(explan.Explanation, selection.Text())
+			})
 		})
+		log.Infof("%+v", explan)
+		ex.MandarinDictionary.Explanation = append(ex.MandarinDictionary.Explanation, explan)
 	})
+
+	log.Infof("%+v", ex.MandarinDictionary)
 	return nil
 }
 func detailedExplanation(ex *StandardCharacter, i int, selection *goquery.Selection) (err error) {
