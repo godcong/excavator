@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/godcong/go-trait"
 )
 
 var log = trait.NewZapSugar()
+
+const tmpFile = "tmp"
 
 // Excavator ...
 type Excavator struct {
@@ -28,8 +29,17 @@ func New(url string, workspace string) *Excavator {
 	return &Excavator{URL: url, Workspace: workspace}
 }
 
+// Run ...
+func (exc *Excavator) Run() error {
+	return exc.parseRadical()
+}
+
 func (exc *Excavator) parseRadical() (e error) {
 	doc, e := exc.parseDocument(exc.URL)
+	if e != nil {
+		return e
+	}
+	exc.HTML, e = doc.Html()
 	if e != nil {
 		return e
 	}
@@ -72,15 +82,6 @@ func (exc *Excavator) parseDocument(url string) (doc *goquery.Document, e error)
 	return goquery.NewDocumentFromReader(reader)
 }
 
-func trim(s string) string {
-	s = strings.TrimSpace(s)
-	s = strings.Replace(s, "　", "", -1)
-	s = strings.Replace(s, "\n", "", -1)
-	return s
-}
-
-var tmpDir = "tmp"
-
 // IsExist ...
 func (exc *Excavator) IsExist(name string) bool {
 	_, e := os.Open(name)
@@ -92,7 +93,8 @@ func (exc *Excavator) getFilePath(s string) string {
 	if exc.Workspace == "" {
 		exc.Workspace, _ = os.Getwd()
 	}
-	return filepath.Join(exc.Workspace, tmpDir, s)
+	log.With("workspace", exc.Workspace, "tmpFile", tmpFile, s)
+	return filepath.Join(exc.Workspace, tmpFile, s)
 }
 
 // SHA256 ...
