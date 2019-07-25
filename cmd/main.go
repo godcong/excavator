@@ -1,36 +1,44 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"sort"
 
 	"github.com/godcong/excavator"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli"
 )
 
-var rootCmd = &cobra.Command{
-	Use:        "ex",
-	Aliases:    nil,
-	SuggestFor: nil,
-	Short:      "ex parsing dictionary",
-	Long:       `ex parsing dictionary and insert to db`,
-}
-
 func main() {
-	host := rootCmd.PersistentFlags().StringP("host", "H", "http://www.zdic.net", "set the root url path")
-	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		if err := excavator.RootRegular(*host, excavator.CommonlyBase); err != nil {
-			panic(err)
-		}
+	app := cli.App{
+		Version: "v0.0.1",
+		Name:    "excavator",
+		Usage:   "excavator a dictionary",
+		Action: func(c *cli.Context) error {
+			url := ""
+			if c.NArg() > 0 {
+				url = c.Args().Get(0)
+			}
+			excavator.New(url, "")
+			return nil
+		},
+		Flags: mainFlags(),
 	}
-	rootCmd.SuggestionsMinimumDistance = 1
-	Execute()
+	app.Commands = []cli.Command{}
+
+	sort.Sort(cli.FlagsByName(app.Flags))
+	sort.Sort(cli.CommandsByName(app.Commands))
+	err := app.Run(os.Args)
+	if err != nil {
+		return
+	}
 }
 
-// Execute ...
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func mainFlags() (flags []cli.Flag) {
+	flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "workspace",
+			Usage: "set workspace to storage temp file",
+		},
 	}
+	return flags
 }
