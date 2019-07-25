@@ -18,8 +18,7 @@ func main() {
 			if c.NArg() > 0 {
 				url = c.Args().Get(0)
 			}
-			excavator.New(url, "")
-			return nil
+			return excavator.New(url, "").Run()
 		},
 		Flags: mainFlags(),
 	}

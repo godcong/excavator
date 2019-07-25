@@ -93,7 +93,7 @@ func (exc *Excavator) getFilePath(s string) string {
 	if exc.Workspace == "" {
 		exc.Workspace, _ = os.Getwd()
 	}
-	log.With("workspace", exc.Workspace, "tmpFile", tmpFile, s)
+	log.With("workspace", exc.Workspace, "temp", tmpFile, "file", s).Info("file path")
 	return filepath.Join(exc.Workspace, tmpFile, s)
 }
 
