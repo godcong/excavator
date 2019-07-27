@@ -31,6 +31,9 @@ type Excavator struct {
 
 // Header ...
 func (exc *Excavator) Header() http.Header {
+	if exc.header == nil {
+		return make(http.Header)
+	}
 	return exc.header
 }
 
