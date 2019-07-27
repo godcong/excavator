@@ -123,8 +123,8 @@ func (exc *Excavator) Run() error {
 	exc.PreRun()
 	switch exc.step {
 	case StepAll:
-		go exc.parseRadical(exc.radical)
-		go exc.parseCharacter(exc.radical, exc.character)
+		//go exc.parseRadical(exc.radical)
+		//go exc.parseCharacter(exc.radical, exc.character)
 	case StepRadical:
 		go exc.parseRadical(exc.radical)
 	case StepCharacter:
@@ -174,6 +174,11 @@ func (exc *Excavator) parseRadical(characters chan<- *RadicalCharacter) {
 		for _, tmp := range *(*[]RadicalUnion)(r) {
 			for i := range tmp.RadicalCharacterArray {
 				rc := tmp.RadicalCharacterArray[i]
+				e := exc.saveRadicalCharacter(&tmp.RadicalCharacterArray[i])
+				if e != nil {
+					log.Error(e)
+					continue
+				}
 				characters <- &rc
 			}
 		}
@@ -268,16 +273,72 @@ func (exc *Excavator) getFilePath(s string) string {
 	return filepath.Join(exc.Workspace, tmpFile, s)
 }
 
+/*URL 拼接地址 */
+func URL(prefix string, uris ...string) string {
+	end := len(prefix)
+	if end > 1 && prefix[end-1] == '/' {
+		prefix = prefix[:end-1]
+	}
+
+	var url = []string{prefix}
+	for _, v := range uris {
+		url = append(url, TrimSlash(v))
+	}
+	return strings.Join(url, "/")
+}
+
+// TrimSlash ...
+func TrimSlash(s string) string {
+	if size := len(s); size > 1 {
+		if s[size-1] == '/' {
+			s = s[:size-1]
+		}
+		if s[0] == '/' {
+			s = s[1:]
+		}
+	}
+	return s
+}
+
 func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char chan<- *Character) {
 	defer func() {
 		char <- nil
 	}()
 	for {
 		select {
-		case c := <-characters:
+		case cr := <-characters:
+			c := colly.NewCollector()
+			c.OnHTML("a[class=mui-ellipsis]", func(element *colly.HTMLElement) {
+				da := element.Attr("data-action")
+				log.With("value", da).Info("data action")
+				if da == "" {
+					return
+				}
 
+				//log.With("value", r).Info("radical")
+			})
+			c.OnResponse(func(response *colly.Response) {
+				log.Info(string(response.StatusCode))
+			})
+			c.OnRequest(func(r *colly.Request) {
+				fmt.Println("Visiting", r.URL)
+			})
+			e := c.Visit(URL(exc.URL, cr.URL))
+			if e != nil {
+				log.Error(e)
+			}
+			return
 		}
 	}
+}
+
+func (exc *Excavator) saveRadicalCharacter(characters *RadicalCharacter) (e error) {
+	i, e := exc.db.Where("url = ?", characters.URL).Count(RadicalCharacter{})
+	if e != nil || i == 0 {
+		return e
+	}
+	_, e = exc.db.InsertOne(characters)
+	return
 }
 
 // SHA256 ...
