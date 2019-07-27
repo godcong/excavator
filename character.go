@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -67,8 +68,17 @@ type BaseCharacter struct {
 
 //Character 字符
 type Character struct {
-	Character string //字符
-	Radical   string //部首
+	Character                string   `xorm:"character"`                  //字符
+	Radical                  string   `xorm:"radical"`                    //部首
+	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
+	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
+	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
+	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
+	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
+	KangXi                   string   `json:"traditional_radical"`        //康熙
+	KangXiStroke             int      `json:"traditional_radical_stroke"` //康熙笔画
+	TotalStroke              int      `xorm:"total_stroke"`               //总笔画
+	PinYin                   []string `xorm:"pin_yin"`                    //拼音
 }
 
 //Folk 民俗参考
@@ -113,14 +123,53 @@ type Index struct {
 type ParseFunc func(*Character, string)
 
 var charList = map[string]ParseFunc{
-	"部首:": parseBuShou,
+	"部首:":   parseBuShou,
+	"部首笔画:": parseBuShouStroke,
+	"总笔画:":  parseTotalStroke,
+	"拼音":    parsePinYin,
 }
 
 func parseDummy(c *Character, input string) {
 	log.With("character", c, "input", input).Info("dummy")
 }
+func parseArray(source *[]string, input string) {
+	*source = append(*source, input)
+}
+func parseNumber(source *int, input string) {
+	i, e := strconv.Atoi(strings.ReplaceAll(input, "画", ""))
+	if e != nil {
+		log.With("input", input).Error(e)
+		return
+	}
+	*source = i
+}
+func parsePinYin(c *Character, input string) {
+	log.With("input", input).Info("pinyin")
+	parseArray(&c.PinYin, input)
+}
 func parseBuShou(c *Character, input string) {
+	log.With("input", input).Info("bushou")
 	c.Radical = input
+}
+func parseBuShouStroke(c *Character, input string) {
+	parseNumber(&c.RadicalStroke, input)
+}
+func parseSimpleRadical(c *Character, input string) {
+	log.With("input", input).Info("simple radical")
+	c.SimpleRadical = input
+}
+func parseSimpleRadicalStroke(c *Character, input string) {
+	parseNumber(&c.SimpleRadicalStroke, input)
+}
+func parseTraditionalRadical(c *Character, input string) {
+	log.With("input", input).Info("simple radical")
+	c.TraditionalRadical = input
+}
+func parseTraditionalRadicalStroke(c *Character, input string) {
+	parseNumber(&c.TraditionalRadicalStroke, input)
+}
+func parseTotalStroke(c *Character, input string) {
+	parseNumber(&c.TotalStroke, input)
 }
 
 func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
