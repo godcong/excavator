@@ -20,8 +20,8 @@ func (r *Radical) Marshal() ([]byte, error) {
 // RadicalClass ...
 type RadicalClass struct {
 	Zi     string `json:"zi"`
-	Pinyin string `json:"pinyin"`
-	Bushou string `json:"bushou"`
+	PinYin string `json:"pinyin"`
+	BuShou string `json:"bushou"`
 	Num    string `json:"num"`
 	URL    string `json:"url"`
 }
@@ -35,11 +35,9 @@ type RadicalUnion struct {
 // UnmarshalJSON ...
 func (x *RadicalUnion) UnmarshalJSON(data []byte) error {
 	x.RadicalClassArray = nil
-	object, err := unmarshalUnion(data, nil, nil, nil, &x.String, true, &x.RadicalClassArray, false, nil, false, nil, false, nil, false)
+	_, err := unmarshalUnion(data, nil, nil, nil, &x.String, true, &x.RadicalClassArray, false, nil, false, nil, false, nil, false)
 	if err != nil {
 		return err
-	}
-	if object {
 	}
 	return nil
 }
