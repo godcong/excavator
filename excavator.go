@@ -21,6 +21,16 @@ var log = trait.NewZapSugar()
 
 const tmpFile = "tmp"
 
+// Step ...
+type Step int
+
+// excavator run step status ...
+const (
+	StepAll       Step = 0
+	StepRadical        = iota
+	StepCharacter      = iota
+)
+
 // Excavator ...
 type Excavator struct {
 	Workspace string `json:"workspace"`
@@ -30,6 +40,19 @@ type Excavator struct {
 	header    http.Header
 	db        *xorm.Engine
 	radical   chan *RadicalCharacter
+	step      Step
+	limit     int64
+	character chan *Character
+}
+
+// Limit ...
+func (exc *Excavator) Limit() int64 {
+	return exc.limit
+}
+
+// SetLimit ...
+func (exc *Excavator) SetLimit(limit int64) {
+	exc.limit = limit
 }
 
 // DB ...
@@ -58,7 +81,7 @@ func (exc *Excavator) SetHeader(header http.Header) {
 // New ...
 func New(url string, workspace string) *Excavator {
 	log.With("url", url, "workspace", workspace).Info("init")
-	return &Excavator{URL: url, Workspace: workspace}
+	return &Excavator{URL: url, Workspace: workspace, limit: 50}
 }
 
 // PreRun ...
@@ -70,36 +93,75 @@ func (exc *Excavator) PreRun() {
 	if e != nil {
 		panic(e)
 	}
+	e = exc.db.Sync2(Character{})
+	if e != nil {
+		panic(e)
+	}
 	exc.radical = make(chan *RadicalCharacter)
+	exc.character = make(chan *Character)
+}
+
+// Radical ...
+func (exc *Excavator) Radical() (rc <-chan *RadicalCharacter) {
+	if exc.step == StepRadical {
+		return exc.radical
+	}
+	return nil
+}
+
+// Character ...
+func (exc *Excavator) Character() (rc <-chan *Character) {
+	if exc.step == StepCharacter {
+		return exc.character
+	}
+	return nil
 }
 
 // Run ...
 func (exc *Excavator) Run() error {
 	log.Info("excavator run")
 	exc.PreRun()
-	go exc.parseRadical()
-	inRadical := (<-chan *RadicalCharacter)(exc.radical)
-	for {
-		select {
-		case r := <-inRadical:
-			if r == nil {
-				goto END
-			}
-			log.With("value", *r).Info("insert")
-			_, e := exc.db.InsertOne(r)
-			if e != nil {
-				log.Error()
-			}
-		}
+	switch exc.step {
+	case StepAll:
+		go exc.parseRadical(exc.radical)
+		go exc.parseCharacter(exc.radical, exc.character)
+	case StepRadical:
+		go exc.parseRadical(exc.radical)
+	case StepCharacter:
+		go exc.findRadical(exc.radical)
+		go exc.parseCharacter(exc.radical, exc.character)
 	}
-END:
+
 	return nil
 }
+func (exc *Excavator) findRadical(characters chan<- *RadicalCharacter) {
+	defer func() {
+		characters <- nil
+	}()
+	i, e := exc.db.Count(RadicalCharacter{})
+	if e != nil || i == 0 {
+		log.Error(e)
+		return
+	}
+	for x := int64(0); x < i; x += exc.Limit() {
+		rc := new([]RadicalCharacter)
+		e := exc.db.Limit(int(exc.Limit()), int(x)).Find(&rc)
+		if e != nil {
+			log.Error(e)
+			continue
+		}
+		for i := range *rc {
+			characters <- &(*rc)[i]
+		}
+	}
+}
 
-func (exc *Excavator) parseRadical() (e error) {
+func (exc *Excavator) parseRadical(characters chan<- *RadicalCharacter) {
+	defer func() {
+		characters <- nil
+	}()
 	c := colly.NewCollector()
 	c.OnHTML("a[href][data-action]", func(element *colly.HTMLElement) {
-		out := (chan<- *RadicalCharacter)(exc.radical)
 		da := element.Attr("data-action")
 		log.With("value", da).Info("data action")
 		if da == "" {
@@ -112,11 +174,10 @@ func (exc *Excavator) parseRadical() (e error) {
 		for _, tmp := range *(*[]RadicalUnion)(r) {
 			for i := range tmp.RadicalCharacterArray {
 				rc := tmp.RadicalCharacterArray[i]
-				out <- &rc
+				characters <- &rc
 			}
 		}
 		log.With("value", r).Info("radical")
-		out <- nil
 	})
 	c.OnResponse(func(response *colly.Response) {
 		log.Info(string(response.Body))
@@ -124,7 +185,11 @@ func (exc *Excavator) parseRadical() (e error) {
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
 	})
-	return c.Visit(exc.URL)
+	e := c.Visit(exc.URL)
+	if e != nil {
+		log.Error(e)
+	}
+	return
 }
 
 func (exc *Excavator) parseAJAX(url string, body io.Reader) (r *Radical, e error) {
@@ -201,6 +266,18 @@ func (exc *Excavator) getFilePath(s string) string {
 	}
 	log.With("workspace", exc.Workspace, "temp", tmpFile, "file", s).Info("file path")
 	return filepath.Join(exc.Workspace, tmpFile, s)
+}
+
+func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char chan<- *Character) {
+	defer func() {
+		char <- nil
+	}()
+	for {
+		select {
+		case c := <-characters:
+
+		}
+	}
 }
 
 // SHA256 ...
