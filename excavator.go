@@ -43,6 +43,7 @@ type Excavator struct {
 	step      Step
 	limit     int64
 	character chan *Character
+	selenium  *Selenium
 }
 
 // Limit ...
@@ -99,6 +100,8 @@ func (exc *Excavator) PreRun() {
 	}
 	exc.radical = make(chan *RadicalCharacter)
 	exc.character = make(chan *Character)
+	exc.selenium = NewSelenium("", 9515)
+	exc.selenium.Start()
 }
 
 // Radical ...
@@ -307,27 +310,11 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 	for {
 		select {
 		case cr := <-characters:
-			c := colly.NewCollector()
-			c.OnHTML("a[class=mui-ellipsis]", func(element *colly.HTMLElement) {
-				da := element.Attr("data-action")
-				log.With("value", da).Info("data action")
-				if da == "" {
-					return
-				}
-
-				//log.With("value", r).Info("radical")
-			})
-			c.OnResponse(func(response *colly.Response) {
-				log.Info(string(response.StatusCode))
-			})
-			c.OnRequest(func(r *colly.Request) {
-				fmt.Println("Visiting", r.URL)
-			})
-			e := c.Visit(URL(exc.URL, cr.URL))
+			_, e := exc.selenium.Get(URL(exc.URL, cr.URL))
 			if e != nil {
-				log.Error(e)
+				return
 			}
-			return
+			//TODO
 		}
 	}
 }
