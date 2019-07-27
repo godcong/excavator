@@ -6,7 +6,7 @@ import (
 
 // InitSqlite3 ...
 func InitSqlite3(name string) *xorm.Engine {
-	eng, e := xorm.NewEngine("sqlite3", "seed.db")
+	eng, e := xorm.NewEngine("sqlite3", name)
 	if e != nil {
 		panic(e)
 	}

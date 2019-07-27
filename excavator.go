@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-xorm/xorm"
 	"github.com/gocolly/colly"
 	"github.com/godcong/go-trait"
 )
@@ -27,6 +28,20 @@ type Excavator struct {
 	HTML      string `json:"html"`
 	Radicals  map[string]Radical
 	header    http.Header
+	db        *xorm.Engine
+}
+
+// DB ...
+func (exc *Excavator) DB() *xorm.Engine {
+	if exc.db == nil {
+		return InitSqlite3("exc.db")
+	}
+	return exc.db
+}
+
+// SetDB ...
+func (exc *Excavator) SetDB(db *xorm.Engine) {
+	exc.db = db
 }
 
 // Header ...
