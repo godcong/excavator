@@ -2,7 +2,10 @@ package excavator
 
 import (
 	"github.com/go-xorm/xorm"
+	"github.com/mattn/go-sqlite3"
 )
+
+var _ = &sqlite3.SQLiteDriver{}
 
 // InitSqlite3 ...
 func InitSqlite3(name string) *xorm.Engine {

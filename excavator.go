@@ -29,13 +29,11 @@ type Excavator struct {
 	Radicals  map[string]Radical
 	header    http.Header
 	db        *xorm.Engine
+	radical   chan *RadicalCharacter
 }
 
 // DB ...
 func (exc *Excavator) DB() *xorm.Engine {
-	if exc.db == nil {
-		return InitSqlite3("exc.db")
-	}
 	return exc.db
 }
 
@@ -63,15 +61,45 @@ func New(url string, workspace string) *Excavator {
 	return &Excavator{URL: url, Workspace: workspace}
 }
 
+// PreRun ...
+func (exc *Excavator) PreRun() {
+	if exc.db == nil {
+		exc.db = InitSqlite3("exc.db")
+	}
+	e := exc.db.Sync2(RadicalCharacter{})
+	if e != nil {
+		panic(e)
+	}
+	exc.radical = make(chan *RadicalCharacter)
+}
+
 // Run ...
 func (exc *Excavator) Run() error {
 	log.Info("excavator run")
-	return exc.parseRadical()
+	exc.PreRun()
+	go exc.parseRadical()
+	inRadical := (<-chan *RadicalCharacter)(exc.radical)
+	for {
+		select {
+		case r := <-inRadical:
+			if r == nil {
+				goto END
+			}
+			log.With("value", *r).Info("insert")
+			_, e := exc.db.InsertOne(r)
+			if e != nil {
+				log.Error()
+			}
+		}
+	}
+END:
+	return nil
 }
 
 func (exc *Excavator) parseRadical() (e error) {
 	c := colly.NewCollector()
 	c.OnHTML("a[href][data-action]", func(element *colly.HTMLElement) {
+		out := (chan<- *RadicalCharacter)(exc.radical)
 		da := element.Attr("data-action")
 		log.With("value", da).Info("data action")
 		if da == "" {
@@ -81,7 +109,14 @@ func (exc *Excavator) parseRadical() (e error) {
 		if e != nil {
 			return
 		}
+		for _, tmp := range *(*[]RadicalUnion)(r) {
+			for i := range tmp.RadicalCharacterArray {
+				rc := tmp.RadicalCharacterArray[i]
+				out <- &rc
+			}
+		}
 		log.With("value", r).Info("radical")
+		out <- nil
 	})
 	c.OnResponse(func(response *colly.Response) {
 		log.Info(string(response.Body))
