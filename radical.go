@@ -6,10 +6,10 @@ import "encoding/json"
 type Radical []RadicalUnion
 
 // UnmarshalRadical ...
-func UnmarshalRadical(data []byte) (Radical, error) {
+func UnmarshalRadical(data []byte) (*Radical, error) {
 	var r Radical
 	err := json.Unmarshal(data, &r)
-	return r, err
+	return &r, err
 }
 
 // Marshal ...
