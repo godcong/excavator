@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
@@ -24,8 +25,7 @@ type Excavator struct {
 	Workspace string `json:"workspace"`
 	URL       string `json:"url"`
 	HTML      string `json:"html"`
-	Radical   map[string]string
-	collector *colly.Collector
+	Radicals  map[string]Radical
 	header    http.Header
 }
 
@@ -44,24 +44,37 @@ func (exc *Excavator) SetHeader(header http.Header) {
 
 // New ...
 func New(url string, workspace string) *Excavator {
-	return &Excavator{URL: url, Workspace: workspace, collector: colly.NewCollector()}
+	log.With("url", url, "workspace", workspace).Info("init")
+	return &Excavator{URL: url, Workspace: workspace}
 }
 
 // Run ...
 func (exc *Excavator) Run() error {
+	log.Info("excavator run")
 	return exc.parseRadical()
 }
 
 func (exc *Excavator) parseRadical() (e error) {
-	doc, e := exc.parseDocument(exc.URL)
-	if e != nil {
-		return e
-	}
-	exc.HTML, e = doc.Html()
-	if e != nil {
-		return e
-	}
-	return nil
+	c := colly.NewCollector()
+	c.OnHTML("a[href][data-action]", func(element *colly.HTMLElement) {
+		da := element.Attr("data-action")
+		log.With("value", da).Info("data action")
+		if da == "" {
+			return
+		}
+		r, e := exc.parseAJAX(exc.URL, strings.NewReader(fmt.Sprintf("wd=%s", da)))
+		if e != nil {
+			return
+		}
+		log.With("value", r).Info("radical")
+	})
+	c.OnResponse(func(response *colly.Response) {
+		log.Info(string(response.Body))
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL)
+	})
+	return c.Visit(exc.URL)
 }
 
 func (exc *Excavator) parseAJAX(url string, body io.Reader) (r *Radical, e error) {
@@ -71,7 +84,7 @@ func (exc *Excavator) parseAJAX(url string, body io.Reader) (r *Radical, e error
 	}
 	client := &http.Client{Transport: tr}
 	//body := strings.NewReader(`wd=%E4%B9%99`)
-	req, err := http.NewRequest("POST", "http://hy.httpcn.com/bushou/kangxi/", body)
+	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
 	}
