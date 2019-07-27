@@ -1,5 +1,12 @@
 package excavator
 
+import (
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/gocolly/colly"
+)
+
 // CharacterFunc ...
 type CharacterFunc func(character *Character) error
 
@@ -60,18 +67,8 @@ type BaseCharacter struct {
 
 //Character 字符
 type Character struct {
-	//URL            string //汉字地址
-	Character      string //字符
-	Pinyin         string //拼音
-	Radical        string //部首
-	RadicalStrokes string //部首笔画
-	TotalStrokes   string //总笔画
-	KangxiStrokes  string //康熙笔画数
-	Phonetic       string //注音
-	Folk
-	Structure
-	Explain
-	Index
+	Character string //字符
+	Radical   string //部首
 }
 
 //Folk 民俗参考
@@ -110,4 +107,51 @@ type Index struct {
 	KangxiDictionary  string //康熙字典
 	ChineseDictionary string //汉语字典
 	Cihai             string //辞　海
+}
+
+// ParseFunc ...
+type ParseFunc func(*Character, string)
+
+var charList = map[string]ParseFunc{
+	"部首:": parseBuShou,
+}
+
+func parseDummy(c *Character, input string) {
+	log.With("character", c, "input", input).Info("dummy")
+}
+func parseBuShou(c *Character, input string) {
+	c.Radical = input
+}
+
+func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
+	html, e := element.DOM.Html()
+	if e != nil {
+		log.Error(e)
+		return e
+	}
+	n, e := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if e != nil {
+		log.Error(e)
+		return e
+	}
+	v := StringClearUp(n.ReplaceWith("font[class=colred]").Text())
+	vv := strings.Split(v, " ")
+	log.With("source", v).Info(len(vv), ":", vv)
+	n1, e := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if e != nil {
+		log.Error(e)
+		return nil
+	}
+	n1.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
+		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
+		text := StringClearUp(selection.Text())
+		f := parseDummy
+		if v, b := charList[text]; b {
+			f = v
+		}
+		if len(vv) > i {
+			f(ch, vv[i])
+		}
+	})
+	return nil
 }
