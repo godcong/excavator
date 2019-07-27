@@ -6,38 +6,20 @@ import (
 	"errors"
 )
 
-// UnionMustNotBeNull ...
-const UnionMustNotBeNull = "union must not be null"
-
-// UnparsableNumber ...
-const UnparsableNumber = "unparsable number"
-
-// UnionDoesNotContainNumber ...
-const UnionDoesNotContainNumber = "union does not contain number"
-
-// DecoderShouldNotReturnFloat64 ...
-const DecoderShouldNotReturnFloat64 = "decoder should not return float64"
-
-// UnionDoesNotContainBool ...
-const UnionDoesNotContainBool = "union does not contain bool"
-
-// UnionDoesNotContainString ...
-const UnionDoesNotContainString = "union does not contain string"
-
-// UnionDoesNotContainNull ...
-const UnionDoesNotContainNull = "union does not contain null"
-
-// UnionDoesNotContainObject ...
-const UnionDoesNotContainObject = "union does not contain object"
-
-// UnionDoesNotContainArray ...
-const UnionDoesNotContainArray = "union does not contain array"
-
-// CannotHandleDelimiter ...
-const CannotHandleDelimiter = "cannot handle delimiter"
-
-// CannotUnmarshalUnion ...
-const CannotUnmarshalUnion = "cannot unmarshal union"
+// const error list ...
+const (
+	UnionMustNotBeNull            = "union must not be null"
+	UnparsableNumber              = "unparsable number"
+	UnionDoesNotContainNumber     = "union does not contain number"
+	DecoderShouldNotReturnFloat64 = "decoder should not return float64"
+	UnionDoesNotContainBool       = "union does not contain bool"
+	UnionDoesNotContainString     = "union does not contain string"
+	UnionDoesNotContainNull       = "union does not contain null"
+	UnionDoesNotContainObject     = "union does not contain object"
+	UnionDoesNotContainArray      = "union does not contain array"
+	CannotHandleDelimiter         = "cannot handle delimiter"
+	CannotUnmarshalUnion          = "cannot unmarshal union"
+)
 
 // marshalUnion ...
 func marshalUnion(pi *int64, pf *float64, pb *bool, ps *string, haveArray bool, pa interface{}, haveObject bool, pc interface{}, haveMap bool, pm interface{}, haveEnum bool, pe interface{}, nullable bool) ([]byte, error) {
