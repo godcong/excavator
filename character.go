@@ -145,6 +145,8 @@ func parseNumber(source *int, input string) {
 }
 func parsePinYin(c *Character, input string) {
 	log.With("input", input).Info("pinyin")
+	input = strings.ReplaceAll(input, "[", "")
+	input = strings.ReplaceAll(input, "]", "")
 	parseArray(&c.PinYin, input)
 }
 func parseBuShou(c *Character, input string) {
@@ -184,8 +186,12 @@ func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 		return e
 	}
 	v := StringClearUp(n.ReplaceWith("font[class=colred]").Text())
-	vv := strings.Split(v, " ")
-	log.With("source", v).Info(len(vv), ":", vv)
+	var data []string
+	if v != "" {
+		data = strings.Split(v, " ")
+	}
+
+	log.With("source", v).Info(len(data), ":", data)
 	n1, e := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if e != nil {
 		log.Error(e)
@@ -195,11 +201,15 @@ func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
 		text := StringClearUp(selection.Text())
 		f := parseDummy
-		if v, b := charList[text]; b {
-			f = v
+		if data == nil || len(data) == 0 {
+			f = parsePinYin
+		} else {
+			if v, b := charList[text]; b {
+				f = v
+			}
 		}
-		if len(vv) > i {
-			f(ch, vv[i])
+		if len(data) > i {
+			f(ch, data[i])
 		}
 	})
 	return nil

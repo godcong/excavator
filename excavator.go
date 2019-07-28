@@ -307,16 +307,36 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 	defer func() {
 		char <- nil
 	}()
+	c := colly.NewCollector()
+	var ch *Character
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL)
+	})
+	c.OnResponse(func(response *colly.Response) {
+		log.Info(response.StatusCode)
+	})
+	c.OnHTML(`div[class=info] > p[class=mui-ellipsis]`, func(element *colly.HTMLElement) {
+		e := parseCharacter(element, ch)
+		log.Infof("%+v", ch)
+		log.Error(e)
+	})
+	c.OnScraped(func(response *colly.Response) {
+
+	})
 	for {
 		select {
 		case cr := <-characters:
-			_, e := exc.selenium.Get(URL(exc.URL, cr.URL))
-			if e != nil {
-				return
+			if cr == nil {
+				goto END
 			}
-			//TODO
+			ch = new(Character)
+			e := c.Visit(URL(exc.URL, cr.URL))
+			if e != nil {
+				log.Error(e)
+			}
 		}
 	}
+END:
 }
 
 func (exc *Excavator) saveRadicalCharacter(characters *RadicalCharacter) (e error) {
