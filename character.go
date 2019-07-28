@@ -156,7 +156,7 @@ func parseBuShou(c *Character, input string) {
 func parseBuShouStroke(c *Character, input string) {
 	parseNumber(&c.RadicalStroke, input)
 }
-func parseSimpleRadical(c *Character, input string) {
+func parseSimple(c *Character, input string) {
 	log.With("input", input).Info("simple radical")
 	c.SimpleRadical = input
 }
@@ -210,6 +210,8 @@ func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 		}
 		if len(data) > i {
 			f(ch, data[i])
+		} else {
+			f(ch, text)
 		}
 	})
 	return nil
