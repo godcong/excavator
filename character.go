@@ -155,6 +155,7 @@ func parseSimple(c *Character, index int, input string) {
 	log.With("input", input).Info("simple")
 	switch index {
 	case 0:
+
 		c.SimpleRadical = input
 	case 1:
 		parseNumber(&c.SimpleRadicalStroke, input)
@@ -239,18 +240,22 @@ func parsePinYin(c *Character, index int, input string) {
 	input = strings.ReplaceAll(input, "]", "")
 	parseArray(&c.PinYin, input)
 }
-
-func parseBracket(c *Character, index int, input string) {
-	log.With("input", input).Info("bracket")
-	input = strings.ReplaceAll(input, "(", "")
-	input = strings.ReplaceAll(input, ")", "")
-	s := strings.Split(input, ";")
+func parseBuShouBracket(c *Character, index int, input string) {
+	log.With("input", input).Info("bushou bracket")
+	input = strings.ReplaceAll(input, "(", " ")
+	input = strings.ReplaceAll(input, ")", " ")
+}
+func parseKangxiBracket(c *Character, index int, input string) {
+	log.With("input", input).Info("kangxi bracket")
+	input = strings.ReplaceAll(input, "(", " ")
+	input = strings.ReplaceAll(input, ")", " ")
+	s := strings.Split(strings.TrimSpace(input), ";")
 	if c.KangXiStroke == 0 {
 		for _, ss := range s {
 			if strings.Index(ss, c.Character) >= 0 {
-				vv := strings.Split(ss, ":")
+				vv := strings.Split(strings.TrimSpace(ss), ":")
 				if len(vv) == 2 {
-					i, e := strconv.Atoi(vv[1])
+					i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
 					if e != nil {
 						log.Error(e)
 						return
