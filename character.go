@@ -71,13 +71,15 @@ type Character struct {
 	Character                string   `xorm:"character"`                  //字符
 	Radical                  string   `xorm:"radical"`                    //部首
 	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
-	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
-	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
-	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
-	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
 	KangXi                   string   `json:"traditional_radical"`        //康熙
 	KangXiStroke             int      `json:"traditional_radical_stroke"` //康熙笔画
-	TotalStroke              int      `xorm:"total_stroke"`               //总笔画
+	KangXiTotalStroke        int      `xorm:"total_stroke"`               //总笔画
+	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
+	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
+	SimpleTotalStroke        int      `json:"traditional_radical_stroke"` //简体部首笔画
+	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
+	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
+	TraditionalTotalStroke   int      `json:"traditional_radical_stroke"` //简体部首笔画
 	PinYin                   []string `xorm:"pin_yin"`                    //拼音
 }
 
@@ -120,45 +122,49 @@ type Index struct {
 }
 
 // ParseFunc ...
-type ParseFunc func(*Character, string)
+type ParseFunc func(*Character, int, string)
 
 var charList = map[string]ParseFunc{
-	"部首:":   parseBuShou,
-	"部首笔画:": parseBuShouStroke,
-	"总笔画:":  parseTotalStroke,
-	"拼音":    parsePinYin,
+	"部首:":      parseBuShou,
+	"简体部首:":    parseSimple,
+	"康熙字典笔画::": parseKangXi,
+	"拼音":       parsePinYin,
 }
 
-func parseDummy(c *Character, input string) {
-	log.With("character", c, "input", input).Info("dummy")
+func parseDummy(c *Character, index int, input string) {
+	log.With("character", c, "index", index, "input", input).Info("dummy")
 }
-func parseArray(source *[]string, input string) {
-	*source = append(*source, input)
+func parseKangXi(c *Character, index int, input string) {
+	log.With("character", c, "index", index, "input", input).Info("kangxi")
 }
-func parseNumber(source *int, input string) {
-	i, e := strconv.Atoi(strings.ReplaceAll(input, "画", ""))
-	if e != nil {
-		log.With("input", input).Error(e)
-		return
-	}
-	*source = i
-}
-func parsePinYin(c *Character, input string) {
-	log.With("input", input).Info("pinyin")
-	input = strings.ReplaceAll(input, "[", "")
-	input = strings.ReplaceAll(input, "]", "")
-	parseArray(&c.PinYin, input)
-}
-func parseBuShou(c *Character, input string) {
+func parseBuShou(c *Character, index int, input string) {
 	log.With("input", input).Info("bushou")
-	c.Radical = input
+	switch index {
+	case 0:
+		c.Radical = input
+	case 1:
+		parseNumber(&c.RadicalStroke, input)
+	case 2:
+		parseNumber(&c.KangXiTotalStroke, input)
+	default:
+		log.Error("bushou")
+	}
+
 }
-func parseBuShouStroke(c *Character, input string) {
-	parseNumber(&c.RadicalStroke, input)
-}
-func parseSimple(c *Character, input string) {
+
+func parseSimple(c *Character, index int, input string) {
 	log.With("input", input).Info("simple radical")
-	c.SimpleRadical = input
+	switch index {
+	case 0:
+		c.SimpleRadical = input
+	case 1:
+		parseNumber(&c.SimpleRadicalStroke, input)
+	case 2:
+		parseNumber(&c.SimpleRadicalStroke, input)
+	default:
+		log.Error("bushou")
+	}
+
 }
 func parseSimpleRadicalStroke(c *Character, input string) {
 	parseNumber(&c.SimpleRadicalStroke, input)
@@ -170,11 +176,8 @@ func parseTraditionalRadical(c *Character, input string) {
 func parseTraditionalRadicalStroke(c *Character, input string) {
 	parseNumber(&c.TraditionalRadicalStroke, input)
 }
-func parseTotalStroke(c *Character, input string) {
-	parseNumber(&c.TotalStroke, input)
-}
 
-func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
+func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 	html, e := element.DOM.Html()
 	if e != nil {
 		log.Error(e)
@@ -201,18 +204,40 @@ func parseCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
 		text := StringClearUp(selection.Text())
 		f := parseDummy
-		if data == nil || len(data) == 0 {
-			f = parsePinYin
-		} else {
-			if v, b := charList[text]; b {
-				f = v
+		if i == 0 {
+			if data == nil || len(data) == 0 {
+				f = parsePinYin
+			} else {
+				if v, b := charList[text]; b {
+					f = v
+				}
 			}
 		}
 		if len(data) > i {
-			f(ch, data[i])
+			f(ch, i, data[i])
 		} else {
-			f(ch, text)
+			if data == nil || len(data) == 0 {
+				f(ch, i, text)
+			}
 		}
 	})
 	return nil
+}
+
+func parseArray(source *[]string, input string) {
+	*source = append(*source, input)
+}
+func parseNumber(source *int, input string) {
+	i, e := strconv.Atoi(strings.ReplaceAll(input, "画", ""))
+	if e != nil {
+		log.With("input", input).Error(e)
+		return
+	}
+	*source = i
+}
+func parsePinYin(c *Character, index int, input string) {
+	log.With("input", input).Info("pinyin")
+	input = strings.ReplaceAll(input, "[", "")
+	input = strings.ReplaceAll(input, "]", "")
+	parseArray(&c.PinYin, input)
 }

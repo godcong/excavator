@@ -127,7 +127,7 @@ func (exc *Excavator) Run() error {
 	switch exc.step {
 	case StepAll:
 		//go exc.parseRadical(exc.radical)
-		//go exc.parseCharacter(exc.radical, exc.character)
+		//go exc.parseKangXiCharacter(exc.radical, exc.character)
 	case StepRadical:
 		go exc.parseRadical(exc.radical)
 	case StepCharacter:
@@ -316,7 +316,7 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 		log.Info(response.StatusCode)
 	})
 	c.OnHTML(`div[class=info] > p[class=mui-ellipsis]`, func(element *colly.HTMLElement) {
-		e := parseCharacter(element, ch)
+		e := parseKangXiCharacter(element, ch)
 		log.Infof("%+v", ch)
 		log.Error(e)
 	})
