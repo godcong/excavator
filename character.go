@@ -199,10 +199,10 @@ func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 		log.Error(e)
 		return nil
 	}
+	f := parseDummy
 	n1.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
 		text := StringClearUp(selection.Text())
-		f := parseDummy
 		if i == 0 {
 			if data == nil || len(data) == 0 {
 				f = parsePinYin
