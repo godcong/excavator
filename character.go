@@ -68,12 +68,12 @@ type BaseCharacter struct {
 
 //Character 字符
 type Character struct {
-	Character                string   `xorm:"character"`                  //字符
-	Radical                  string   `xorm:"radical"`                    //部首
-	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
-	KangXi                   string   `json:"traditional_radical"`        //康熙
-	KangXiStroke             int      `json:"traditional_radical_stroke"` //康熙笔画
-	KangXiTotalStroke        int      `xorm:"total_stroke"`               //总笔画
+	Character     string `xorm:"character"`                  //字符
+	Radical       string `xorm:"radical"`                    //部首
+	RadicalStroke int    `xorm:"radical_stroke"`             //部首笔画
+	KangXi        string `json:"traditional_radical"`        //康熙
+	KangXiStroke  int    `json:"traditional_radical_stroke"` //康熙笔画
+	//KangXiTotalStroke        int      `xorm:"total_stroke"`               //总笔画
 	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
 	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
 	SimpleTotalStroke        int      `json:"traditional_radical_stroke"` //简体部首笔画
@@ -145,26 +145,24 @@ func parseBuShou(c *Character, index int, input string) {
 	case 1:
 		parseNumber(&c.RadicalStroke, input)
 	case 2:
-		parseNumber(&c.KangXiTotalStroke, input)
+		parseNumber(&c.KangXiStroke, input)
 	default:
 		log.Error("bushou")
 	}
-
 }
 
 func parseSimple(c *Character, index int, input string) {
-	log.With("input", input).Info("simple radical")
+	log.With("input", input).Info("simple")
 	switch index {
 	case 0:
 		c.SimpleRadical = input
 	case 1:
 		parseNumber(&c.SimpleRadicalStroke, input)
 	case 2:
-		parseNumber(&c.SimpleRadicalStroke, input)
+		parseNumber(&c.SimpleTotalStroke, input)
 	default:
-		log.Error("bushou")
+		log.Error("simple")
 	}
-
 }
 func parseSimpleRadicalStroke(c *Character, input string) {
 	parseNumber(&c.SimpleRadicalStroke, input)
@@ -240,4 +238,27 @@ func parsePinYin(c *Character, index int, input string) {
 	input = strings.ReplaceAll(input, "[", "")
 	input = strings.ReplaceAll(input, "]", "")
 	parseArray(&c.PinYin, input)
+}
+
+func parseBracket(c *Character, index int, input string) {
+	log.With("input", input).Info("bracket")
+	input = strings.ReplaceAll(input, "(", "")
+	input = strings.ReplaceAll(input, ")", "")
+	s := strings.Split(input, ";")
+	if c.KangXiStroke == 0 {
+		for _, ss := range s {
+			if strings.Index(ss, c.Character) >= 0 {
+				vv := strings.Split(ss, ":")
+				if len(vv) == 2 {
+					i, e := strconv.Atoi(vv[1])
+					if e != nil {
+						log.Error(e)
+						return
+					}
+					c.KangXiStroke = i
+				}
+			}
+		}
+	}
+
 }
