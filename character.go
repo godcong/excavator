@@ -80,7 +80,8 @@ type Character struct {
 	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
 	TraditionalTotalStroke   int      `json:"traditional_radical_stroke"` //简体部首笔画
 	PinYin                   []string `xorm:"pin_yin"`                    //拼音
-	NameScience              bool
+	NameScience              bool     //姓名学
+	WuXing                   string   //五行
 }
 
 //Folk 民俗参考
