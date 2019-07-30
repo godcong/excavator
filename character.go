@@ -68,6 +68,7 @@ type BaseCharacter struct {
 
 //Character 字符
 type Character struct {
+	PinYin                   []string `xorm:"pin_yin"`                    //拼音
 	Character                string   `xorm:"character"`                  //字符
 	Radical                  string   `xorm:"radical"`                    //部首
 	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
@@ -79,9 +80,12 @@ type Character struct {
 	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
 	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
 	TraditionalTotalStroke   int      `json:"traditional_radical_stroke"` //简体部首笔画
-	PinYin                   []string `xorm:"pin_yin"`                    //拼音
-	NameScience              bool     //姓名学
-	WuXing                   string   //五行
+	NameScience              bool     `json:"name_science"`               //姓名学
+	WuXing                   string   `json:"wu_xing"`                    //五行
+	Lucky                    string   `json:"lucky"`                      //吉凶寓意
+	Regular                  bool     `json:"regular"`                    //常用
+	TraditionalCharacter     []string `json:"traditional_character"`      //繁体字
+	Variant                  []string `json:"variant"`                    //异体字
 }
 
 //Folk 民俗参考
