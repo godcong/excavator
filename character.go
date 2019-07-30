@@ -68,19 +68,19 @@ type BaseCharacter struct {
 
 //Character 字符
 type Character struct {
-	Character     string `xorm:"character"`                  //字符
-	Radical       string `xorm:"radical"`                    //部首
-	RadicalStroke int    `xorm:"radical_stroke"`             //部首笔画
-	KangXi        string `json:"traditional_radical"`        //康熙
-	KangXiStroke  int    `json:"traditional_radical_stroke"` //康熙笔画
-	//KangXiTotalStroke        int      `xorm:"total_stroke"`               //总笔画
+	Character                string   `xorm:"character"`                  //字符
+	Radical                  string   `xorm:"radical"`                    //部首
+	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
+	KangXi                   string   `json:"traditional_radical"`        //康熙
+	KangXiStroke             int      `json:"traditional_radical_stroke"` //康熙笔画
 	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
 	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
-	SimpleTotalStroke        int      `json:"traditional_radical_stroke"` //简体部首笔画
+	SimpleTotalStroke        int      `json:"traditional_radical_stroke"` //简体笔画
 	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
 	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
 	TraditionalTotalStroke   int      `json:"traditional_radical_stroke"` //简体部首笔画
 	PinYin                   []string `xorm:"pin_yin"`                    //拼音
+	NameScience              bool
 }
 
 //Folk 民俗参考
@@ -129,6 +129,14 @@ var charList = map[string]ParseFunc{
 	"简体部首:":    parseSimple,
 	"康熙字典笔画::": parseKangXi,
 	"拼音":       parsePinYin,
+}
+
+// Clone ...
+func (c *Character) Clone() (char *Character) {
+	char = new(Character)
+	*char = *c
+	copy(char.PinYin, c.PinYin)
+	return char
 }
 
 func parseDummy(c *Character, index int, input string) {
