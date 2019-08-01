@@ -132,6 +132,7 @@ type ParseFunc func(*Character, int, string)
 var charList = map[string]ParseFunc{
 	"部首:":      parseBuShou,
 	"简体部首:":    parseSimple,
+	"繁体部首:":    parseTraditional,
 	"康熙字典笔画::": parseKangXi,
 	"拼音":       parsePinYin,
 }
@@ -168,25 +169,24 @@ func parseSimple(c *Character, index int, input string) {
 	log.With("input", input).Info("simple")
 	switch index {
 	case 0:
-
-		c.SimpleRadical = input
+		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
 	case 1:
-		parseNumber(&c.SimpleRadicalStroke, input)
-	case 2:
 		parseNumber(&c.SimpleTotalStroke, input)
 	default:
 		log.Error("simple")
 	}
 }
-func parseSimpleRadicalStroke(c *Character, input string) {
-	parseNumber(&c.SimpleRadicalStroke, input)
-}
-func parseTraditionalRadical(c *Character, input string) {
-	log.With("input", input).Info("simple radical")
-	c.TraditionalRadical = input
-}
-func parseTraditionalRadicalStroke(c *Character, input string) {
-	parseNumber(&c.TraditionalRadicalStroke, input)
+
+func parseTraditional(c *Character, index int, input string) {
+	log.With("input", input).Info("traditional")
+	switch index {
+	case 0:
+		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
+	case 1:
+		parseNumber(&c.TraditionalTotalStroke, input)
+	default:
+		log.Error("traditional")
+	}
 }
 
 func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
@@ -253,10 +253,16 @@ func parsePinYin(c *Character, index int, input string) {
 	input = strings.ReplaceAll(input, "]", "")
 	parseArray(&c.PinYin, input)
 }
-func parseBuShouBracket(c *Character, index int, input string) {
+func parseBuShouBracket(input string, radical *string, stroke *int) {
 	log.With("input", input).Info("bushou bracket")
 	input = strings.ReplaceAll(input, "(", " ")
 	input = strings.ReplaceAll(input, ")", " ")
+	input = strings.TrimSpace(input)
+	s := strings.Split(input, " ")
+	if len(s) == 2 {
+		*radical = s[0]
+		*stroke, _ = strconv.Atoi(s[1])
+	}
 }
 func parseKangxiBracket(c *Character, index int, input string) {
 	log.With("input", input).Info("kangxi bracket")
