@@ -280,25 +280,9 @@ func parseBuShouBracket(input string, radical *string, stroke *int) {
 		*stroke, _ = strconv.Atoi(s[1])
 	}
 }
-func parseKangxiBracket(c *Character, index int, input string) {
-	log.With("input", input).Info("kangxi bracket")
-	input = strings.ReplaceAll(input, "(", " ")
-	input = strings.ReplaceAll(input, ")", " ")
-	s := strings.Split(strings.TrimSpace(input), ";")
-	if c.KangXiStroke == 0 {
-		for _, ss := range s {
-			if strings.Index(ss, c.Character) >= 0 {
-				vv := strings.Split(strings.TrimSpace(ss), ":")
-				if len(vv) == 2 {
-					i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
-					if e != nil {
-						log.Error(e)
-						return
-					}
-					c.KangXiStroke = i
-				}
-			}
-		}
-	}
-
+func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
+	element.ForEach("li", func(i int, element *colly.HTMLElement) {
+		log.Info(element.Text)
+	})
+	return
 }

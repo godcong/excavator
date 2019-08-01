@@ -321,8 +321,15 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 		if e != nil {
 			log.Error(e)
 		}
-
 	})
+	c.OnHTML(`div > ul.hanyu-cha-info.mui-clearfix`, func(element *colly.HTMLElement) {
+		e := parseDictInformation(element, ch)
+		log.Infof("%+v", ch)
+		if e != nil {
+			log.Error(e)
+		}
+	})
+
 	c.OnScraped(func(response *colly.Response) {
 
 	})
