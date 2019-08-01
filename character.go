@@ -130,11 +130,11 @@ type Index struct {
 type ParseFunc func(*Character, int, string)
 
 var charList = map[string]ParseFunc{
-	"部首:":      parseBuShou,
-	"简体部首:":    parseSimple,
-	"繁体部首:":    parseTraditional,
-	"康熙字典笔画::": parseKangXi,
-	"拼音":       parsePinYin,
+	"部首:":     parseBuShou,
+	"简体部首:":   parseSimple,
+	"繁体部首:":   parseTraditional,
+	"康熙字典笔画:": parseKangXi,
+	"拼音":      parsePinYin,
 }
 
 // Clone ...
