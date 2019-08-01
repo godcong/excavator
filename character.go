@@ -210,7 +210,7 @@ func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 	n1, e := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if e != nil {
 		log.Error(e)
-		return nil
+		return e
 	}
 	f := parseDummy
 	n1.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
