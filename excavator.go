@@ -318,7 +318,10 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 	c.OnHTML(`div[class=info] > p[class=mui-ellipsis]`, func(element *colly.HTMLElement) {
 		e := parseKangXiCharacter(element, ch)
 		log.Infof("%+v", ch)
-		log.Error(e)
+		if e != nil {
+			log.Error(e)
+		}
+
 	})
 	c.OnScraped(func(response *colly.Response) {
 
