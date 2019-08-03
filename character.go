@@ -291,8 +291,8 @@ var infoList = map[string]ParseFunc{
 	"吉凶寓意：":   parseLucy,
 	"姓名学：":    parseNameScience,
 	"是否为常用字：": parseRegular,
-	"繁体字集：":   parseTraditionalCharacter,
-	"异体字集：":   parseVariantCharacter,
+	//"繁体字集：":   parseTraditionalCharacter,
+	//"异体字集：":   parseVariantCharacter,
 }
 var infoList2 = map[string]ParseFunc{
 	"繁体字集：": parseTraditionalCharacter,
