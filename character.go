@@ -294,6 +294,10 @@ var infoList = map[string]ParseFunc{
 	"繁体字集：":   parseTraditionalCharacter,
 	"异体字集：":   parseVariantCharacter,
 }
+var infoList2 = map[string]ParseFunc{
+	"繁体字集：": parseTraditionalCharacter,
+	"异体字集：": parseVariantCharacter,
+}
 
 func parseVariantCharacter(c *Character, index int, input string) {
 	log.With("input", input).Info("var char")
@@ -351,5 +355,17 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 		}
 	})
 
+	n1, e := newDoc(element)
+	if e != nil {
+		log.Error(e)
+		return e
+	}
+	n1.Find("li").Each(func(i int, selection *goquery.Selection) {
+		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
+		tx := selection.Find("span").Text()
+		if v, b := infoList2[tx]; b {
+			v(ch, selection.Index(), selection.Find("a").Text())
+		}
+	})
 	return
 }
