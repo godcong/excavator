@@ -1,7 +1,6 @@
 package excavator
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -283,10 +282,26 @@ func parseBuShouBracket(input string, radical *string, stroke *int) {
 }
 
 var infoList = map[string]ParseFunc{
-	"汉字五行：": parseWuXing,
-	"吉凶寓意：": parseLucy,
+	"汉字五行：":   parseWuXing,
+	"吉凶寓意：":   parseLucy,
+	"姓名学：":    parseNameScience,
+	"是否为常用字：": parseRegular,
 }
 
+func parseRegular(c *Character, index int, input string) {
+	log.With("input", input).Info("lucky")
+	if input == "是" {
+		c.Regular = true
+	}
+
+}
+
+func parseNameScience(c *Character, index int, input string) {
+	log.With("input", input).Info("lucky")
+	if input == "是" {
+		c.NameScience = true
+	}
+}
 func parseLucy(c *Character, index int, input string) {
 	log.With("input", input).Info("lucky")
 	c.Lucky = input
@@ -301,7 +316,7 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 	fn := parseDummy
 	element.ForEach("li", func(i int, element *colly.HTMLElement) {
 		element.DOM.Contents().Each(func(i int, selection *goquery.Selection) {
-			fmt.Printf(">>> (%d) >>> %s\n", i, selection.Text())
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
 			tx := selection.Text()
 			if i == 0 {
 				fn = parseDummy
