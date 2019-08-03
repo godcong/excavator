@@ -85,7 +85,7 @@ type Character struct {
 	Lucky                    string   `json:"lucky"`                      //吉凶寓意
 	Regular                  bool     `json:"regular"`                    //常用
 	TraditionalCharacter     []string `json:"traditional_character"`      //繁体字
-	Variant                  []string `json:"variant"`                    //异体字
+	VariantCharacter         []string `json:"variant_character"`          //异体字
 }
 
 //Folk 民俗参考
@@ -205,13 +205,18 @@ func parseTraditional(c *Character, index int, input string) {
 	}
 }
 
-func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
+func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
 	html, e := element.DOM.Html()
 	if e != nil {
 		log.Error(e)
-		return e
+		return
 	}
-	n, e := goquery.NewDocumentFromReader(strings.NewReader(html))
+	d, e = goquery.NewDocumentFromReader(strings.NewReader(html))
+	return
+}
+
+func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
+	n, e := newDoc(element)
 	if e != nil {
 		log.Error(e)
 		return e
@@ -223,7 +228,7 @@ func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
 	}
 
 	log.With("source", v).Info(len(data), ":", data)
-	n1, e := goquery.NewDocumentFromReader(strings.NewReader(html))
+	n1, e := newDoc(element)
 	if e != nil {
 		log.Error(e)
 		return e
@@ -286,18 +291,30 @@ var infoList = map[string]ParseFunc{
 	"吉凶寓意：":   parseLucy,
 	"姓名学：":    parseNameScience,
 	"是否为常用字：": parseRegular,
+	"繁体字集：":   parseTraditionalCharacter,
+	"异体字集：":   parseVariantCharacter,
 }
 
+func parseVariantCharacter(c *Character, index int, input string) {
+	log.With("input", input).Info("var char")
+	if input != "" {
+		c.VariantCharacter = append(c.VariantCharacter, input)
+	}
+}
+func parseTraditionalCharacter(c *Character, index int, input string) {
+	log.With("input", input).Info("trad char")
+	if input != "" {
+		c.TraditionalCharacter = append(c.TraditionalCharacter, input)
+	}
+}
 func parseRegular(c *Character, index int, input string) {
-	log.With("input", input).Info("lucky")
+	log.With("input", input).Info("regular")
 	if input == "是" {
 		c.Regular = true
 	}
-
 }
-
 func parseNameScience(c *Character, index int, input string) {
-	log.With("input", input).Info("lucky")
+	log.With("input", input).Info("name science")
 	if input == "是" {
 		c.NameScience = true
 	}
@@ -306,15 +323,15 @@ func parseLucy(c *Character, index int, input string) {
 	log.With("input", input).Info("lucky")
 	c.Lucky = input
 }
-
 func parseWuXing(c *Character, index int, input string) {
 	log.With("input", input).Info("wuxing")
 	c.WuXing = input
 }
-
 func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 	fn := parseDummy
 	element.ForEach("li", func(i int, element *colly.HTMLElement) {
+		element.DOM.Html()
+
 		element.DOM.Contents().Each(func(i int, selection *goquery.Selection) {
 			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
 			tx := selection.Text()
@@ -323,9 +340,10 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 				if v, b := infoList[tx]; b {
 					fn = v
 				}
+
 			}
 			if goquery.NodeName(selection) == "#text" {
-				fn(ch, i, tx)
+				fn(ch, i, StringClearUp(tx))
 			}
 		})
 	})
