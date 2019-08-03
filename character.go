@@ -344,26 +344,12 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 			if v, b := infoList[tx]; b {
 				fn = v
 			}
+		}
 
+		if goquery.NodeName(selection) == "#text" {
+			fn(ch, i, StringClearUp(tx))
 		}
 	})
-	element.ForEach("li", func(i int, element *colly.HTMLElement) {
-		element.DOM.Html()
 
-		element.DOM.Contents().Each(func(i int, selection *goquery.Selection) {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
-			tx := selection.Text()
-			if i == 0 {
-				fn = parseDummy
-				if v, b := infoList[tx]; b {
-					fn = v
-				}
-
-			}
-			if goquery.NodeName(selection) == "#text" {
-				fn(ch, i, StringClearUp(tx))
-			}
-		})
-	})
 	return
 }
