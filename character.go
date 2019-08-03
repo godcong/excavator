@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -280,9 +281,30 @@ func parseBuShouBracket(input string, radical *string, stroke *int) {
 		*stroke, _ = strconv.Atoi(s[1])
 	}
 }
+
+var infoList = map[string]ParseFunc{
+	"汉字五行：": parseWuXing,
+}
+
+var _ ParseFunc = parseWuXing
+
+func parseWuXing(c *Character, index int, input string) {
+	c.WuXing = input
+}
+
 func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
+	fn := parseDummy
 	element.ForEach("li", func(i int, element *colly.HTMLElement) {
-		log.Info(element.Text)
+		element.DOM.Contents().Each(func(i int, selection *goquery.Selection) {
+			fmt.Printf(">>> (%d) >>> %s\n", i, selection.Text())
+			tx := selection.Text()
+			if i == 0 {
+				fn = infoList[tx]
+			}
+			if goquery.NodeName(selection) == "#text" {
+				fn(ch, i, tx)
+			}
+		})
 	})
 	return
 }
