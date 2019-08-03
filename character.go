@@ -329,21 +329,21 @@ func parseWuXing(c *Character, index int, input string) {
 }
 func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 	fn := parseDummy
-
 	n, e := newDoc(element)
 	if e != nil {
 		log.Error(e)
 		return e
 	}
 
-	n.Find("li").Each(func(i int, selection *goquery.Selection) {
+	n.Find("li").Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
 		tx := selection.Text()
-		if i == 0 {
+		if selection.Index() == 0 {
 			fn = parseDummy
 			if v, b := infoList[tx]; b {
 				fn = v
 			}
+			return
 		}
 
 		if goquery.NodeName(selection) == "#text" {
