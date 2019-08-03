@@ -284,11 +284,16 @@ func parseBuShouBracket(input string, radical *string, stroke *int) {
 
 var infoList = map[string]ParseFunc{
 	"汉字五行：": parseWuXing,
+	"吉凶寓意：": parseLucy,
 }
 
-var _ ParseFunc = parseWuXing
+func parseLucy(c *Character, index int, input string) {
+	log.With("input", input).Info("lucky")
+	c.Lucky = input
+}
 
 func parseWuXing(c *Character, index int, input string) {
+	log.With("input", input).Info("wuxing")
 	c.WuXing = input
 }
 
@@ -299,6 +304,7 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 			fmt.Printf(">>> (%d) >>> %s\n", i, selection.Text())
 			tx := selection.Text()
 			if i == 0 {
+				fn = parseDummy
 				if v, b := infoList[tx]; b {
 					fn = v
 				}
