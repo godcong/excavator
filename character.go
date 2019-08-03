@@ -299,7 +299,9 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 			fmt.Printf(">>> (%d) >>> %s\n", i, selection.Text())
 			tx := selection.Text()
 			if i == 0 {
-				fn = infoList[tx]
+				if v, b := infoList[tx]; b {
+					fn = v
+				}
 			}
 			if goquery.NodeName(selection) == "#text" {
 				fn(ch, i, tx)
