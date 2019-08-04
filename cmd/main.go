@@ -36,6 +36,31 @@ func main() {
 			exc.SetStep(excavator.Step(c.String("step")))
 
 			exc.Run()
+
+			r := exc.Radical()
+			cr := exc.Character()
+			if r != nil {
+				for {
+					select {
+					case rr := <-r:
+						if rr == nil {
+							goto END
+						}
+					}
+				}
+			}
+
+			if cr != nil {
+				for {
+					select {
+					case ccr := <-cr:
+						if ccr == nil {
+							goto END
+						}
+					}
+				}
+			}
+		END:
 			return nil
 		},
 		Flags: mainFlags(),
