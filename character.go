@@ -17,59 +17,22 @@ type Character struct {
 	Character                string   `xorm:"character"`                  //字符
 	Radical                  string   `xorm:"radical"`                    //部首
 	RadicalStroke            int      `xorm:"radical_stroke"`             //部首笔画
-	KangXi                   string   `json:"traditional_radical"`        //康熙
-	KangXiStroke             int      `json:"traditional_radical_stroke"` //康熙笔画
-	SimpleRadical            string   `json:"traditional_radical"`        //简体部首
-	SimpleRadicalStroke      int      `json:"traditional_radical_stroke"` //简体部首笔画
-	SimpleTotalStroke        int      `json:"traditional_radical_stroke"` //简体笔画
-	TraditionalRadical       string   `json:"traditional_radical"`        //繁体部首
-	TraditionalRadicalStroke int      `json:"traditional_radical_stroke"` //繁体部首笔画
-	TraditionalTotalStroke   int      `json:"traditional_radical_stroke"` //简体部首笔画
-	NameScience              bool     `json:"name_science"`               //姓名学
-	WuXing                   string   `json:"wu_xing"`                    //五行
-	Lucky                    string   `json:"lucky"`                      //吉凶寓意
-	Regular                  bool     `json:"regular"`                    //常用
-	TraditionalCharacter     []string `json:"traditional_character"`      //繁体字
-	VariantCharacter         []string `json:"variant_character"`          //异体字
-	Comment                  string   `json:"comment"`                    //解释
-}
-
-//Folk 民俗参考
-type Folk struct {
-	CommonlyCharacters   string //是否为常用字
-	NameScience          string //姓名学
-	FiveElementCharacter string //汉字五行
-	GodBadMoral          string //吉凶寓意
-}
-
-//Structure 字形结构
-type Structure struct {
-	DecompositionSearch string //首尾分解查字
-	StrokeNumber        string //笔顺编号
-	StrokeReadWrite     string //笔顺读写
-}
-
-//Explain 说文解字
-type Explain struct {
-	Intro  string //简介
-	Detail string //详情
-}
-
-//PhoneticDialect 音韵方言
-type PhoneticDialect struct {
-	GuangYun  string //广　韵
-	Mandarin  string //国　语
-	Cantonese string //粤　语
-}
-
-//Index 索引参考
-type Index struct {
-	AncientWrite      string //古文字诂林
-	HometownTrain     string //故训彙纂
-	Explain           string //说文解字
-	KangxiDictionary  string //康熙字典
-	ChineseDictionary string //汉语字典
-	Cihai             string //辞　海
+	IsKangXi                 bool     `xorm:"is_kang_xi"`                 //是否康熙字典
+	KangXi                   string   `xorm:"kang_xi"`                    //康熙
+	KangXiStroke             int      `xorm:"kang_xi_stroke"`             //康熙笔画
+	SimpleRadical            string   `xorm:"simple_radical"`             //简体部首
+	SimpleRadicalStroke      int      `xorm:"simple_radical_stroke"`      //简体部首笔画
+	SimpleTotalStroke        int      `xorm:"simple_total_stroke"`        //简体笔画
+	TraditionalRadical       string   `xorm:"traditional_radical"`        //繁体部首
+	TraditionalRadicalStroke int      `xorm:"traditional_radical_stroke"` //繁体部首笔画
+	TraditionalTotalStroke   int      `xorm:"traditional_total_stroke"`   //简体部首笔画
+	NameScience              bool     `xorm:"name_science"`               //姓名学
+	WuXing                   string   `xorm:"wu_xing"`                    //五行
+	Lucky                    string   `xorm:"lucky"`                      //吉凶寓意
+	Regular                  bool     `xorm:"regular"`                    //常用
+	TraditionalCharacter     []string `xorm:"traditional_character"`      //繁体字
+	VariantCharacter         []string `xorm:"variant_character"`          //异体字
+	Comment                  string   `xorm:"comment"`                    //解释
 }
 
 // ParseFunc ...
