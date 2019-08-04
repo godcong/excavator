@@ -32,6 +32,9 @@ func main() {
 			header.Set("X-Requested-With", "XMLHttpRequest")
 			header.Set("Connection", "keep-alive")
 			exc.SetHeader(header)
+
+			exc.SetStep(excavator.Step(c.String("step")))
+
 			exc.Run()
 			return nil
 		},
@@ -52,6 +55,10 @@ func mainFlags() (flags []cli.Flag) {
 		cli.StringFlag{
 			Name:  "workspace",
 			Usage: "set workspace to storage temp file",
+		},
+		cli.StringFlag{
+			Name:  "step",
+			Usage: "set the run step",
 		},
 	}
 	return flags

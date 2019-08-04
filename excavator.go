@@ -22,13 +22,13 @@ var log = trait.NewZapSugar()
 const tmpFile = "tmp"
 
 // Step ...
-type Step int
+type Step string
 
 // excavator run step status ...
 const (
-	StepAll       Step = 0
-	StepRadical        = iota
-	StepCharacter      = iota
+	StepAll       Step = "all"
+	StepRadical        = "radical"
+	StepCharacter      = "character"
 )
 
 // Excavator ...
@@ -44,6 +44,16 @@ type Excavator struct {
 	limit     int64
 	character chan *Character
 	selenium  *Selenium
+}
+
+// Step ...
+func (exc *Excavator) Step() Step {
+	return exc.step
+}
+
+// SetStep ...
+func (exc *Excavator) SetStep(step Step) {
+	exc.step = step
 }
 
 // Limit ...
