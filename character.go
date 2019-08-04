@@ -11,61 +11,6 @@ import (
 // CharacterFunc ...
 type CharacterFunc func(character *Character) error
 
-// ClassRegular ...
-const ClassRegular int = iota
-
-// RootRadicalCharacter ...
-type RootRadicalCharacter struct {
-	Class     int      `json:"class"`     //分类
-	Character string   `json:"character"` //字符
-	Link      string   `json:"link"`      //链接
-	Pinyin    []string `json:"pinyin"`    //拼音
-}
-
-//BasicExplanation 基本解释
-type BasicExplanation struct {
-	Pinyin       string   `json:"pinyin"`   //拼音
-	Phonetic     string   `json:"phonetic"` //注音
-	BasicMeaning []string `xorm:"json basic_meaning" json:"basic_meaning"`
-	OtherMeaning []string
-}
-
-//DetailedExplanation  详细解释
-type DetailedExplanation struct {
-	Character       string   `json:"character"`
-	Pinyin          string   `json:"pinyin"`
-	DetailedMeaning []string `json:"detailed_meaning"`
-}
-
-// MandarinDictionary 国语辞典
-type MandarinDictionary struct {
-	PartOfSpeech string   //词性
-	Pinyin       string   //拼音
-	Phonetic     string   //注音
-	Explanation  []string //解释
-}
-
-//KangxiDictionary 康熙字典
-type KangxiDictionary struct {
-}
-
-//StandardCharacter 标准字符
-type StandardCharacter struct {
-	Radical             string
-	BasicExplanation    BasicExplanation
-	DetailedExplanation []DetailedExplanation
-	MandarinDictionary  []MandarinDictionary
-	KangxiDictionary    KangxiDictionary
-	CharacterDetail     map[string]string
-}
-
-// BaseCharacter ...
-type BaseCharacter struct {
-	NeedFix   bool
-	Character string
-	Data      map[string]string
-}
-
 //Character 字符
 type Character struct {
 	PinYin                   []string `xorm:"pin_yin"`                    //拼音
@@ -86,6 +31,7 @@ type Character struct {
 	Regular                  bool     `json:"regular"`                    //常用
 	TraditionalCharacter     []string `json:"traditional_character"`      //繁体字
 	VariantCharacter         []string `json:"variant_character"`          //异体字
+	Comment                  string   `json:"comment"`                    //解释
 }
 
 //Folk 民俗参考
