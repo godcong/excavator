@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"github.com/go-xorm/xorm"
 	"strconv"
 	"strings"
 
@@ -52,6 +53,24 @@ func (c *Character) Clone() (char *Character) {
 	*char = *c
 	copy(char.PinYin, c.PinYin)
 	return char
+}
+
+// InsertIfNotExist ...
+func (c *Character) InsertIfNotExist(session *xorm.Session) (e error) {
+
+	i, e := session.Table(&Character{}).Where("character = ?", c.Character).Count()
+	if e != nil {
+		return e
+	}
+	if i == 0 {
+		_, e = session.InsertOne(c)
+		return
+	}
+	_, e = session.Update(c)
+	//if e != nil {
+	//	return e
+	//}
+	return
 }
 
 func parseDummy(c *Character, index int, input string) {
