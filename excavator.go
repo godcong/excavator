@@ -43,7 +43,7 @@ type Excavator struct {
 	step      Step
 	limit     int64
 	character chan *Character
-	selenium  *Selenium
+	//selenium  *Selenium
 }
 
 // Step ...
@@ -110,8 +110,8 @@ func (exc *Excavator) PreRun() {
 	}
 	exc.radical = make(chan *RadicalCharacter)
 	exc.character = make(chan *Character)
-	exc.selenium = NewSelenium("", 9515)
-	exc.selenium.Start()
+	//exc.selenium = NewSelenium("", 9515)
+	//exc.selenium.Start()
 }
 
 // Radical ...
