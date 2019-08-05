@@ -283,7 +283,7 @@ func parseComment(c *Character, index int, input string) {
 	if input == "" {
 		return
 	}
-	input = StringClearUp(input)
+	c.Comment = append(c.Comment, StringClearUp(input))
 }
 
 func parseDictComment(element *colly.HTMLElement, character *Character) (e error) {
