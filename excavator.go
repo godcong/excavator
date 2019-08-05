@@ -362,8 +362,8 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 				log.With("radical", cr.BuShou).Error(e)
 				continue
 			}
-
-			_, e = exc.db.InsertOne(ch)
+			e = ch.InsertIfNotExist(exc.db.NewSession())
+			//_, e = exc.db.InsertOne(ch)
 			if e != nil {
 				return
 			}
