@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"sort"
@@ -54,6 +55,7 @@ func main() {
 				for {
 					select {
 					case ccr := <-cr:
+						fmt.Println(ccr.Character, "inserted")
 						if ccr == nil {
 							goto END
 						}
