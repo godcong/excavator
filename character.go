@@ -32,7 +32,7 @@ type Character struct {
 	Regular                  bool     `xorm:"regular"`                    //常用
 	TraditionalCharacter     []string `xorm:"traditional_character"`      //繁体字
 	VariantCharacter         []string `xorm:"variant_character"`          //异体字
-	Comment                  string   `xorm:"comment"`                    //解释
+	Comment                  []string `xorm:"comment"`                    //解释
 }
 
 // ParseFunc ...
@@ -276,5 +276,29 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 			v(ch, selection.Index(), selection.Find("a").Text())
 		}
 	})
+	return
+}
+func parseComment(c *Character, index int, input string) {
+	log.With("input", input).Info("comment")
+	if input == "" {
+		return
+	}
+	input = StringClearUp(input)
+}
+
+func parseDictComment(element *colly.HTMLElement, character *Character) (e error) {
+	n, e := newDoc(element)
+	if e != nil {
+		log.Error(e)
+		return e
+	}
+	tx := StringClearUp(n.Find("li > a").Text())
+	if tx == "康熙字典解释" {
+		n.Find("li > div").Contents().Each(func(i int, selection *goquery.Selection) {
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li3")
+			parseComment(character, i, selection.Text())
+		})
+	}
+
 	return
 }

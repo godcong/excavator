@@ -339,7 +339,12 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 			log.Error(e)
 		}
 	})
-
+	c.OnHTML(`div > ul.hanyu-cha-ul`, func(element *colly.HTMLElement) {
+		e := parseDictComment(element, ch)
+		if e != nil {
+			log.Error(e)
+		}
+	})
 	c.OnScraped(func(response *colly.Response) {
 
 	})
