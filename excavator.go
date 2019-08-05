@@ -156,6 +156,7 @@ func (exc *Excavator) findRadical(characters chan<- *RadicalCharacter) {
 		log.Error(e)
 		return
 	}
+	log.With("total", i).Info("total char")
 	for x := int64(0); x < i; x += exc.Limit() {
 		rc := new([]RadicalCharacter)
 		e := exc.db.Limit(int(exc.Limit()), int(x)).Find(rc)
