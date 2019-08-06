@@ -66,7 +66,7 @@ func (c *Character) InsertIfNotExist(session *xorm.Session) (e error) {
 		_, e = session.InsertOne(c)
 		return
 	}
-	_, e = session.Update(c)
+	_, e = session.Where("character = ?", c.Character).Update(c)
 	//if e != nil {
 	//	return e
 	//}
