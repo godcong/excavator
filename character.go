@@ -292,7 +292,9 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
 		tx := selection.Find("span").Text()
 		if v, b := infoList2[tx]; b {
-			v(ch, selection.Index(), selection.Find("a").Text())
+			selection.Find("a").Each(func(i int, selection *goquery.Selection) {
+				v(ch, selection.Index(), selection.Text())
+			})
 		}
 	})
 	return
