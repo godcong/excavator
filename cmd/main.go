@@ -55,10 +55,11 @@ func main() {
 				for {
 					select {
 					case ccr := <-cr:
-						fmt.Println(ccr.Character, "inserted")
 						if ccr == nil {
+							fmt.Println("end")
 							goto END
 						}
+						fmt.Println(ccr.Character, "inserted")
 					}
 				}
 			}
