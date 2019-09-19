@@ -15,11 +15,11 @@ func InitSqlite3(name string) *xorm.Engine {
 	}
 	eng.ShowSQL(true)
 	eng.ShowExecTime(true)
+	_, e = eng.Exec("PRAGMA journal_mode = OFF;")
+	if e != nil {
+		return nil
+	}
 	return eng
-	//result, e := eng.Exec("PRAGMA journal_mode = OFF;")
-	//if e != nil {
-	//	return e
-	//}
 	//log.Info("result:", result)
 	//for idx, val := range syncTable {
 	//	log.Info("syncing ", idx)
