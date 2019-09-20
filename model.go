@@ -21,7 +21,7 @@ func InitSqlite3(name string) *xorm.Engine {
 	eng.ShowExecTime(true)
 	_, e = eng.Exec("PRAGMA journal_mode = OFF;")
 	if e != nil {
-		return nil
+		log.Fatal(e)
 	}
 	return eng
 	//log.Info("result:", result)
@@ -43,8 +43,9 @@ func InitMysql(addr, name, pass string) *xorm.Engine {
 	u := fmt.Sprintf(sqlURL, name, pass, addr, "excavator", url.QueryEscape("Asia/Shanghai"))
 	eng, e := xorm.NewEngine("mysql", u)
 	if e != nil {
-		panic(e)
+		log.Fatal(e)
 	}
 	eng.ShowSQL(true)
 	eng.ShowExecTime(true)
+	return eng
 }

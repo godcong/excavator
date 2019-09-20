@@ -98,7 +98,7 @@ func New(url string, workspace string) *Excavator {
 // PreRun ...
 func (exc *Excavator) PreRun() {
 	if exc.db == nil {
-		exc.db = InitSqlite3("exc.db")
+		exc.db = InitMysql("localhost:3306", "root", "111111")
 	}
 	e := exc.db.Sync2(RadicalCharacter{})
 	if e != nil {
