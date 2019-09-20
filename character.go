@@ -15,7 +15,7 @@ type CharacterFunc func(character *Character) error
 //Character 字符
 type Character struct {
 	PinYin                   []string `xorm:"default() notnull pin_yin"`                     //拼音
-	Character                string   `xorm:"default() notnull character"`                   //字符
+	Ch                       string   `xorm:"default() notnull ch"`                          //字符
 	Radical                  string   `xorm:"default() notnull radical"`                     //部首
 	RadicalStroke            int      `xorm:"default(0) notnull radical_stroke"`             //部首笔画
 	IsKangXi                 bool     `xorm:"default(0) notnull is_kang_xi"`                 //是否康熙字典
@@ -58,7 +58,7 @@ func (c *Character) Clone() (char *Character) {
 // InsertIfNotExist ...
 func (c *Character) InsertIfNotExist(session *xorm.Session) (e error) {
 
-	i, e := session.Table(&Character{}).Where("character = ?", c.Character).Count()
+	i, e := session.Table(&Character{}).Where("ch = ?", c.Ch).Count()
 	if e != nil {
 		return e
 	}
@@ -66,7 +66,7 @@ func (c *Character) InsertIfNotExist(session *xorm.Session) (e error) {
 		_, e = session.InsertOne(c)
 		return
 	}
-	_, e = session.Where("character = ?", c.Character).Update(c)
+	_, e = session.Where("ch = ?", c.Ch).Update(c)
 	//if e != nil {
 	//	return e
 	//}
