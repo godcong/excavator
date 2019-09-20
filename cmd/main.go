@@ -59,7 +59,7 @@ func main() {
 							fmt.Println("end")
 							goto END
 						}
-						fmt.Println(ccr.Character, "inserted")
+						fmt.Println(ccr.Ch, "inserted")
 					}
 				}
 			}
