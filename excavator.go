@@ -377,10 +377,13 @@ END:
 
 func (exc *Excavator) saveRadicalCharacter(characters *RadicalCharacter) (e error) {
 	i, e := exc.db.Where("url = ?", characters.URL).Count(RadicalCharacter{})
-	if e != nil || i == 0 {
+	if e != nil {
 		return e
 	}
-	_, e = exc.db.InsertOne(characters)
+	if i == 0 {
+		_, e = exc.db.InsertOne(characters)
+	}
+	log.With("url", characters.URL).Info("exist")
 	return
 }
 
