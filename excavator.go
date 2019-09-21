@@ -357,7 +357,9 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 			}
 			ch = new(Character)
 			ch.Ch = cr.Zi
-			//ch.Radical = cr.BuShou
+			if ch.Radical == "" {
+				ch.Radical = cr.BuShou
+			}
 			e := c.Visit(URL(exc.URL, cr.URL))
 			if e != nil {
 				log.With("radical", cr.BuShou).Error(e)
