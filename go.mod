@@ -14,8 +14,10 @@ require (
 	github.com/godcong/go-trait v0.0.0-20190528080809-9a857488365f
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/pkg/errors v0.8.1
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/tebeka/selenium v0.9.4
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/urfave/cli v1.20.0
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 )

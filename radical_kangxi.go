@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gocolly/colly"
+	"io"
 	"strings"
 )
 
@@ -29,6 +30,7 @@ type RadicalCharacter struct {
 	BuShou string `json:"bushou"`
 	Num    string `json:"num"`
 	URL    string `json:"url" xorm:"url"`
+	Hash   string `json:"hash"`
 }
 
 // RadicalUnion ...
@@ -84,6 +86,7 @@ func grabRadical(url string, characters chan<- *RadicalCharacter) {
 				//	log.Error(e)
 				//	continue
 				//}
+				io.MultiReader()
 				characters <- &rc
 			}
 		}
