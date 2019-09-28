@@ -23,15 +23,6 @@ func (r *Radical) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-// RadicalCharacter ...
-type RadicalCharacter struct {
-	Zi     string `json:"zi"`
-	PinYin string `json:"pinyin"`
-	BuShou string `json:"bushou"`
-	Num    string `json:"num"`
-	URL    string `json:"url" xorm:"url"`
-	Hash   string `json:"hash"`
-}
 
 // RadicalUnion ...
 type RadicalUnion struct {

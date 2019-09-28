@@ -43,11 +43,15 @@ func NewCache(tmp string) *Cache {
 }
 
 func (c *Cache) Reader(url string) (reader io.ReadCloser, e error) {
-	h := hash(url)
-	stat, e := os.Stat(filepath.Join(c.tmp, h))
-	log.With("url", url, "hash", h).Info("cache get")
+	name := hash(url)
+	stat, e := os.Stat(filepath.Join(c.tmp, name))
+	log.With("url", url, "hash", name).Info("cache get")
 	if (e == nil && stat.Size() != 0) || !os.IsNotExist(e) {
-		return nil, os.ErrExist
+		open, e := os.Open(filepath.Join(c.tmp, name))
+		if e != nil {
+			return nil, e
+		}
+		return open, nil
 	}
 
 	if cli == nil {
@@ -62,7 +66,7 @@ func (c *Cache) Reader(url string) (reader io.ReadCloser, e error) {
 	if res.StatusCode != 200 {
 		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
 	}
-	name := hash(url)
+
 	file, e := os.OpenFile(filepath.Join(c.tmp, name), os.O_TRUNC|os.O_CREATE|os.O_RDONLY|os.O_SYNC, os.ModePerm)
 	if e != nil {
 		return nil, e
