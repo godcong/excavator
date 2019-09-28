@@ -23,6 +23,9 @@ func analyzeRadical(document *goquery.Document) chan<- *RadicalCharacter {
 		ch.BiHua = selection.Find("a.mui-navigate-right").Text()
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
 			log.With("index", i, "text", selection.Text()).Info("bushou")
+			bushouChar := *ch
+			bushouChar.BuShou, _ = selection.Attr("data-action")
+			log.With("bushou", bushouChar.BuShou).Info("bushou")
 		})
 		log.Infof("radical[%+v]", *ch)
 	})
