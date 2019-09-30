@@ -96,15 +96,6 @@ func (q *Query) Request(wd string) *Query {
 	return q
 }
 
-func (q *Query) Request(wd string) *Query {
-	request, e := requestList[q.requestType](wd)
-	if e != nil {
-		panic(e)
-	}
-	q.req = request
-	return q
-}
-
 func DummyRequest(wd string) (*http.Request, error) {
 	log.With(wd).Info("dummy")
 	return nil, errors.New("dummy request call")
