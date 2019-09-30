@@ -2,6 +2,7 @@ package excavator
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -81,19 +82,41 @@ func NewQuery(ops ...QueryOptions) *Query {
 	return q
 }
 
+func RequestTypeOption(requestType RequestType) QueryOptions {
+	return func(query *Query) {
+		query.requestType = requestType
+	}
+}
+
 func (q *Query) SetRequestType(requestType RequestType) {
 	q.requestType = requestType
+}
+
+func CacheOption(cache *net.Cache) QueryOptions {
+	return func(query *Query) {
+		query.cache = cache
+	}
 }
 
 func (q *Query) SetCache(cache *net.Cache) {
 	q.cache = cache
 }
-func (q *Query) Request(wd string) (*http.Response, error) {
-	request, e := requestList[q.requestType](wd)
-	if e != nil {
-		panic(e)
+
+func (q *Query) Grab(wd string) (reader io.ReadCloser, err error) {
+	request, err := requestList[q.requestType](wd)
+	if err != nil {
+		return nil, err
 	}
-	return net.Request(request)
+	response, err := net.Request(request)
+	if err != nil {
+		return nil, err
+	}
+	closer := response.Body
+	if q.cache != nil {
+		name := request.URL.String()
+		closer, err = q.cache.Cache(response.Body, name)
+	}
+	return closer, err
 }
 
 func DummyRequest(wd string) (*http.Request, error) {

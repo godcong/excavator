@@ -12,10 +12,16 @@ func grabRadicalList(url string) {
 	if e != nil {
 		panic(e)
 	}
-	analyzeRadical(document)
+	radical := analyzeRadical(document)
+
+	for {
+		r := <-radical
+		_ = fillRadicalDetail(r)
+	}
+
 }
 
-func analyzeRadical(document *goquery.Document) chan<- *RadicalCharacter {
+func analyzeRadical(document *goquery.Document) <-chan *RadicalCharacter {
 	rc := make(chan *RadicalCharacter)
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		log.Info(selection.Html())
@@ -33,5 +39,29 @@ func analyzeRadical(document *goquery.Document) chan<- *RadicalCharacter {
 }
 
 func fillRadicalDetail(character *RadicalCharacter) *RadicalCharacter {
+	q := NewQuery(RequestTypeOption(RequestTypeHanCheng))
+
+	closer, e := q.Grab(character.BuShou)
+	if e != nil {
+		return nil
+	}
+
+	radical, e := RadicalReader(closer)
+	if e != nil {
+		return nil
+	}
+
+	for _, tmp := range *(*[]RadicalUnion)(radical) {
+		for i := range tmp.RadicalCharacterArray {
+			rc := tmp.RadicalCharacterArray[i]
+			//e := exc.saveRadicalCharacter(&tmp.RadicalCharacterArray[i])
+			//if e != nil {
+			//	log.Error(e)
+			//	continue
+			//}
+			log.Panic(rc)
+		}
+	}
+
 	return new(RadicalCharacter)
 }

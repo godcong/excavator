@@ -69,11 +69,11 @@ func grabRadical(url string, characters chan<- *RadicalCharacter) {
 		}
 		q := NewQuery()
 
-		r, e := q.Request(da)
+		closer, e := q.Grab(da)
 		if e != nil {
 			return
 		}
-		radical, e := RadicalReader(r.Body)
+		radical, e := RadicalReader(closer)
 		if e != nil {
 			return
 		}
@@ -89,7 +89,7 @@ func grabRadical(url string, characters chan<- *RadicalCharacter) {
 				characters <- &rc
 			}
 		}
-		log.With("value", r).Info("radical")
+		log.With("value", radical).Info("radical")
 	})
 	c.OnResponse(func(response *colly.Response) {
 		log.Info(string(response.Body))
