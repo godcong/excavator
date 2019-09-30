@@ -3,9 +3,10 @@ package excavator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gocolly/colly"
 	"io"
-	"strings"
+	"io/ioutil"
+
+	"github.com/gocolly/colly"
 )
 
 // Radical ...
@@ -18,11 +19,18 @@ func UnmarshalRadical(data []byte) (*Radical, error) {
 	return &r, err
 }
 
+func RadicalReader(reader io.ReadCloser) (*Radical, error) {
+	bytes, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return UnmarshalRadical(bytes)
+}
+
 // Marshal ...
 func (r *Radical) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
-
 
 // RadicalUnion ...
 type RadicalUnion struct {
@@ -59,13 +67,13 @@ func grabRadical(url string, characters chan<- *RadicalCharacter) {
 		if da == "" {
 			return
 		}
-		q := NewQuery(url)
+		q := NewQuery()
 
-		r, e := q.AJAX(strings.NewReader(fmt.Sprintf("wd=%s", da)))
+		r, e := q.Request(da)
 		if e != nil {
 			return
 		}
-		radical, e := UnmarshalRadical(r)
+		radical, e := RadicalReader(r.Body)
 		if e != nil {
 			return
 		}

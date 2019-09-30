@@ -3,18 +3,26 @@ package net
 import (
 	"context"
 	"crypto/tls"
-	"github.com/godcong/go-trait"
-	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/godcong/go-trait"
+	"golang.org/x/net/proxy"
 )
 
 var log = trait.NewZapSugar()
 var cli *http.Client
 
 type ProxyArgs func(cli *http.Client)
+
+func Request(r *http.Request) (*http.Response, error) {
+	if cli == nil {
+		cli = http.DefaultClient
+	}
+	return cli.Do(r)
+}
 
 func TimeOut(sec int) ProxyArgs {
 	return func(cli *http.Client) {

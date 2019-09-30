@@ -2,10 +2,11 @@ package excavator
 
 import (
 	"errors"
-	"github.com/godcong/excavator/net"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/godcong/excavator/net"
 )
 
 //type Query interface {
@@ -87,13 +88,12 @@ func (q *Query) SetRequestType(requestType RequestType) {
 func (q *Query) SetCache(cache *net.Cache) {
 	q.cache = cache
 }
-func (q *Query) Request(wd string) *Query {
+func (q *Query) Request(wd string) (*http.Response, error) {
 	request, e := requestList[q.requestType](wd)
 	if e != nil {
 		panic(e)
 	}
-	q.req = request
-	return q
+	return net.Request(request)
 }
 
 func DummyRequest(wd string) (*http.Request, error) {
