@@ -53,7 +53,7 @@ const (
 	RequestTypeDummy
 )
 
-var request = []RequestFunc{
+var requestList = []RequestFunc{
 	RequestTypeHanCheng: HanChengRequest,
 	RequestTypeKangXi:   KangXiRequest,
 	RequestTypeDummy:    DummyRequest,
@@ -86,6 +86,23 @@ func (q *Query) SetRequestType(requestType RequestType) {
 
 func (q *Query) SetCache(cache *net.Cache) {
 	q.cache = cache
+}
+func (q *Query) Request(wd string) *Query {
+	request, e := requestList[q.requestType](wd)
+	if e != nil {
+		panic(e)
+	}
+	q.req = request
+	return q
+}
+
+func (q *Query) Request(wd string) *Query {
+	request, e := requestList[q.requestType](wd)
+	if e != nil {
+		panic(e)
+	}
+	q.req = request
+	return q
 }
 
 func DummyRequest(wd string) (*http.Request, error) {
