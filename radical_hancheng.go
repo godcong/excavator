@@ -31,3 +31,9 @@ func analyzeRadical(document *goquery.Document) chan<- *RadicalCharacter {
 	})
 	return rc
 }
+
+func fillRadicalDetail(character *RadicalCharacter) *RadicalCharacter {
+
+
+
+}
