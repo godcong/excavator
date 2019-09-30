@@ -85,7 +85,6 @@ func grabRadical(url string, characters chan<- *RadicalCharacter) {
 				//	log.Error(e)
 				//	continue
 				//}
-				io.MultiReader()
 				characters <- &rc
 			}
 		}
