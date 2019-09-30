@@ -65,18 +65,28 @@ type Query struct {
 	requestType RequestType
 }
 
-func NewQuery() *Query {
-	return &Query{
+type QueryOptions func(query *Query)
+
+func NewQuery(ops ...QueryOptions) *Query {
+	q := &Query{
 		req:         nil,
 		cache:       nil,
 		requestType: RequestTypeDummy,
 	}
+
+	for _, op := range ops {
+		op(q)
+	}
+	return q
+}
+
+func (q *Query) SetRequestType(requestType RequestType) {
+	q.requestType = requestType
 }
 
 func (q *Query) SetCache(cache *net.Cache) {
 	q.cache = cache
 }
-
 
 func DummyRequest(wd string) (*http.Request, error) {
 	log.With(wd).Info("dummy")
