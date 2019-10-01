@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/godcong/excavator/net"
 )
@@ -14,12 +15,16 @@ func grabRadicalList(s SearchType, url string) {
 	}
 	//radical := make(chan *RadicalCharacter)
 	rc := analyzePinyinRadical(document)
-	log.With("size", len(rc)).Info("radicals")
+	bytes, e := json.Marshal(rc)
+	if e != nil {
+		return
+	}
+	log.With("size", len(rc)).Info(string(bytes))
 
-	for _, r := range rc {
-		e := fillRadicalDetail(r)
+	for idx := range rc {
+		e := fillRadicalDetail(rc[idx])
 		if e != nil {
-			log.With("bushou", r.BuShou).Error(e)
+			log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 			continue
 		}
 	}
@@ -80,6 +85,7 @@ func fillRadicalDetail(character *RadicalCharacter) (err error) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
 			rc.BuShou = character.BuShou
+			rc.Alphabet = character.Alphabet
 			one, e := insertRadicalCharacter(db, &rc)
 			if e != nil {
 				return e
