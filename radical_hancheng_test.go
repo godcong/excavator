@@ -11,5 +11,5 @@ func TestRadical_Hancheng(t *testing.T) {
 	}
 	//grabRadicalList("http://hy.httpcn.com/bushou/zi/")
 
-	grabRadicalList("http://hy.httpcn.com/pinyin/kangxi/")
+	grabRadicalList(SearchTypePinyin, "http://hy.httpcn.com/pinyin/kangxi/")
 }
