@@ -8,6 +8,14 @@ import (
 	"io/ioutil"
 )
 
+type SearchType int
+
+const (
+	SearchTypePinyin SearchType = iota
+	SearchTypeBushou
+	SearchTypeBihua
+)
+
 // RadicalCharacter ...
 type RadicalCharacter struct {
 	Hash   string `json:"hash" xorm:"pk hash"`
