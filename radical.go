@@ -18,13 +18,15 @@ const (
 
 // RadicalCharacter ...
 type RadicalCharacter struct {
-	Hash   string `json:"hash" xorm:"pk hash"`
-	Zi     string `json:"zi" xorm:"zi"`
-	PinYin string `json:"pinyin" xorm:"pinyin"`
-	BiHua  string `json:"bihua" xorm:"bihua"`
-	BuShou string `json:"bushou" xorm:"bushou"`
-	Num    string `json:"num" xorm:"num"`
-	URL    string `json:"url" xorm:"url"`
+	SType    SearchType `json:"stype" json:"stype"`
+	Hash     string     `json:"hash" xorm:"pk hash"`
+	Zi       string     `json:"zi" xorm:"zi"`
+	Alphabet string     `json:"alphabet" xorm:"alphabet"`
+	PinYin   string     `json:"pinyin" xorm:"pinyin"`
+	BiHua    string     `json:"bihua" xorm:"bihua"`
+	BuShou   string     `json:"bushou" xorm:"bushou"`
+	Num      string     `json:"num" xorm:"num"`
+	URL      string     `json:"url" xorm:"url"`
 }
 
 func (r *RadicalCharacter) BeforeInsert() {

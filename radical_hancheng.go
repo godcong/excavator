@@ -7,13 +7,13 @@ import (
 
 const HanChengMainPage = "http://hy.httpcn.com/bushou/zi/"
 
-func grabRadicalList(url string) {
+func grabRadicalList(s SearchType, url string) {
 	document, e := net.CacheQuery(url)
 	if e != nil {
 		panic(e)
 	}
 	//radical := make(chan *RadicalCharacter)
-	rc := analyzeRadical(document)
+	rc := analyzePinyinRadical(document)
 	log.With("size", len(rc)).Info("radicals")
 
 	for _, r := range rc {
@@ -25,17 +25,35 @@ func grabRadicalList(url string) {
 	}
 }
 
-func analyzeRadical(document *goquery.Document) (rc []*RadicalCharacter) {
+func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
+	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
+		alphabet := selection.Find("a.mui-navigate-right").Text()
+		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
+			log.With("index", i, "text", selection.Text()).Info("bushou")
+			radChar := new(RadicalCharacter)
+			radChar.Alphabet = alphabet
+			radChar.PinYin, _ = selection.Attr("data-action")
+			log.With("pinyin", radChar.PinYin).Info("pinyin")
+			if radChar.PinYin != "" {
+				rc = append(rc, radChar)
+			}
+		})
+		log.Infof("radical[%+v]", rc)
+	})
+	return
+}
+
+func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		bihua := selection.Find("a.mui-navigate-right").Text()
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
 			log.With("index", i, "text", selection.Text()).Info("bushou")
-			bushouChar := new(RadicalCharacter)
-			bushouChar.BiHua = bihua
-			bushouChar.BuShou, _ = selection.Attr("data-action")
-			log.With("bushou", bushouChar.BuShou).Info("bushou")
-			if bushouChar.BuShou != "" {
-				rc = append(rc, bushouChar)
+			radChar := new(RadicalCharacter)
+			radChar.BiHua = bihua
+			radChar.BuShou, _ = selection.Attr("data-action")
+			log.With("bushou", radChar.BuShou).Info("bushou")
+			if radChar.BuShou != "" {
+				rc = append(rc, radChar)
 			}
 		})
 		log.Infof("radical[%+v]", rc)
