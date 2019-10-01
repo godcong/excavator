@@ -50,7 +50,7 @@ func analyzeRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 func fillRadicalDetail(character *RadicalCharacter) (*RadicalCharacter, error) {
 	q := NewQuery(RequestTypeOption(RequestTypeHanCheng))
 
-	closer, e := q.Grab(character.BuShou)
+	closer, e := q.Grab(character.Zi)
 	if e != nil {
 		return nil, e
 	}

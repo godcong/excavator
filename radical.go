@@ -10,13 +10,13 @@ import (
 
 // RadicalCharacter ...
 type RadicalCharacter struct {
-	Hash   string `json:"hash" xorm:"hash,pk"`
-	Zi     string `json:"zi"`
-	PinYin string `json:"pinyin"`
-	BiHua  string `json:"bihua"`
-	BuShou string `json:"bushou"`
-	Num    string `json:"num"`
-	URL    string `json:"url"`
+	Hash   string `json:"hash" xorm:"pk hash"`
+	Zi     string `json:"zi" xorm:"zi"`
+	PinYin string `json:"pinyin" xorm:"pinyin"`
+	BiHua  string `json:"bihua" xorm:"bihua"`
+	BuShou string `json:"bushou" xorm:"bushou"`
+	Num    string `json:"num" xorm:"num"`
+	URL    string `json:"url" xorm:"url"`
 }
 
 func (r *RadicalCharacter) BeforeInsert() {
@@ -68,14 +68,14 @@ func (x *RadicalUnion) MarshalJSON() ([]byte, error) {
 }
 
 func insertRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i int64, e error) {
-	i, e = engine.Where("hash =", character.Hash).Count(&RadicalCharacter{})
+	i, e = engine.Where("hash = ?", net.Hash(character.URL)).Count(&RadicalCharacter{})
 	if e != nil {
 		return i, e
 	}
 
+	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.URL)).Info("insert")
 	if i == 0 {
 		return engine.InsertOne(character)
 	}
-	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi).Info("insert none")
 	return
 }
