@@ -78,7 +78,7 @@ func (x *RadicalUnion) MarshalJSON() ([]byte, error) {
 	return marshalUnion(nil, nil, nil, x.String, x.RadicalCharacterArray != nil, x.RadicalCharacterArray, false, nil, false, nil, false, nil, false)
 }
 
-func insertRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i int64, e error) {
+func insertOrUpdateRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i int64, e error) {
 	i, e = engine.Where("hash = ?", net.Hash(character.URL)).Count(&RadicalCharacter{})
 	if e != nil {
 		return i, e
@@ -87,6 +87,8 @@ func insertRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i
 	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.URL)).Info("insert")
 	if i == 0 {
 		return engine.InsertOne(character)
+	} else if i == 1 {
+		return engine.Where("hash = ?", net.Hash(character.URL)).Update(character)
 	}
 	return
 }

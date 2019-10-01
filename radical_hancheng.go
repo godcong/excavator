@@ -22,7 +22,7 @@ func grabRadicalList(s SearchType, url string) {
 	log.With("size", len(rc)).Info(string(bytes))
 
 	for idx := range rc {
-		e := fillRadicalDetail(rc[idx])
+		e := fillRadicalPinyinDetail(rc[idx])
 		if e != nil {
 			log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 			continue
@@ -68,7 +68,7 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	return
 }
 
-func fillRadicalDetail(character *RadicalCharacter) (err error) {
+func fillRadicalPinyinDetail(character *RadicalCharacter) (err error) {
 	q := NewQuery(RequestTypeOption(RequestTypeKangXiPinyin))
 
 	closer, e := q.Grab(character.PinYin)
