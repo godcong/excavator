@@ -28,6 +28,7 @@ func RadicalReader(reader io.ReadCloser) (*Radical, error) {
 	if e != nil {
 		return nil, e
 	}
+	log.Info(string(bytes))
 	return UnmarshalRadical(bytes)
 }
 

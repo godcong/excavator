@@ -19,6 +19,7 @@ import (
 
 var log = trait.NewZapSugar()
 var db *xorm.Engine
+var debug = false
 
 const tmpFile = "tmp"
 
