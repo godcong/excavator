@@ -25,7 +25,7 @@ func grabRadicalList(url string) {
 	}
 }
 
-func analyzeRadical(document *goquery.Document, ) (rc []*RadicalCharacter) {
+func analyzeRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	//rc := make(chan *RadicalCharacter)
 	//defer func() {
 	//	rc <- nil
@@ -63,12 +63,12 @@ func fillRadicalDetail(character *RadicalCharacter) (*RadicalCharacter, error) {
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
-			//e := exc.saveRadicalCharacter(&tmp.RadicalCharacterArray[i])
-			//if e != nil {
-			//	log.Error(e)
-			//	continue
-			//}
-			log.Info(rc)
+			one, e := insertRadicalCharacter(db, &tmp.RadicalCharacterArray[i])
+			if e != nil {
+				log.Error(e)
+				continue
+			}
+			log.With("num", one).Info(rc)
 		}
 		log.With("value", radical).Info("radical")
 	}

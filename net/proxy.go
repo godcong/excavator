@@ -2,7 +2,9 @@ package net
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -88,4 +90,9 @@ func getSOCKS5Transport(addr string) *http.Transport {
 			return queryProxy.Dial(network, addr)
 		},
 	}
+}
+
+func Hash(url string) string {
+	sum256 := sha256.Sum256([]byte(url))
+	return fmt.Sprintf("%x", sum256)
 }
