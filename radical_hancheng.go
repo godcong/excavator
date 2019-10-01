@@ -17,7 +17,7 @@ func grabRadicalList(url string) {
 	log.With("size", len(rc)).Info("radicals")
 
 	for _, r := range rc {
-		 e := fillRadicalDetail(r)
+		e := fillRadicalDetail(r)
 		if e != nil {
 			log.With("bushou", r.BuShou).Error(e)
 			continue
@@ -59,7 +59,8 @@ func fillRadicalDetail(character *RadicalCharacter) (err error) {
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
-			one, e := insertRadicalCharacter(db, &tmp.RadicalCharacterArray[i])
+			rc.BuShou = character.BuShou
+			one, e := insertRadicalCharacter(db, &rc)
 			if e != nil {
 				return e
 			}
