@@ -17,11 +17,11 @@ func grabRadicalList(url string) {
 	log.With("size", len(rc)).Info("radicals")
 
 	for _, r := range rc {
-		//r := <-radical
-		//if r == nil {
-		//	break
-		//}
-		log.Info(fillRadicalDetail(r))
+		 e := fillRadicalDetail(r)
+		if e != nil {
+			log.With("bushou", r.BuShou).Error(e)
+			continue
+		}
 	}
 }
 
@@ -43,33 +43,30 @@ func analyzeRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	return
 }
 
-func fillRadicalDetail(character *RadicalCharacter) (*RadicalCharacter, error) {
+func fillRadicalDetail(character *RadicalCharacter) (err error) {
 	q := NewQuery(RequestTypeOption(RequestTypeHanCheng))
 
 	closer, e := q.Grab(character.BuShou)
 	if e != nil {
-		return nil, e
+		return e
 	}
 
 	radical, e := RadicalReader(closer)
 	if e != nil {
-		return nil, e
+		return e
 	}
-	log.Panicf("%+v", *radical)
-
 	log.Infof("%+v", radical)
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
 			one, e := insertRadicalCharacter(db, &tmp.RadicalCharacterArray[i])
 			if e != nil {
-				log.Error(e)
-				continue
+				return e
 			}
 			log.With("num", one).Info(rc)
 		}
 		log.With("value", radical).Info("radical")
 	}
 
-	return new(RadicalCharacter), nil
+	return nil
 }
