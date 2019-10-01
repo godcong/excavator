@@ -86,7 +86,7 @@ func fillRadicalPinyinDetail(character *RadicalCharacter) (err error) {
 			rc := tmp.RadicalCharacterArray[i]
 			rc.BuShou = character.BuShou
 			rc.Alphabet = character.Alphabet
-			one, e := insertRadicalCharacter(db, &rc)
+			one, e := insertOrUpdateRadicalCharacter(db, &rc)
 			if e != nil {
 				return e
 			}
