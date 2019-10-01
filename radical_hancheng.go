@@ -64,9 +64,9 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 }
 
 func fillRadicalDetail(character *RadicalCharacter) (err error) {
-	q := NewQuery(RequestTypeOption(RequestTypeHanChengBushou))
+	q := NewQuery(RequestTypeOption(RequestTypeKangXiPinyin))
 
-	closer, e := q.Grab(character.BuShou)
+	closer, e := q.Grab(character.PinYin)
 	if e != nil {
 		return e
 	}

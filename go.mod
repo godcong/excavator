@@ -11,7 +11,7 @@ require (
 	github.com/go-xorm/xorm v0.7.8
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
-	github.com/godcong/go-trait v0.0.0-20190528080809-9a857488365f
+	github.com/godcong/go-trait v0.0.0-20190816072228-f216e906756e
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0

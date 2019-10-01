@@ -17,7 +17,7 @@ import (
 	"github.com/godcong/go-trait"
 )
 
-var log = trait.NewZapSugar()
+var log = trait.NewZapFileSugar("excavator.log")
 var db *xorm.Engine
 var debug = false
 
