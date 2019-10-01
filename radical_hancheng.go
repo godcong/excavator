@@ -14,18 +14,35 @@ func grabRadicalList(s SearchType, url string) {
 		panic(e)
 	}
 	//radical := make(chan *RadicalCharacter)
-	rc := analyzePinyinRadical(document)
-	bytes, e := json.Marshal(rc)
-	if e != nil {
-		return
-	}
-	log.With("size", len(rc)).Info(string(bytes))
-
-	for idx := range rc {
-		e := fillRadicalPinyinDetail(rc[idx])
+	if s == SearchTypePinyin {
+		rc := analyzePinyinRadical(document)
+		bytes, e := json.Marshal(rc)
 		if e != nil {
-			log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
-			continue
+			return
+		}
+		log.With("size", len(rc)).Info(string(bytes))
+
+		for idx := range rc {
+			e := fillRadicalPinyinDetail(rc[idx])
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
+				continue
+			}
+		}
+	} else if s == SearchTypeBushou {
+		rc := analyzeBushouRadical(document)
+		bytes, e := json.Marshal(rc)
+		if e != nil {
+			return
+		}
+		log.With("size", len(rc)).Info(string(bytes))
+
+		for idx := range rc {
+			e := fillRadicalPinyinDetail(rc[idx])
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
+				continue
+			}
 		}
 	}
 }
