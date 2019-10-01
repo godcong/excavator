@@ -29,7 +29,7 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		alphabet := selection.Find("a.mui-navigate-right").Text()
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
-			log.With("index", i, "text", selection.Text()).Info("bushou")
+			log.With("index", i, "text", selection.Text()).Info("pinyin")
 			radChar := new(RadicalCharacter)
 			radChar.Alphabet = alphabet
 			radChar.SType = SearchTypePinyin
@@ -39,8 +39,8 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 				rc = append(rc, radChar)
 			}
 		})
-		log.Infof("radical[%+v]", rc)
 	})
+	log.Infof("radical[%+v]", rc)
 	return
 }
 
@@ -64,7 +64,7 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 }
 
 func fillRadicalDetail(character *RadicalCharacter) (err error) {
-	q := NewQuery(RequestTypeOption(RequestTypeHanCheng))
+	q := NewQuery(RequestTypeOption(RequestTypeHanChengBushou))
 
 	closer, e := q.Grab(character.BuShou)
 	if e != nil {
