@@ -2,6 +2,7 @@ package excavator
 
 import (
 	"encoding/json"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/go-xorm/xorm"
 	"github.com/godcong/excavator/net"
 	"io"
@@ -108,4 +109,41 @@ func copyRadicalCharacter(tg, src *RadicalCharacter) {
 	stringCompareCopy(&tg.BiHua, src.BiHua)
 	stringCompareCopy(&tg.Zi, src.Zi)
 	stringCompareCopy(&tg.Num, src.Num)
+}
+
+func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
+	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
+		alphabet := selection.Find("a.mui-navigate-right").Text()
+		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
+			log.With("index", i, "text", selection.Text()).Info("pinyin")
+			radChar := new(RadicalCharacter)
+			radChar.Alphabet = alphabet
+			radChar.SType = SearchTypePinyin
+			radChar.PinYin, _ = selection.Attr("data-action")
+			log.With("pinyin", radChar.PinYin).Info("pinyin")
+			if radChar.PinYin != "" {
+				rc = append(rc, radChar)
+			}
+		})
+	})
+	log.Infof("radical[%+v]", rc)
+	return
+}
+func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
+	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
+		bihua := selection.Find("a.mui-navigate-right").Text()
+		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
+			log.With("index", i, "text", selection.Text()).Info("bushou")
+			radChar := new(RadicalCharacter)
+			radChar.BiHua = bihua
+			radChar.SType = SearchTypeBushou
+			radChar.BuShou, _ = selection.Attr("data-action")
+			log.With("bushou", radChar.BuShou).Info("bushou")
+			if radChar.BuShou != "" {
+				rc = append(rc, radChar)
+			}
+		})
+		log.Infof("radical[%+v]", rc)
+	})
+	return
 }
