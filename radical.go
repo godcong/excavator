@@ -9,17 +9,21 @@ import (
 	"io/ioutil"
 )
 
-type SearchType int
+type RadicalType int
+
+const DefaultMainPage = "http://hy.httpcn.com"
 
 const (
-	SearchTypePinyin SearchType = iota
-	SearchTypeBushou
-	SearchTypeBihua
+	RadicalTypeHanChengPinyin RadicalType = iota
+	RadicalTypeHanChengBushou
+	RadicalTypeHanChengBihua
+	RadicalTypeKangXiPinyin
+	RadicalTypeKangXiBushou
+	RadicalTypeKangXiBihua
 )
 
 // RadicalCharacter ...
 type RadicalCharacter struct {
-	SType    SearchType `json:"stype" json:"stype"`
 	Hash     string     `json:"hash" xorm:"pk hash"`
 	Zi       string     `json:"zi" xorm:"zi"`
 	Alphabet string     `json:"alphabet" xorm:"alphabet"`
@@ -118,7 +122,6 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 			log.With("index", i, "text", selection.Text()).Info("pinyin")
 			radChar := new(RadicalCharacter)
 			radChar.Alphabet = alphabet
-			radChar.SType = SearchTypePinyin
 			radChar.PinYin, _ = selection.Attr("data-action")
 			log.With("pinyin", radChar.PinYin).Info("pinyin")
 			if radChar.PinYin != "" {
@@ -136,7 +139,6 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 			log.With("index", i, "text", selection.Text()).Info("bushou")
 			radChar := new(RadicalCharacter)
 			radChar.BiHua = bihua
-			radChar.SType = SearchTypeBushou
 			radChar.BuShou, _ = selection.Attr("data-action")
 			log.With("bushou", radChar.BuShou).Info("bushou")
 			if radChar.BuShou != "" {
@@ -147,3 +149,4 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	})
 	return
 }
+

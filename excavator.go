@@ -35,37 +35,12 @@ const (
 
 // Excavator ...
 type Excavator struct {
-	Workspace string `json:"workspace"`
-	URL       string `json:"url"`
-	HTML      string `json:"html"`
-	Radicals  map[string]Radical
-	header    http.Header
-	db        *xorm.Engine
-	radical   chan *RadicalCharacter
-	step      Step
-	limit     int64
-	character chan *Character
-	//selenium  *Selenium
-}
-
-// Step ...
-func (exc *Excavator) Step() Step {
-	return exc.step
-}
-
-// SetStep ...
-func (exc *Excavator) SetStep(step Step) {
-	exc.step = step
-}
-
-// Limit ...
-func (exc *Excavator) Limit() int64 {
-	return exc.limit
-}
-
-// SetLimit ...
-func (exc *Excavator) SetLimit(limit int64) {
-	exc.limit = limit
+	Workspace   string `json:"workspace"`
+	URL         string `json:"url"`
+	HTML        string `json:"html"`
+	skip        []string
+	db          *xorm.Engine
+	radicalType RadicalType
 }
 
 // DB ...
@@ -78,74 +53,56 @@ func (exc *Excavator) SetDB(db *xorm.Engine) {
 	exc.db = db
 }
 
-// Header ...
-func (exc *Excavator) Header() http.Header {
-	if exc.header == nil {
-		return make(http.Header)
-	}
-	return exc.header
-}
+type ExArgs func(exc *Excavator)
 
-// SetHeader ...
-func (exc *Excavator) SetHeader(header http.Header) {
-	exc.header = header
+func URLArgs(url string) ExArgs {
+	return func(exc *Excavator) {
+		exc.URL = url
+	}
 }
 
 // New ...
-func New(url string, workspace string) *Excavator {
-	log.With("url", url, "workspace", workspace).Info("init")
-	return &Excavator{URL: url, Workspace: workspace, limit: 50}
+func New(radicalType RadicalType, args ...ExArgs) *Excavator {
+	exc := &Excavator{radicalType: radicalType, Workspace: tmpFile}
+	for _, arg := range args {
+		arg(exc)
+	}
+	return exc
 }
 
-// PreRun ...
-func (exc *Excavator) PreRun() {
+func radicalUrl(url string, radicalType RadicalType) string {
+	switch radicalType {
+	case RadicalTypeHanChengPinyin:
+		url += HanChengPinyin
+	case RadicalTypeHanChengBushou:
+		url += HanChengBushou
+	case RadicalTypeHanChengBihua:
+	case RadicalTypeKangXiPinyin:
+	case RadicalTypeKangXiBushou:
+	case RadicalTypeKangXiBihua:
+	}
+	return url
+}
+
+// init ...
+func (exc *Excavator) init() {
 	if exc.db == nil {
 		exc.db = InitMysql("localhost:3306", "root", "111111")
 	}
-	e := exc.db.Sync2(RadicalCharacter{})
-	if e != nil {
-		panic(e)
-	}
-	e = exc.db.Sync2(Character{})
-	if e != nil {
-		panic(e)
-	}
-	exc.radical = make(chan *RadicalCharacter)
-	exc.character = make(chan *Character)
-	//exc.selenium = NewSelenium("", 9515)
-	//exc.selenium.Start()
-}
-
-// Radical ...
-func (exc *Excavator) Radical() (rc <-chan *RadicalCharacter) {
-	if exc.step == StepRadical {
-		return exc.radical
-	}
-	return nil
-}
-
-// Character ...
-func (exc *Excavator) Character() (rc <-chan *Character) {
-	if exc.step == StepCharacter {
-		return exc.character
-	}
-	return nil
 }
 
 // Run ...
 func (exc *Excavator) Run() error {
 	log.Info("excavator run")
-	exc.PreRun()
-	switch exc.step {
-	case StepAll:
-		//go exc.parseRadical(exc.radical)
-		//go exc.parseKangXiCharacter(exc.radical, exc.character)
-	case StepRadical:
-		go exc.parseRadical(exc.radical)
-	case StepCharacter:
-		go exc.findRadical(exc.radical)
-		go exc.parseCharacter(exc.radical, exc.character)
-	}
+	exc.init()
+	//switch exc.step {
+	//case StepAll:
+	//case StepRadical:
+	//	go exc.parseRadical(exc.radical)
+	//case StepCharacter:
+	//	go exc.findRadical(exc.radical)
+	//	go exc.parseCharacter(exc.radical, exc.character)
+	//}
 
 	return nil
 }
@@ -159,9 +116,9 @@ func (exc *Excavator) findRadical(characters chan<- *RadicalCharacter) {
 		return
 	}
 	log.With("total", i).Info("total char")
-	for x := int64(0); x < i; x += exc.Limit() {
+	for x := int64(0); x < i; x += 500 {
 		rc := new([]RadicalCharacter)
-		e := exc.db.Limit(int(exc.Limit()), int(x)).Find(rc)
+		e := exc.db.Limit(500, int(x)).Find(rc)
 		if e != nil {
 			log.Error(e)
 			continue
@@ -224,7 +181,7 @@ func (exc *Excavator) parseAJAX(url string, body io.Reader) (r *Radical, e error
 	if err != nil {
 		return nil, err
 	}
-	req.Header = exc.Header()
+	//req.Header = exc.Header()
 
 	resp, err := client.Do(req)
 	if err != nil {

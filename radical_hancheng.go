@@ -5,24 +5,18 @@ import (
 	"github.com/godcong/excavator/net"
 )
 
-const HanChengMainPage = "http://hy.httpcn.com/bushou/zi/"
+const HanChengBushou = "/bushou/zi/"
+const HanChengPinyin = "/pinyin/zi/"
+const HanChengBihua = "/bihua/zi/"
 
-func grabHanChengRadicalList(s SearchType, url string) {
+func grabHanChengRadicalList(s RadicalType, url string) {
 	document, e := net.CacheQuery(url)
 	if e != nil {
 		panic(e)
 	}
 
 	switch s {
-	case SearchTypePinyin:
-
-	case SearchTypeBushou:
-
-	case SearchTypeBihua:
-
-	}
-
-	if s == SearchTypePinyin {
+	case RadicalTypeHanChengPinyin:
 		rc := analyzePinyinRadical(document)
 		bytes, e := json.Marshal(rc)
 		if e != nil {
@@ -37,7 +31,7 @@ func grabHanChengRadicalList(s SearchType, url string) {
 				continue
 			}
 		}
-	} else if s == SearchTypeBushou {
+	case RadicalTypeHanChengBushou:
 		rc := analyzeBushouRadical(document)
 		bytes, e := json.Marshal(rc)
 		if e != nil {
@@ -52,6 +46,8 @@ func grabHanChengRadicalList(s SearchType, url string) {
 				continue
 			}
 		}
+		//case SearchTypeBihua:
+
 	}
 }
 
