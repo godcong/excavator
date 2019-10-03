@@ -153,3 +153,13 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	})
 	return
 }
+
+func getMainURL(radicalType RadicalType, url string) string {
+	switch radicalType {
+	case RadicalTypeHanChengPinyin:
+		return url + HanChengPinyin
+	case RadicalTypeHanChengBushou:
+		return url + HanChengBushou
+	}
+	return ""
+}

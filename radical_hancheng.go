@@ -10,7 +10,7 @@ const HanChengPinyin = "/pinyin/zi/"
 const HanChengBihua = "/bihua/zi/"
 
 func grabRadicalList(s RadicalType, url string) {
-	document, e := net.CacheQuery(url)
+	document, e := net.CacheQuery(getMainURL(s, url))
 	if e != nil {
 		panic(e)
 	}

@@ -9,7 +9,7 @@ func TestRadical_Hancheng(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	//grabRadicalList(SearchTypeBushou, "http://hy.httpcn.com/bushou/zi/")
+	//grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
 
-	//grabRadicalList(SearchTypePinyin, "http://hy.httpcn.com/pinyin/kangxi/")
+	grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
 }
