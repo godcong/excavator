@@ -5,7 +5,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-xorm/xorm"
 	"github.com/godcong/excavator/net"
-	"io"
 	"io/ioutil"
 )
 
@@ -39,12 +38,16 @@ func (r *RadicalCharacter) BeforeInsert() {
 	r.Hash = net.Hash(r.URL)
 }
 
-func RadicalReader(reader io.ReadCloser) (*Radical, error) {
+func RadicalReader(radicalType RadicalType, wd string) (*Radical, error) {
+	reader, e := NewQuery().Grab(radicalType)(wd)
+	if e != nil {
+		return nil, e
+	}
+
 	bytes, e := ioutil.ReadAll(reader)
 	if e != nil {
 		return nil, e
 	}
-	log.Info(string(bytes))
 	return UnmarshalRadical(bytes)
 }
 

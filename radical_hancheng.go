@@ -24,7 +24,11 @@ func grabRadicalList(s RadicalType, url string) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			e := fillRadicalDetail(s, rc[idx].PinYin)
+			radical, e := RadicalReader(s, rc[idx].PinYin)
+			if e != nil {
+				return
+			}
+			e = fillRadicalDetail(radical, rc[idx])
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -38,7 +42,11 @@ func grabRadicalList(s RadicalType, url string) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			e := fillRadicalDetail(s, rc[idx].BuShou)
+			radical, e := RadicalReader(s, rc[idx].BuShou)
+			if e != nil {
+				return
+			}
+			e = fillRadicalDetail(radical, rc[idx])
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -58,18 +66,7 @@ func parseRadicalWD(radicalType RadicalType, character *RadicalCharacter, wd str
 	}
 }
 
-func fillRadicalDetail(radicalType RadicalType, wd string) (err error) {
-	q := NewQuery()
-
-	closer, e := q.Grab(radicalType)(wd)
-	if e != nil {
-		return e
-	}
-
-	radical, e := RadicalReader(closer)
-	if e != nil {
-		return e
-	}
+func fillRadicalDetail(radical *Radical, character *RadicalCharacter) (err error) {
 	log.Infof("%+v", radical)
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
