@@ -56,6 +56,26 @@ func grabRadicalList(s RadicalType, url string) {
 				continue
 			}
 		}
+	case RadicalTypeHanChengBihua:
+		rc = analyzeBihuaRadical(document)
+		bytes, e := json.Marshal(rc)
+		if e != nil {
+			return
+		}
+		log.With("size", len(rc)).Info(string(bytes))
+		for idx := range rc {
+			radical, e := RadicalReader(s, rc[idx].PinYin)
+			if e != nil {
+				return
+			}
+			char := rc[idx]
+			char.CharType = "hancheng"
+			e = fillRadicalDetail(radical, char)
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
+				continue
+			}
+		}
 	}
 }
 

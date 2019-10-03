@@ -23,15 +23,17 @@ const (
 
 // RadicalCharacter ...
 type RadicalCharacter struct {
-	Hash     string `json:"hash" xorm:"pk hash"`
-	CharType string `json:"char_type" json:"char_type"`
-	Zi       string `json:"zi" xorm:"zi"`
-	Alphabet string `json:"alphabet" xorm:"alphabet"`
-	PinYin   string `json:"pinyin" xorm:"pinyin"`
-	BiHua    string `json:"bihua" xorm:"bihua"`
-	BuShou   string `json:"bushou" xorm:"bushou"`
-	Num      string `json:"num" xorm:"num"`
-	URL      string `json:"url" xorm:"url"`
+	Hash       string `json:"hash" xorm:"pk hash"`
+	CharType   string `json:"char_type" json:"char_type"`
+	Zi         string `json:"zi" xorm:"zi"`
+	Alphabet   string `json:"alphabet" xorm:"alphabet"`
+	PinYin     string `json:"pinyin" xorm:"pinyin"`
+	BiHua      string `json:"bihua" xorm:"bihua"`
+	BuShou     string `json:"bushou" xorm:"bushou"`
+	TotalBiHua string `json:"total_bihua" json:"total_bihua"`
+	QiBi       string `json:"qibi" json:"qibi"`
+	Num        string `json:"num" xorm:"num"`
+	URL        string `json:"url" xorm:"url"`
 }
 
 func (r *RadicalCharacter) BeforeInsert() {
@@ -154,12 +156,33 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	return
 }
 
+func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
+	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
+		tbihua := selection.Find("a.mui-navigate-right").Text()
+		//#segmentedControls > ul > li:nth-child(19) > div > a:nth-child(1)
+		selection.Find("div > a[data-qb]").Each(func(i int, selection *goquery.Selection) {
+			log.With("index", i, "text", selection.Text()).Info("bihua")
+			radChar := new(RadicalCharacter)
+			radChar.TotalBiHua = tbihua
+			radChar.QiBi = selection.Filter("i").Text()
+			log.With("qibi", radChar.QiBi).Info("bihua")
+			if radChar.BuShou != "" {
+				rc = append(rc, radChar)
+			}
+		})
+		log.Infof("radical[%+v]", rc)
+	})
+	return
+}
+
 func getMainURL(radicalType RadicalType, url string) string {
 	switch radicalType {
 	case RadicalTypeHanChengPinyin:
 		return url + HanChengPinyin
 	case RadicalTypeHanChengBushou:
 		return url + HanChengBushou
+	case RadicalTypeHanChengBihua:
+		return url + HanChengBihua
 	}
 	return ""
 }
