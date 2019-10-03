@@ -28,7 +28,9 @@ func grabRadicalList(s RadicalType, url string) {
 			if e != nil {
 				return
 			}
-			e = fillRadicalDetail(radical, rc[idx])
+			char := rc[idx]
+			char.CharType = "hancheng"
+			e = fillRadicalDetail(radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -46,7 +48,9 @@ func grabRadicalList(s RadicalType, url string) {
 			if e != nil {
 				return
 			}
-			e = fillRadicalDetail(radical, rc[idx])
+			char := rc[idx]
+			char.CharType = "hancheng"
+			e = fillRadicalDetail(radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -71,7 +75,9 @@ func fillRadicalDetail(radical *Radical, character *RadicalCharacter) (err error
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
-			//parseRadicalWD(radicalType, &rc, wd)
+			rc.Alphabet = character.Alphabet
+			rc.BuShou = character.BuShou
+			rc.CharType = character.CharType
 			one, e := insertOrUpdateRadicalCharacter(db, &rc)
 			if e != nil {
 				return e
