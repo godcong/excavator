@@ -13,6 +13,6 @@ func TestRadical_Hancheng(t *testing.T) {
 
 	//grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
 
-	grabRadicalList(RadicalTypeHanChengBihua, DefaultMainPage)
+	t.Log(grabRadicalList(RadicalTypeHanChengBihua, DefaultMainPage))
 
 }

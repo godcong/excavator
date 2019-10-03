@@ -52,6 +52,7 @@ func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, err
 	if e != nil {
 		return nil, e
 	}
+	log.With("info", string(bytes)).Info("radical reader")
 	return UnmarshalRadical(bytes)
 }
 
@@ -126,6 +127,7 @@ func copyRadicalCharacter(tg, src *RadicalCharacter) {
 func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		alphabet := selection.Find("a.mui-navigate-right").Text()
+		log.Info(selection.Html())
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
 			log.With("index", i, "text", selection.Text()).Info("pinyin")
 			radChar := new(RadicalCharacter)
@@ -143,6 +145,7 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		bihua := selection.Find("a.mui-navigate-right").Text()
+		log.Info(selection.Html())
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
 			log.With("index", i, "text", selection.Text()).Info("bushou")
 			radChar := new(RadicalCharacter)
@@ -161,16 +164,16 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		tbihua := selection.Find("a.mui-navigate-right").Text()
-		//#segmentedControls > ul > li:nth-child(19) > div > a:nth-child(1)
-		selection.Find("div > a[data-qb]").Each(func(i int, selection *goquery.Selection) {
+		log.Info(selection.Html())
+		selection.Find("div > a[data-bh]").Each(func(i int, selection *goquery.Selection) {
 			log.With("index", i, "text", selection.Text()).Info("bihua")
 			radChar := new(RadicalCharacter)
 			radChar.TotalBiHua = tbihua
 			radChar.QBNum, _ = selection.Attr("data-val")
 			radChar.BHNum, _ = selection.Attr("data-bh")
 			radChar.QiBi, _ = selection.Attr("data-qb")
-			log.With("qibi", radChar.QiBi).Info("bihua")
-			if radChar.BuShou != "" {
+			log.With("qibi", radChar.QiBi, "bh", radChar.BHNum, "qb", radChar.QBNum).Info("bihua")
+			if radChar.QiBi != "" {
 				rc = append(rc, radChar)
 			}
 		})

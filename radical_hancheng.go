@@ -77,6 +77,7 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 			}
 		}
 	}
+	return nil
 }
 
 func parseRadicalWD(radicalType RadicalType, character *RadicalCharacter, wd string) {
