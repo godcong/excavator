@@ -9,10 +9,10 @@ const HanChengBushou = "/bushou/zi/"
 const HanChengPinyin = "/pinyin/zi/"
 const HanChengBihua = "/bihua/zi/"
 
-func grabRadicalList(s RadicalType, url string) {
+func grabRadicalList(s RadicalType, url string) (e error) {
 	document, e := net.CacheQuery(getMainURL(s, url))
 	if e != nil {
-		panic(e)
+		return e
 	}
 	var rc []*RadicalCharacter
 	switch s {
@@ -20,13 +20,13 @@ func grabRadicalList(s RadicalType, url string) {
 		rc = analyzePinyinRadical(document)
 		bytes, e := json.Marshal(rc)
 		if e != nil {
-			return
+			return e
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].PinYin)
+			radical, e := RadicalReader(s, rc[idx].PinYin, "")
 			if e != nil {
-				return
+				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
@@ -40,13 +40,13 @@ func grabRadicalList(s RadicalType, url string) {
 		rc = analyzeBushouRadical(document)
 		bytes, e := json.Marshal(rc)
 		if e != nil {
-			return
+			return e
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BuShou)
+			radical, e := RadicalReader(s, rc[idx].BuShou, "")
 			if e != nil {
-				return
+				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
@@ -60,13 +60,13 @@ func grabRadicalList(s RadicalType, url string) {
 		rc = analyzeBihuaRadical(document)
 		bytes, e := json.Marshal(rc)
 		if e != nil {
-			return
+			return e
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].PinYin)
+			radical, e := RadicalReader(s, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
-				return
+				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
@@ -96,7 +96,8 @@ func fillRadicalDetail(radical *Radical, character *RadicalCharacter) (err error
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]
 			rc.Alphabet = character.Alphabet
-			rc.BuShou = character.BuShou
+			rc.BiHua = character.BiHua
+			rc.TotalBiHua = character.TotalBiHua
 			rc.CharType = character.CharType
 			one, e := insertOrUpdateRadicalCharacter(db, &rc)
 			if e != nil {

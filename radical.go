@@ -30,8 +30,10 @@ type RadicalCharacter struct {
 	PinYin     string `json:"pinyin" xorm:"pinyin"`
 	BiHua      string `json:"bihua" xorm:"bihua"`
 	BuShou     string `json:"bushou" xorm:"bushou"`
-	TotalBiHua string `json:"total_bihua" json:"total_bihua"`
-	QiBi       string `json:"qibi" json:"qibi"`
+	TotalBiHua string `json:"total_bihua" xorm:"total_bihua"`
+	QiBi       string `json:"qibi" xorm:"qibi"`
+	BHNum      string `json:"bh_num" xorm:"bh_num"`
+	QBNum      string `json:"qb_num" xorm:"qb_num"`
 	Num        string `json:"num" xorm:"num"`
 	URL        string `json:"url" xorm:"url"`
 }
@@ -40,8 +42,8 @@ func (r *RadicalCharacter) BeforeInsert() {
 	r.Hash = net.Hash(r.URL)
 }
 
-func RadicalReader(radicalType RadicalType, wd string) (*Radical, error) {
-	reader, e := NewQuery().Grab(radicalType)(wd)
+func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, error) {
+	reader, e := NewQuery().Grab(radicalType)(wd, qb)
 	if e != nil {
 		return nil, e
 	}
@@ -164,7 +166,9 @@ func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 			log.With("index", i, "text", selection.Text()).Info("bihua")
 			radChar := new(RadicalCharacter)
 			radChar.TotalBiHua = tbihua
-			radChar.QiBi = selection.Filter("i").Text()
+			radChar.QBNum, _ = selection.Attr("data-val")
+			radChar.BHNum, _ = selection.Attr("data-bh")
+			radChar.QiBi, _ = selection.Attr("data-qb")
 			log.With("qibi", radChar.QiBi).Info("bihua")
 			if radChar.BuShou != "" {
 				rc = append(rc, radChar)

@@ -11,5 +11,8 @@ func TestRadical_Hancheng(t *testing.T) {
 	}
 	//grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
 
-	grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
+	//grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
+
+	grabRadicalList(RadicalTypeHanChengBihua, DefaultMainPage)
+
 }
