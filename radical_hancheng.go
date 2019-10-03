@@ -98,6 +98,9 @@ func fillRadicalDetail(radical *Radical, character *RadicalCharacter) (err error
 			rc := tmp.RadicalCharacterArray[i]
 			rc.Alphabet = character.Alphabet
 			rc.BiHua = character.BiHua
+			rc.QiBi = character.QiBi
+			rc.QBNum = character.QBNum
+			rc.BHNum = character.BHNum
 			rc.TotalBiHua = character.TotalBiHua
 			rc.CharType = character.CharType
 			one, e := insertOrUpdateRadicalCharacter(db, &rc)

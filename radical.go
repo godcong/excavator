@@ -39,7 +39,7 @@ type RadicalCharacter struct {
 }
 
 func (r *RadicalCharacter) BeforeInsert() {
-	r.Hash = net.Hash(r.URL)
+	r.Hash = net.Hash(r.Zi)
 }
 
 func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, error) {
@@ -94,17 +94,17 @@ func (x *RadicalUnion) MarshalJSON() ([]byte, error) {
 
 func insertOrUpdateRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i int64, e error) {
 	tmp := &RadicalCharacter{}
-	b, e := engine.Where("hash = ?", net.Hash(character.URL)).Get(tmp)
+	b, e := engine.Where("hash = ?", net.Hash(character.Zi)).Where("char_type = ?", character.CharType).Get(tmp)
 	if e != nil {
 		return 0, e
 	}
 
-	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.URL)).Info("insert")
+	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.Zi)).Info("insert")
 	if !b {
 		return engine.InsertOne(character)
 	}
 	copyRadicalCharacter(tmp, character)
-	return engine.Where("hash = ?", net.Hash(character.URL)).Update(tmp)
+	return engine.Where("hash = ?", net.Hash(character.Zi)).Update(tmp)
 }
 
 func stringCompareCopy(tg *string, src string) string {
@@ -120,6 +120,10 @@ func copyRadicalCharacter(tg, src *RadicalCharacter) {
 	stringCompareCopy(&tg.PinYin, src.PinYin)
 	stringCompareCopy(&tg.BuShou, src.BuShou)
 	stringCompareCopy(&tg.BiHua, src.BiHua)
+	stringCompareCopy(&tg.TotalBiHua, src.TotalBiHua)
+	stringCompareCopy(&tg.QBNum, src.QBNum)
+	stringCompareCopy(&tg.BHNum, src.BHNum)
+	stringCompareCopy(&tg.QiBi, src.QiBi)
 	stringCompareCopy(&tg.Zi, src.Zi)
 	stringCompareCopy(&tg.Num, src.Num)
 }
