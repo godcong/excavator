@@ -46,39 +46,34 @@ import (
 //	//return UnmarshalRadical(bytes)
 //}
 
-type RequestType int
+//type RequestType int
 type RequestFunc func(wd string) (*http.Request, error)
 
-const (
-	RequestTypeHanChengBushou RequestType = iota
-	RequestTypeHanChengPinyin
-	RequestTypeKangXiBushou
-	RequestTypeKangXiPinyin
-	RequestTypeDummy
-)
+//const (
+//	RequestTypeHanChengBushou RequestType = iota
+//	RequestTypeHanChengPinyin
+//	RequestTypeKangXiBushou
+//	RequestTypeKangXiPinyin
+//	RequestTypeDummy
+//)
 
 var requestList = []RequestFunc{
-
-	RequestTypeHanChengBushou: HanChengBushouRequest,
-	RequestTypeHanChengPinyin: HanChengPinyinRequest,
-	RequestTypeKangXiBushou:   KangXiBushouRequest,
-	RequestTypeKangXiPinyin:   KangXiPinyinRequest,
-	RequestTypeDummy:          DummyRequest,
+	RadicalTypeHanChengBushou: HanChengBushouRequest,
+	RadicalTypeHanChengPinyin: HanChengPinyinRequest,
+	RadicalTypeKangXiBushou:   KangXiBushouRequest,
+	RadicalTypeKangXiPinyin:   KangXiPinyinRequest,
+	//RequestTypeDummy:          DummyRequest,
 }
 
 type Query struct {
-	req         *http.Request
 	cache       *net.Cache
-	requestType RequestType
 }
 
 type QueryOptions func(query *Query)
 
 func NewQuery(ops ...QueryOptions) *Query {
 	q := &Query{
-		req:         nil,
 		cache:       nil,
-		requestType: RequestTypeDummy,
 	}
 
 	for _, op := range ops {
@@ -87,15 +82,6 @@ func NewQuery(ops ...QueryOptions) *Query {
 	return q
 }
 
-func RequestTypeOption(requestType RequestType) QueryOptions {
-	return func(query *Query) {
-		query.requestType = requestType
-	}
-}
-
-func (q *Query) SetRequestType(requestType RequestType) {
-	q.requestType = requestType
-}
 
 func CacheOption(cache *net.Cache) QueryOptions {
 	return func(query *Query) {
@@ -103,25 +89,26 @@ func CacheOption(cache *net.Cache) QueryOptions {
 	}
 }
 
-func (q *Query) SetCache(cache *net.Cache) {
-	q.cache = cache
-}
+type GrabReader func(wd string)(reader io.ReadCloser, err error)
 
-func (q *Query) Grab(wd string) (reader io.ReadCloser, err error) {
-	request, err := requestList[q.requestType](wd)
-	if err != nil {
-		return nil, err
+func (q *Query)Grab(radicalType RadicalType) GrabReader {
+	r := requestList[radicalType]
+	return func(wd string) (reader io.ReadCloser, err error) {
+		request, err := r(wd)
+		if err != nil {
+			return nil, err
+		}
+		response, err := net.Request(request)
+		if err != nil {
+			return nil, err
+		}
+		closer := response.Body
+		if q.cache != nil {
+			name := request.URL.String()
+			closer, err = q.cache.Cache(response.Body, name)
+		}
+		return closer, err
 	}
-	response, err := net.Request(request)
-	if err != nil {
-		return nil, err
-	}
-	closer := response.Body
-	if q.cache != nil {
-		name := request.URL.String()
-		closer, err = q.cache.Cache(response.Body, name)
-	}
-	return closer, err
 }
 
 func DummyRequest(wd string) (*http.Request, error) {
