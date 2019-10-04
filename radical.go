@@ -270,6 +270,26 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 				continue
 			}
 		}
+	case RadicalTypeKangXiBushou:
+		rc = analyzeBushouRadical(document)
+		bytes, e := json.Marshal(rc)
+		if e != nil {
+			return e
+		}
+		log.With("size", len(rc)).Info(string(bytes))
+		for idx := range rc {
+			radical, e := RadicalReader(s, rc[idx].BuShou, "")
+			if e != nil {
+				return e
+			}
+			char := rc[idx]
+			char.CharType = "kangxi"
+			e = fillRadicalDetail(radical, char)
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
+				continue
+			}
+		}
 	case RadicalTypeKangXiBihua:
 		rc = analyzeBihuaRadical(document)
 		bytes, e := json.Marshal(rc)
@@ -278,7 +298,7 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BiHua, "")
+			radical, e := RadicalReader(s, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
 				return e
 			}
