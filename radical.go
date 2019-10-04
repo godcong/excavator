@@ -39,7 +39,11 @@ type RadicalCharacter struct {
 }
 
 func (r *RadicalCharacter) BeforeInsert() {
-	r.Hash = net.Hash(r.Zi)
+	r.Hash = r.GenHash()
+}
+
+func (r *RadicalCharacter) GenHash() string {
+	return net.Hash(r.CharType + "_" + r.Zi)
 }
 
 func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, error) {
@@ -94,7 +98,7 @@ func (x *RadicalUnion) MarshalJSON() ([]byte, error) {
 
 func insertOrUpdateRadicalCharacter(engine *xorm.Engine, character *RadicalCharacter) (i int64, e error) {
 	tmp := &RadicalCharacter{}
-	b, e := engine.Where("hash = ?", net.Hash(character.Zi)).Where("char_type = ?", character.CharType).Get(tmp)
+	b, e := engine.Where("hash = ?", character.GenHash()).Get(tmp)
 	if e != nil {
 		return 0, e
 	}
@@ -104,7 +108,7 @@ func insertOrUpdateRadicalCharacter(engine *xorm.Engine, character *RadicalChara
 		return engine.InsertOne(character)
 	}
 	copyRadicalCharacter(tmp, character)
-	return engine.Where("hash = ?", net.Hash(character.Zi)).Update(tmp)
+	return engine.Where("hash = ?", character.GenHash()).Update(tmp)
 }
 
 func stringCompareCopy(tg *string, src string) string {
@@ -279,6 +283,26 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
 			radical, e := RadicalReader(s, rc[idx].BuShou, "")
+			if e != nil {
+				return e
+			}
+			char := rc[idx]
+			char.CharType = "kangxi"
+			e = fillRadicalDetail(radical, char)
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
+				continue
+			}
+		}
+	case RadicalTypeKangXiPinyin:
+		rc = analyzePinyinRadical(document)
+		bytes, e := json.Marshal(rc)
+		if e != nil {
+			return e
+		}
+		log.With("size", len(rc)).Info(string(bytes))
+		for idx := range rc {
+			radical, e := RadicalReader(s, rc[idx].PinYin, "")
 			if e != nil {
 				return e
 			}
