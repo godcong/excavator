@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"fmt"
+	"github.com/godcong/excavator/net"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -36,8 +37,7 @@ const (
 // Excavator ...
 type Excavator struct {
 	Workspace   string `json:"workspace"`
-	URL         string `json:"url"`
-	HTML        string `json:"html"`
+	url         string
 	skip        []string
 	db          *xorm.Engine
 	radicalType RadicalType
@@ -57,31 +57,21 @@ type ExArgs func(exc *Excavator)
 
 func URLArgs(url string) ExArgs {
 	return func(exc *Excavator) {
-		exc.URL = url
+		exc.url = url
 	}
 }
 
 // New ...
 func New(radicalType RadicalType, args ...ExArgs) *Excavator {
-	exc := &Excavator{radicalType: radicalType, Workspace: tmpFile}
+	exc := &Excavator{
+		radicalType: radicalType,
+		Workspace:   tmpFile,
+		url:         DefaultMainPage,
+	}
 	for _, arg := range args {
 		arg(exc)
 	}
 	return exc
-}
-
-func radicalUrl(url string, radicalType RadicalType) string {
-	switch radicalType {
-	case RadicalTypeHanChengPinyin:
-		url += HanChengPinyin
-	case RadicalTypeHanChengBushou:
-		url += HanChengBushou
-	case RadicalTypeHanChengBihua:
-	case RadicalTypeKangXiPinyin:
-	case RadicalTypeKangXiBushou:
-	case RadicalTypeKangXiBihua:
-	}
-	return url
 }
 
 // init ...
@@ -95,6 +85,14 @@ func (exc *Excavator) init() {
 func (exc *Excavator) Run() error {
 	log.Info("excavator run")
 	exc.init()
+
+	if !isSkip("radical", exc.skip...) {
+		e := grabRadicalList(exc)
+		if e != nil {
+			log.Error(e)
+			panic(e)
+		}
+	}
 	//switch exc.step {
 	//case StepAll:
 	//case StepRadical:
@@ -106,6 +104,38 @@ func (exc *Excavator) Run() error {
 
 	return nil
 }
+func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalCharacter) (err error) {
+	log.Infof("%+v", radical)
+	for _, tmp := range *(*[]RadicalUnion)(radical) {
+		for i := range tmp.RadicalCharacterArray {
+			rc := tmp.RadicalCharacterArray[i]
+			rc.Alphabet = character.Alphabet
+			rc.BiHua = character.BiHua
+			rc.QiBi = character.QiBi
+			rc.QBNum = character.QBNum
+			rc.BHNum = character.BHNum
+			rc.TotalBiHua = character.TotalBiHua
+			rc.CharType = character.CharType
+			one, e := insertOrUpdateRadicalCharacter(exc.db, &rc)
+			if e != nil {
+				return e
+			}
+			log.With("num", one).Info(rc)
+		}
+		log.With("value", radical).Info("radical")
+	}
+	return nil
+}
+
+func isSkip(src string, skip ...string) bool {
+	for _, s := range skip {
+		if s == src {
+			return true
+		}
+	}
+	return false
+}
+
 func (exc *Excavator) findRadical(characters chan<- *RadicalCharacter) {
 	defer func() {
 		characters <- nil
@@ -140,7 +170,7 @@ func (exc *Excavator) parseRadical(characters chan<- *RadicalCharacter) {
 		if da == "" {
 			return
 		}
-		r, e := exc.parseAJAX(exc.URL, strings.NewReader(fmt.Sprintf("wd=%s", da)))
+		r, e := exc.parseAJAX(exc.url, strings.NewReader(fmt.Sprintf("wd=%s", da)))
 		if e != nil {
 			return
 		}
@@ -163,7 +193,7 @@ func (exc *Excavator) parseRadical(characters chan<- *RadicalCharacter) {
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL)
 	})
-	e := c.Visit(exc.URL)
+	e := c.Visit(exc.url)
 	if e != nil {
 		log.Error(e)
 	}
@@ -273,10 +303,9 @@ func TrimSlash(s string) string {
 	return s
 }
 
-func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char chan<- *Character) {
-	defer func() {
-		char <- nil
-	}()
+func parseCharacter(exc *Excavator, characters <-chan *RadicalCharacter) {
+	net.CacheQuery(exc.url)
+
 	c := colly.NewCollector()
 	var ch *Character
 	c.OnRequest(func(r *colly.Request) {
@@ -319,7 +348,7 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 			if ch.Radical == "" {
 				ch.Radical = cr.BuShou
 			}
-			e := c.Visit(URL(exc.URL, cr.URL))
+			e := c.Visit(URL(exc.url, cr.URL))
 			if e != nil {
 				log.With("radical", cr.BuShou).Error(e)
 				continue
@@ -333,7 +362,6 @@ func (exc *Excavator) parseCharacter(characters <-chan *RadicalCharacter, char c
 				continue
 			}
 			session.Close()
-			char <- ch
 		}
 	}
 END:

@@ -207,13 +207,13 @@ func getMainURL(radicalType RadicalType, url string) string {
 	}
 	return ""
 }
-func grabRadicalList(s RadicalType, url string) (e error) {
-	document, e := net.CacheQuery(getMainURL(s, url))
+func grabRadicalList(exc *Excavator) (e error) {
+	document, e := net.CacheQuery(getMainURL(exc.radicalType, exc.url))
 	if e != nil {
 		return e
 	}
 	var rc []*RadicalCharacter
-	switch s {
+	switch exc.radicalType {
 	case RadicalTypeHanChengPinyin:
 		rc = analyzePinyinRadical(document)
 		bytes, e := json.Marshal(rc)
@@ -222,13 +222,13 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].PinYin, "")
+			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
-			e = fillRadicalDetail(radical, char)
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -242,13 +242,13 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BuShou, "")
+			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
-			e = fillRadicalDetail(radical, char)
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
 				continue
@@ -262,13 +262,13 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BHNum, rc[idx].QBNum)
+			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
 			char.CharType = "hancheng"
-			e = fillRadicalDetail(radical, char)
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
 				continue
@@ -282,13 +282,13 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BuShou, "")
+			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
 			char.CharType = "kangxi"
-			e = fillRadicalDetail(radical, char)
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
 				continue
@@ -302,13 +302,13 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].PinYin, "")
+			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
 			char.CharType = "kangxi"
-			e = fillRadicalDetail(radical, char)
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
 				continue
@@ -322,42 +322,18 @@ func grabRadicalList(s RadicalType, url string) (e error) {
 		}
 		log.With("size", len(rc)).Info(string(bytes))
 		for idx := range rc {
-			radical, e := RadicalReader(s, rc[idx].BHNum, rc[idx].QBNum)
+			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
 				return e
 			}
 			char := rc[idx]
-			char.CharType = "kangxi"
-			e = fillRadicalDetail(radical, char)
+			//char.CharType = "kangxi"
+			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
 				continue
 			}
 		}
 	}
-	return nil
-}
-
-func fillRadicalDetail(radical *Radical, character *RadicalCharacter) (err error) {
-	log.Infof("%+v", radical)
-	for _, tmp := range *(*[]RadicalUnion)(radical) {
-		for i := range tmp.RadicalCharacterArray {
-			rc := tmp.RadicalCharacterArray[i]
-			rc.Alphabet = character.Alphabet
-			rc.BiHua = character.BiHua
-			rc.QiBi = character.QiBi
-			rc.QBNum = character.QBNum
-			rc.BHNum = character.BHNum
-			rc.TotalBiHua = character.TotalBiHua
-			rc.CharType = character.CharType
-			one, e := insertOrUpdateRadicalCharacter(db, &rc)
-			if e != nil {
-				return e
-			}
-			log.With("num", one).Info(rc)
-		}
-		log.With("value", radical).Info("radical")
-	}
-
 	return nil
 }
