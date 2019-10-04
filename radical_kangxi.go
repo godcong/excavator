@@ -1,5 +1,5 @@
 package excavator
 
-const KangXiBushou = "/bushou/zi/"
-const KangXiPinyin = "/pinyin/zi/"
-const KangXiBihua = "/bihua/zi/"
+const KangXiBushou = "/bushou/kangxi/"
+const KangXiPinyin = "/pinyin/kangxi/"
+const KangXiBihua = "/bihua/kangxi/"
