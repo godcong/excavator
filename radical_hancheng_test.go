@@ -9,10 +9,15 @@ func TestRadical_Hancheng(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
+	//grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
 
-	grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
+	//grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
 
-	grabRadicalList(RadicalTypeHanChengBihua, DefaultMainPage)
+	//grabRadicalList(RadicalTypeHanChengBihua, DefaultMainPage)
 
+	//grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
+
+	//grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
+
+	grabRadicalList(RadicalTypeKangXiBihua, DefaultMainPage)
 }
