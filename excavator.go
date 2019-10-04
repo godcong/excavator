@@ -54,6 +54,12 @@ func URLArgs(url string) ExArgs {
 	}
 }
 
+func SkipArgs(skip ...string) ExArgs {
+	return func(exc *Excavator) {
+		exc.skip = skip
+	}
+}
+
 // New ...
 func New(radicalType RadicalType, args ...ExArgs) *Excavator {
 	exc := &Excavator{
@@ -91,16 +97,10 @@ func (exc *Excavator) Run() error {
 		}
 	}
 
-	//switch exc.step {
-	//case StepAll:
-	//case StepRadical:
-	//	go exc.parseRadical(exc.radical)
-	//case StepCharacter:
-	//	go exc.findRadical(exc.radical)
-	ch := make(chan *RadicalCharacter)
-	go findRadical(exc, ch)
-	parseCharacter(exc, ch)
-
+	e := parseCharacter(exc)
+	if e != nil {
+		return e
+	}
 	return nil
 }
 func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalCharacter) (err error) {
@@ -226,7 +226,9 @@ func getCharacter(document *goquery.Document) *Character {
 	return ch
 }
 
-func parseCharacter(exc *Excavator, ch <-chan *RadicalCharacter) (e error) {
+func parseCharacter(exc *Excavator) (e error) {
+	ch := make(chan *RadicalCharacter)
+	go findRadical(exc, ch)
 ParseEnd:
 	for {
 		select {

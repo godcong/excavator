@@ -9,8 +9,6 @@ func TestRadical_Hancheng(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	exc := New(RadicalTypeKangXiPinyin)
-	exc.Run()
 	//grabRadicalList(RadicalTypeHanChengBushou, DefaultMainPage)
 
 	//grabRadicalList(RadicalTypeHanChengPinyin, DefaultMainPage)
