@@ -143,26 +143,17 @@ func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
 	return
 }
 
-func parseKangXiCharacter(element *colly.HTMLElement, ch *Character) (e error) {
-	n, e := newDoc(element)
-	if e != nil {
-		log.Error(e)
-		return e
-	}
-	v := StringClearUp(n.ReplaceWith("font[class=colred]").Text())
+func parseKangXiCharacter(selection *goquery.Selection, ch *Character) (e error) {
+	v := StringClearUp(selection.ReplaceWith("font[class=colred]").Text())
 	var data []string
 	if v != "" {
 		data = strings.Split(v, " ")
 	}
 
 	log.With("source", v).Info(len(data), ":", data)
-	n1, e := newDoc(element)
-	if e != nil {
-		log.Error(e)
-		return e
-	}
+
 	f := parseDummy
-	n1.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
+	selection.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
 		text := StringClearUp(selection.Text())
 		if i == 0 {
@@ -259,15 +250,10 @@ func parseWuXing(c *Character, index int, input string) {
 	log.With("input", input).Info("wuxing")
 	c.WuXing = input
 }
-func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
+func parseDictInformation(selection *goquery.Selection, ch *Character) (e error) {
 	fn := parseDummy
-	n, e := newDoc(element)
-	if e != nil {
-		log.Error(e)
-		return e
-	}
 
-	n.Find("li").Contents().Each(func(i int, selection *goquery.Selection) {
+	selection.Find("li").Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
 		tx := selection.Text()
 		if selection.Index() == 0 {
@@ -283,12 +269,7 @@ func parseDictInformation(element *colly.HTMLElement, ch *Character) (e error) {
 		}
 	})
 
-	n1, e := newDoc(element)
-	if e != nil {
-		log.Error(e)
-		return e
-	}
-	n1.Find("li").Each(func(i int, selection *goquery.Selection) {
+	selection.Find("li").Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
 		tx := selection.Find("span").Text()
 		if v, b := infoList2[tx]; b {
@@ -307,15 +288,10 @@ func parseComment(c *Character, index int, input string) {
 	c.Comment = append(c.Comment, StringClearUp(input))
 }
 
-func parseDictComment(element *colly.HTMLElement, character *Character) (e error) {
-	n, e := newDoc(element)
-	if e != nil {
-		log.Error(e)
-		return e
-	}
-	tx := StringClearUp(n.Find("li > a").Text())
+func parseDictComment(selection *goquery.Selection, character *Character) (e error) {
+	tx := StringClearUp(selection.Find("li > a").Text())
 	if tx == "康熙字典解释" {
-		n.Find("li > div").Contents().Each(func(i int, selection *goquery.Selection) {
+		selection.Find("li > div").Contents().Each(func(i int, selection *goquery.Selection) {
 			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li3")
 			parseComment(character, i, selection.Text())
 		})
