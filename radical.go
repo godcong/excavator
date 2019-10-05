@@ -328,7 +328,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 				return e
 			}
 			char := rc[idx]
-			//char.CharType = "kangxi"
+			char.CharType = "kangxi"
 			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
 				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin, "bihua", rc[idx].BiHua).Error(e)
