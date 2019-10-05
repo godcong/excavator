@@ -17,6 +17,7 @@ type Character struct {
 	Ch                       string   `xorm:"default() notnull ch"`                          //字符
 	Radical                  string   `xorm:"default() notnull radical"`                     //部首
 	RadicalStroke            int      `xorm:"default(0) notnull radical_stroke"`             //部首笔画
+	Stroke                   int      `xorm:"default() notnull stroke"`                      //总笔画数
 	IsKangXi                 bool     `xorm:"default(0) notnull is_kang_xi"`                 //是否康熙字典
 	KangXi                   string   `xorm:"default() notnull kang_xi"`                     //康熙
 	KangXiStroke             int      `xorm:"default(0) notnull kang_xi_stroke"`             //康熙笔画
@@ -102,15 +103,14 @@ func parseDummy(c *Character, index int, input string) {
 }
 func parseKangXi(c *Character, index int, input string) {
 	log.With("index", index, "input", input).Info("kangxi")
-
 	switch index {
-	case 1:
+	case 2:
 		input = strings.ReplaceAll(input, "(", " ")
 		input = strings.ReplaceAll(input, ")", " ")
 		s := strings.Split(strings.TrimSpace(input), ";")
-		if c.KangXiStroke == 0 && len(s) > 0 {
+		if len(s) > 0 {
 			vv := strings.Split(strings.TrimSpace(s[0]), ":")
-			if len(vv) == 2 {
+			if len(vv) == 2 && (vv[0] != c.Ch) {
 				c.KangXi = vv[0]
 				i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
 				if e != nil {
@@ -118,8 +118,12 @@ func parseKangXi(c *Character, index int, input string) {
 					return
 				}
 				c.KangXiStroke = i
+			} else {
+				c.KangXi = c.Ch
+				c.KangXiStroke = c.Stroke
 			}
 		}
+
 	default:
 	}
 }
@@ -131,7 +135,7 @@ func parseBuShou(c *Character, index int, input string) {
 	case 3:
 		parseNumber(&c.RadicalStroke, input)
 	case 5:
-		parseNumber(&c.KangXiStroke, input)
+		parseNumber(&c.Stroke, input)
 	default:
 		//log.Error("bushou")
 	}
