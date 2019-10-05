@@ -98,7 +98,7 @@ func (c *Character) InsertIfNotExist(session *xorm.Session) (i int64, e error) {
 }
 
 func parseDummy(c *Character, index int, input string) {
-	log.With("character", c, "index", index, "input", input).Error("dummy")
+	log.With("character", c, "index", index, "input", input).Warn("dummy")
 }
 func parseKangXi(c *Character, index int, input string) {
 	log.With("character", c, "index", index, "input", input).Info("kangxi")
