@@ -14,7 +14,7 @@ type CharacterFunc func(character *Character) error
 
 //Character 字符
 type Character struct {
-	PinYin                   []string `xorm:"default() notnull pin_yin"`                     //拼音
+	PinYin                   []string `xorm:"default('') notnull pin_yin"`                   //拼音
 	Ch                       string   `xorm:"default() notnull ch"`                          //字符
 	Radical                  string   `xorm:"default() notnull radical"`                     //部首
 	RadicalStroke            int      `xorm:"default(0) notnull radical_stroke"`             //部首笔画
@@ -31,9 +31,9 @@ type Character struct {
 	WuXing                   string   `xorm:"default() notnull wu_xing"`                     //五行
 	Lucky                    string   `xorm:"default() notnull lucky"`                       //吉凶寓意
 	Regular                  bool     `xorm:"default(0) notnull regular"`                    //常用
-	TraditionalCharacter     []string `xorm:"default() notnull traditional_character"`       //繁体字
-	VariantCharacter         []string `xorm:"default() notnull variant_character"`           //异体字
-	Comment                  []string `xorm:"default() notnull comment"`                     //解释
+	TraditionalCharacter     []string `xorm:"default('') notnull traditional_character"`     //繁体字
+	VariantCharacter         []string `xorm:"default('') notnull variant_character"`         //异体字
+	Comment                  []string `xorm:"default('') notnull comment"`                   //解释
 }
 
 // ParseFunc ...
