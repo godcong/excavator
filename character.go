@@ -143,13 +143,18 @@ func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
 	return
 }
 
-func parseKangXiCharacter(selection *goquery.Selection, ch *Character) (e error) {
+func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e error) {
+	f := parseDummy
 	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
-	f := parsePinYin
-	if v, b := charList[v]; b {
-		f = v
+	if i == 0 {
+		f = parsePinYin
+	} else {
+		if v, b := charList[v]; b {
+			f = v
+		}
 	}
-	log.With("source", v).Info("first")
+
+	log.With("index", i, "source", v).Info("first")
 	//log.Info(selection.Html())
 	selection.Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
@@ -185,10 +190,16 @@ func parseNumber(source *int, input string) {
 	*source = i
 }
 func parsePinYin(c *Character, index int, input string) {
-	log.With("input", input).Info("pinyin")
-	input = strings.ReplaceAll(input, "[", "")
-	input = strings.ReplaceAll(input, "]", "")
-	parseArray(&c.PinYin, input)
+	switch index {
+	case 1, 5:
+		log.With("index", index, "input", input).Info("pinyin")
+		input = strings.ReplaceAll(input, "[", "")
+		input = strings.ReplaceAll(input, "]", "")
+		parseArray(&c.PinYin, input)
+	default:
+
+	}
+
 }
 func parseBuShouBracket(input string, radical *string, stroke *int) {
 	log.With("input", input).Info("bushou bracket")

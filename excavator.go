@@ -204,7 +204,7 @@ func getCharacter(document *goquery.Document) *Character {
 	ch := new(Character)
 
 	document.Find("div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
-		e := parseKangXiCharacter(selection, ch)
+		e := parseKangXiCharacter(i, selection, ch)
 		if e != nil {
 			log.Error(e)
 		}
