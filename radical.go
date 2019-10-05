@@ -56,7 +56,9 @@ func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, err
 	if e != nil {
 		return nil, e
 	}
-	log.With("info", string(bytes)).Info("radical reader")
+	if debug {
+		log.With("info", string(bytes)).Info("radical reader")
+	}
 	return UnmarshalRadical(bytes)
 }
 
@@ -102,8 +104,9 @@ func insertOrUpdateRadicalCharacter(engine *xorm.Engine, character *RadicalChara
 	if e != nil {
 		return 0, e
 	}
-
-	log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.Zi)).Info("insert")
+	if debug {
+		log.With("url", character.URL, "character", character.BuShou, "zi", character.Zi, "hash", net.Hash(character.Zi)).Info("insert")
+	}
 	if !b {
 		return engine.InsertOne(character)
 	}
@@ -130,6 +133,7 @@ func copyRadicalCharacter(tg, src *RadicalCharacter) {
 	stringCompareCopy(&tg.QiBi, src.QiBi)
 	stringCompareCopy(&tg.Zi, src.Zi)
 	stringCompareCopy(&tg.Num, src.Num)
+	stringCompareCopy(&tg.CharType, src.CharType)
 }
 
 func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
