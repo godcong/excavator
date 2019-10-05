@@ -113,7 +113,6 @@ func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalChara
 			}
 			log.With("num", one).Info(rc)
 		}
-		log.With("value", radical).Info("radical")
 	}
 	return nil
 }

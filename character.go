@@ -119,8 +119,8 @@ func parseKangXi(c *Character, index int, input string) {
 				}
 				c.KangXiStroke = i
 			} else {
-				c.KangXi = c.Ch
-				c.KangXiStroke = c.Stroke
+				//c.KangXi = c.Ch
+				//c.KangXiStroke = c.Stroke
 			}
 		}
 
