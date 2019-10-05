@@ -201,7 +201,7 @@ func TrimSlash(s string) string {
 }
 
 func getCharacter(document *goquery.Document) *Character {
-	ch := new(Character)
+	ch := NewCharacter()
 
 	document.Find("div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
 		e := parseKangXiCharacter(i, selection, ch)
