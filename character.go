@@ -96,13 +96,13 @@ func parseKangXi(c *Character, index int, input string) {
 	}
 }
 func parseBuShou(c *Character, index int, input string) {
-	log.With("input", input).Info("bushou")
+	log.With("index", index, "input", input).Info("bushou")
 	switch index {
-	case 0:
-		c.Radical = input
 	case 1:
+		c.Radical = input
+	case 3:
 		parseNumber(&c.RadicalStroke, input)
-	case 2:
+	case 5:
 		parseNumber(&c.KangXiStroke, input)
 	default:
 		log.Error("bushou")
@@ -110,7 +110,7 @@ func parseBuShou(c *Character, index int, input string) {
 }
 
 func parseSimple(c *Character, index int, input string) {
-	log.With("input", input).Info("simple")
+	log.With("index", index, "input", input).Info("simple")
 	switch index {
 	case 0:
 		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
@@ -122,7 +122,7 @@ func parseSimple(c *Character, index int, input string) {
 }
 
 func parseTraditional(c *Character, index int, input string) {
-	log.With("input", input).Info("traditional")
+	log.With("index", index, "input", input).Info("traditional")
 	switch index {
 	case 0:
 		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
@@ -144,29 +144,26 @@ func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
 }
 
 func parseKangXiCharacter(selection *goquery.Selection, ch *Character) (e error) {
-	//v := StringClearUp(selection.ReplaceWith("font[class=colred]").Text())
-	//var data []string
-	//if v != "" {
-	//	data = strings.Split(v, " ")
-	//}
-	//
-	//log.With("source", v).Info(len(data), ":", data)
-
-	//f := parseDummy
+	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
+	f := parsePinYin
+	if v, b := charList[v]; b {
+		f = v
+	}
+	log.With("source", v).Info("first")
+	//log.Info(selection.Html())
 	selection.Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
-		//text := StringClearUp(selection.Text())
+
+		text := StringClearUp(selection.Text())
 		//if i == 0 {
 		//	if data == nil || len(data) == 0 {
 		//		f = parsePinYin
 		//	} else {
-		//		if v, b := charList[text]; b {
-		//			f = v
-		//		}
+		//
 		//	}
 		//}
 		//if len(data) > i {
-		//	f(ch, i, data[i])
+		f(ch, i, text)
 		//} else {
 		//	if data == nil || len(data) == 0 {
 		//		f(ch, i, text)
