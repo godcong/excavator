@@ -101,22 +101,26 @@ func parseDummy(c *Character, index int, input string) {
 	log.With("character", c, "index", index, "input", input).Warn("dummy")
 }
 func parseKangXi(c *Character, index int, input string) {
-	log.With("character", c, "index", index, "input", input).Info("kangxi")
-	log.With("input", input).Info("kangxi bracket")
-	input = strings.ReplaceAll(input, "(", " ")
-	input = strings.ReplaceAll(input, ")", " ")
-	s := strings.Split(strings.TrimSpace(input), ";")
-	if c.KangXiStroke == 0 && len(s) > 0 {
-		vv := strings.Split(strings.TrimSpace(s[0]), ":")
-		if len(vv) == 2 {
-			c.KangXi = vv[0]
-			i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
-			if e != nil {
-				log.Error(e)
-				return
+	log.With("index", index, "input", input).Info("kangxi")
+
+	switch index {
+	case 1:
+		input = strings.ReplaceAll(input, "(", " ")
+		input = strings.ReplaceAll(input, ")", " ")
+		s := strings.Split(strings.TrimSpace(input), ";")
+		if c.KangXiStroke == 0 && len(s) > 0 {
+			vv := strings.Split(strings.TrimSpace(s[0]), ":")
+			if len(vv) == 2 {
+				c.KangXi = vv[0]
+				i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
+				if e != nil {
+					log.Error(e)
+					return
+				}
+				c.KangXiStroke = i
 			}
-			c.KangXiStroke = i
 		}
+	default:
 	}
 }
 func parseBuShou(c *Character, index int, input string) {

@@ -179,7 +179,6 @@ func HanChengBihuaRequest(wd string, qb string) (*http.Request, error) {
 	req.Header.Set("Referer", "http://hy.httpcn.com/bihua/zi/")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 	req.Header.Set("Connection", "keep-alive")
-
 	return req, nil
 }
 
@@ -200,7 +199,6 @@ func KangXiBushouRequest(wd string, qb string) (*http.Request, error) {
 	req.Header.Set("Referer", "http://hy.httpcn.com/bushou/kangxi/")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 	req.Header.Set("Connection", "keep-alive")
-
 	return req, nil
 
 }
