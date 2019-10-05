@@ -20,9 +20,9 @@ const tmpFile = "tmp"
 // Excavator ...
 type Excavator struct {
 	Workspace   string `json:"workspace"`
-	url         string
-	skip        []string
 	db          *xorm.Engine
+	url         string
+	action      []RadicalType
 	radicalType RadicalType
 }
 
@@ -44,9 +44,9 @@ func URLArgs(url string) ExArgs {
 	}
 }
 
-func SkipArgs(skip ...string) ExArgs {
+func ActionArgs(act ...RadicalType) ExArgs {
 	return func(exc *Excavator) {
-		exc.skip = skip
+		exc.action = act
 	}
 }
 
@@ -79,8 +79,10 @@ func (exc *Excavator) Run() error {
 	log.Info("excavator run")
 	exc.init()
 
-	if !isSkip("radical", exc.skip...) {
-		e := grabRadicalList(exc)
+	for _, act := range exc.action {
+		excClone := *exc
+		excClone.radicalType = act
+		e := grabRadicalList(&excClone)
 		if e != nil {
 			log.Error(e)
 			panic(e)
@@ -114,15 +116,6 @@ func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalChara
 		log.With("value", radical).Info("radical")
 	}
 	return nil
-}
-
-func isSkip(src string, skip ...string) bool {
-	for _, s := range skip {
-		if s == src {
-			return true
-		}
-	}
-	return false
 }
 
 func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
