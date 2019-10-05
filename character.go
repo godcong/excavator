@@ -105,31 +105,31 @@ func parseBuShou(c *Character, index int, input string) {
 	case 5:
 		parseNumber(&c.KangXiStroke, input)
 	default:
-		log.Error("bushou")
+		//log.Error("bushou")
 	}
 }
 
 func parseSimple(c *Character, index int, input string) {
 	log.With("index", index, "input", input).Info("simple")
 	switch index {
-	case 0:
-		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
 	case 1:
+		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
+	case 3:
 		parseNumber(&c.SimpleTotalStroke, input)
 	default:
-		log.Error("simple")
+		//log.Error("simple")
 	}
 }
 
 func parseTraditional(c *Character, index int, input string) {
 	log.With("index", index, "input", input).Info("traditional")
 	switch index {
-	case 0:
-		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
 	case 1:
+		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
+	case 3:
 		parseNumber(&c.TraditionalTotalStroke, input)
 	default:
-		log.Error("traditional")
+		//log.Error("traditional")
 	}
 }
 
