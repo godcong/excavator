@@ -47,6 +47,35 @@ var charList = map[string]ParseFunc{
 	"拼音":      parsePinYin,
 }
 
+func initStringArray() []string {
+	return *new([]string)
+}
+
+func NewCharacter() *Character {
+	return &Character{
+		PinYin:                   initStringArray(),
+		Ch:                       "",
+		Radical:                  "",
+		RadicalStroke:            0,
+		IsKangXi:                 false,
+		KangXi:                   "",
+		KangXiStroke:             0,
+		SimpleRadical:            "",
+		SimpleRadicalStroke:      0,
+		SimpleTotalStroke:        0,
+		TraditionalRadical:       "",
+		TraditionalRadicalStroke: 0,
+		TraditionalTotalStroke:   0,
+		NameScience:              false,
+		WuXing:                   "",
+		Lucky:                    "",
+		Regular:                  false,
+		TraditionalCharacter:     initStringArray(),
+		VariantCharacter:         initStringArray(),
+		Comment:                  initStringArray(),
+	}
+}
+
 // Clone ...
 func (c *Character) Clone() (char *Character) {
 	char = new(Character)
