@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
 )
 
 // CharacterFunc ...
@@ -85,20 +84,16 @@ func (c *Character) Clone() (char *Character) {
 }
 
 // InsertIfNotExist ...
-func (c *Character) InsertIfNotExist(session *xorm.Session) (e error) {
-
-	i, e := session.Table(&Character{}).Where("ch = ?", c.Ch).Count()
+func (c *Character) InsertIfNotExist(session *xorm.Session) (i int64, e error) {
+	i, e = session.Table(&Character{}).Where("ch = ?", c.Ch).Count()
 	if e != nil {
-		return e
-	}
-	if i == 0 {
-		_, e = session.InsertOne(c)
 		return
 	}
-	_, e = session.Where("ch = ?", c.Ch).Update(c)
-	//if e != nil {
-	//	return e
-	//}
+	if i == 0 {
+		i, e = session.InsertOne(c)
+		return
+	}
+	i, e = session.Where("ch = ?", c.Ch).Update(c)
 	return
 }
 
@@ -162,16 +157,6 @@ func parseTraditional(c *Character, index int, input string) {
 	}
 }
 
-func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
-	html, e := element.DOM.Html()
-	if e != nil {
-		log.Error(e)
-		return
-	}
-	d, e = goquery.NewDocumentFromReader(strings.NewReader(html))
-	return
-}
-
 func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e error) {
 	f := parseDummy
 	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
@@ -184,25 +169,10 @@ func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e
 	}
 
 	log.With("index", i, "source", v).Info("first")
-	//log.Info(selection.Html())
 	selection.Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
-
 		text := StringClearUp(selection.Text())
-		//if i == 0 {
-		//	if data == nil || len(data) == 0 {
-		//		f = parsePinYin
-		//	} else {
-		//
-		//	}
-		//}
-		//if len(data) > i {
 		f(ch, i, text)
-		//} else {
-		//	if data == nil || len(data) == 0 {
-		//		f(ch, i, text)
-		//	}
-		//}
 	})
 	return nil
 }

@@ -17,16 +17,6 @@ var debug = false
 
 const tmpFile = "tmp"
 
-// Step ...
-type Step string
-
-// excavator run step status ...
-const (
-	StepAll       Step = "all"
-	StepRadical        = "radical"
-	StepCharacter      = "character"
-)
-
 // Excavator ...
 type Excavator struct {
 	Workspace   string `json:"workspace"`
@@ -139,7 +129,7 @@ func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
 	defer func() {
 		characters <- nil
 	}()
-	i, e := exc.db.Count(RadicalCharacter{})
+	i, e := exc.db.Where("char_type = ?", radicalCharType(exc.radicalType)).Count(RadicalCharacter{})
 	if e != nil || i == 0 {
 		log.Error(e)
 		return
@@ -147,7 +137,7 @@ func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
 	log.With("total", i).Info("total char")
 	for x := int64(0); x < i; x += 500 {
 		rc := new([]RadicalCharacter)
-		e := exc.db.Limit(500, int(x)).Find(rc)
+		e := exc.db.Where("char_type = ?", radicalCharType(exc.radicalType)).Limit(500, int(x)).Find(rc)
 		if e != nil {
 			log.Error(e)
 			continue
@@ -244,7 +234,7 @@ ParseEnd:
 			}
 			character := getCharacter(document)
 			character.Ch = c.Zi
-			e = character.InsertIfNotExist(exc.db.Where(""))
+			_, e = character.InsertIfNotExist(exc.db.Where(""))
 			if e != nil {
 				return e
 			}
@@ -260,4 +250,14 @@ func characterURL(excavator *Excavator, url string) string {
 	default:
 		return URL(excavator.url, "html/zi", url)
 	}
+}
+func radicalCharType(radicalType RadicalType) string {
+	switch radicalType {
+	case RadicalTypeHanChengPinyin, RadicalTypeHanChengBushou, RadicalTypeHanChengBihua:
+		return "hancheng"
+	default:
+		//RadicalTypeKangXiBihua, RadicalTypeKangXiPinyin, RadicalTypeKangXiBushou:
+		return "kangxi"
+	}
+	//return ""
 }

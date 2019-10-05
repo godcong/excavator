@@ -207,6 +207,7 @@ func getMainURL(radicalType RadicalType, url string) string {
 	}
 	return ""
 }
+
 func grabRadicalList(exc *Excavator) (e error) {
 	document, e := net.CacheQuery(getMainURL(exc.radicalType, exc.url))
 	if e != nil {
