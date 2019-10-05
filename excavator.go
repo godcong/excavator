@@ -203,7 +203,7 @@ func TrimSlash(s string) string {
 func getCharacter(document *goquery.Document) *Character {
 	ch := new(Character)
 
-	document.Find("div[class=info] > p[class=mui-ellipsis]").Each(func(i int, selection *goquery.Selection) {
+	document.Find("div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
 		e := parseKangXiCharacter(selection, ch)
 		if e != nil {
 			log.Error(e)
@@ -236,6 +236,7 @@ ParseEnd:
 			if c == nil {
 				break ParseEnd
 			}
+			log.With("url", c.URL).Info("character")
 			document, e := net.CacheQuery(characterURL(exc, c.URL))
 			if e != nil {
 				log.Error(e)

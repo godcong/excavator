@@ -144,34 +144,34 @@ func newDoc(element *colly.HTMLElement) (d *goquery.Document, e error) {
 }
 
 func parseKangXiCharacter(selection *goquery.Selection, ch *Character) (e error) {
-	v := StringClearUp(selection.ReplaceWith("font[class=colred]").Text())
-	var data []string
-	if v != "" {
-		data = strings.Split(v, " ")
-	}
+	//v := StringClearUp(selection.ReplaceWith("font[class=colred]").Text())
+	//var data []string
+	//if v != "" {
+	//	data = strings.Split(v, " ")
+	//}
+	//
+	//log.With("source", v).Info(len(data), ":", data)
 
-	log.With("source", v).Info(len(data), ":", data)
-
-	f := parseDummy
-	selection.Find("font[class=colred]").Each(func(i int, selection *goquery.Selection) {
+	//f := parseDummy
+	selection.Contents().Each(func(i int, selection *goquery.Selection) {
 		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
-		text := StringClearUp(selection.Text())
-		if i == 0 {
-			if data == nil || len(data) == 0 {
-				f = parsePinYin
-			} else {
-				if v, b := charList[text]; b {
-					f = v
-				}
-			}
-		}
-		if len(data) > i {
-			f(ch, i, data[i])
-		} else {
-			if data == nil || len(data) == 0 {
-				f(ch, i, text)
-			}
-		}
+		//text := StringClearUp(selection.Text())
+		//if i == 0 {
+		//	if data == nil || len(data) == 0 {
+		//		f = parsePinYin
+		//	} else {
+		//		if v, b := charList[text]; b {
+		//			f = v
+		//		}
+		//	}
+		//}
+		//if len(data) > i {
+		//	f(ch, i, data[i])
+		//} else {
+		//	if data == nil || len(data) == 0 {
+		//		f(ch, i, text)
+		//	}
+		//}
 	})
 	return nil
 }
