@@ -173,7 +173,9 @@ func parseZiBuShou(c *Character, index int, input string) {
 	}
 }
 func parseSimple(c *Character, index int, input string) {
-	log.With("index", index, "input", input).Info("simple")
+	if debug {
+		log.With("index", index, "input", input).Info("simple")
+	}
 	switch index {
 	case 1:
 		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
