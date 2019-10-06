@@ -93,12 +93,17 @@ func (c *Character) Clone() (char *Character) {
 
 // InsertIfNotExist ...
 func (c *Character) InsertIfNotExist(session *xorm.Session) (i int64, e error) {
-	i, e = session.Table(&Character{}).Where("ch = ?", c.Ch).Count()
+	tmp := new(Character)
+	b, e := session.Table(&Character{}).Where("ch = ?", c.Ch).Get(tmp)
 	if e != nil {
+		return 0, e
+	}
+	if !b {
+		i, e = session.InsertOne(c)
 		return
 	}
-	if i == 0 {
-		i, e = session.InsertOne(c)
+	if tmp.IsKangXi {
+		log.With("zi", tmp.Ch).Warn("skip update")
 		return
 	}
 	i, e = session.Where("ch = ?", c.Ch).Update(c)
