@@ -39,8 +39,15 @@ type Character struct {
 // ParseFunc ...
 type ParseFunc func(*Character, int, string)
 
-var charList = map[string]ParseFunc{
+var charKangxiList = map[string]ParseFunc{
 	"部首:":     parseKangxiBuShou,
+	"简体部首:":   parseSimple,
+	"繁体部首:":   parseTraditional,
+	"康熙字典笔画:": parseKangXi,
+	"拼音":      parsePinYin,
+}
+var charZiList = map[string]ParseFunc{
+	"部首:":     parseZiBuShou,
 	"简体部首:":   parseSimple,
 	"繁体部首:":   parseTraditional,
 	"康熙字典笔画:": parseKangXi,
@@ -150,6 +157,21 @@ func parseKangxiBuShou(c *Character, index int, input string) {
 	}
 }
 
+func parseZiBuShou(c *Character, index int, input string) {
+	if debug {
+		log.With("index", index, "input", input).Info("bushou")
+	}
+	switch index {
+	case 1:
+		c.Radical = input
+	case 3:
+		parseNumber(&c.RadicalStroke, input)
+	case 5:
+		parseNumber(&c.Stroke, input)
+	default:
+		//log.Error("bushou")
+	}
+}
 func parseSimple(c *Character, index int, input string) {
 	log.With("index", index, "input", input).Info("simple")
 	switch index {
@@ -176,13 +198,13 @@ func parseTraditional(c *Character, index int, input string) {
 	}
 }
 
-func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e error) {
+func parseZiCharacter(i int, selection *goquery.Selection, character *Character) interface{} {
 	f := parseDummy
 	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
 	if i == 0 {
 		f = parsePinYin
 	} else {
-		if v, b := charList[v]; b {
+		if v, b := charZiList[v]; b {
 			f = v
 		}
 	}
@@ -194,7 +216,29 @@ func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e
 			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
 		}
 		text := StringClearUp(selection.Text())
-		f(ch, i, text)
+		f(character, i, text)
+	})
+	return nil
+}
+func parseKangXiCharacter(i int, selection *goquery.Selection, character *Character) (e error) {
+	f := parseDummy
+	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
+	if i == 0 {
+		f = parsePinYin
+	} else {
+		if v, b := charKangxiList[v]; b {
+			f = v
+		}
+	}
+	if debug {
+		log.With("index", i, "source", v).Info("first")
+	}
+	selection.Contents().Each(func(i int, selection *goquery.Selection) {
+		if debug {
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
+		}
+		text := StringClearUp(selection.Text())
+		f(character, i, text)
 	})
 	return nil
 }
