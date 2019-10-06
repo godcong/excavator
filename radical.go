@@ -165,9 +165,13 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		bihua := selection.Find("a.mui-navigate-right").Text()
-		log.Info(selection.Html())
+		if debug {
+			log.Info(selection.Html())
+		}
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
-			log.With("index", i, "text", selection.Text()).Info("bushou")
+			if debug {
+				log.With("index", i, "text", selection.Text()).Info("bushou")
+			}
 			radChar := new(RadicalCharacter)
 			radChar.BiHua = bihua
 			radChar.BuShou, _ = selection.Attr("data-action")
@@ -188,7 +192,9 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		tbihua := selection.Find("a.mui-navigate-right").Text()
-		log.Info(selection.Html())
+		if debug {
+			log.Info(selection.Html())
+		}
 		selection.Find("div > a[data-bh]").Each(func(i int, selection *goquery.Selection) {
 			if debug {
 				log.With("index", i, "text", selection.Text()).Info("bihua")

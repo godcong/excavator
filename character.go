@@ -133,7 +133,9 @@ func parseKangXi(c *Character, index int, input string) {
 	}
 }
 func parseKangxiBuShou(c *Character, index int, input string) {
-	log.With("index", index, "input", input).Info("bushou")
+	if debug {
+		log.With("index", index, "input", input).Info("bushou")
+	}
 	switch index {
 	case 1:
 		c.KangXi = input
@@ -161,7 +163,9 @@ func parseSimple(c *Character, index int, input string) {
 }
 
 func parseTraditional(c *Character, index int, input string) {
-	log.With("index", index, "input", input).Info("traditional")
+	if debug {
+		log.With("index", index, "input", input).Info("traditional")
+	}
 	switch index {
 	case 1:
 		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
@@ -339,7 +343,9 @@ func parseDictComment(selection *goquery.Selection, character *Character) (e err
 	tx := StringClearUp(selection.Find("li > a").Text())
 	if tx == "康熙字典解释" {
 		selection.Find("li > div").Contents().Each(func(i int, selection *goquery.Selection) {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li3")
+			if debug {
+				log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li3")
+			}
 			parseComment(character, i, selection.Text())
 		})
 	}
