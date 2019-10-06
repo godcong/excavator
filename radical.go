@@ -194,6 +194,16 @@ func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	return
 }
 
+func isKangxi(radicalType RadicalType) bool {
+	switch radicalType {
+	case RadicalTypeKangXiBihua,
+		RadicalTypeKangXiPinyin,
+		RadicalTypeKangXiBushou:
+		return true
+	}
+	return false
+}
+
 func getMainURL(radicalType RadicalType, url string) string {
 	switch radicalType {
 	case RadicalTypeHanChengPinyin:
