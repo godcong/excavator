@@ -171,12 +171,16 @@ func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 			radChar := new(RadicalCharacter)
 			radChar.BiHua = bihua
 			radChar.BuShou, _ = selection.Attr("data-action")
-			log.With("bushou", radChar.BuShou).Info("bushou")
+			if debug {
+				log.With("bushou", radChar.BuShou).Info("bushou")
+			}
 			if radChar.BuShou != "" {
 				rc = append(rc, radChar)
 			}
 		})
-		log.Infof("radical[%+v]", rc)
+		if debug {
+			log.Infof("radical[%+v]", rc)
+		}
 	})
 	return
 }
@@ -186,7 +190,9 @@ func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 		tbihua := selection.Find("a.mui-navigate-right").Text()
 		log.Info(selection.Html())
 		selection.Find("div > a[data-bh]").Each(func(i int, selection *goquery.Selection) {
-			log.With("index", i, "text", selection.Text()).Info("bihua")
+			if debug {
+				log.With("index", i, "text", selection.Text()).Info("bihua")
+			}
 			radChar := new(RadicalCharacter)
 			radChar.TotalBiHua = tbihua
 			radChar.QBNum, _ = selection.Attr("data-val")
@@ -197,7 +203,9 @@ func analyzeBihuaRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 				rc = append(rc, radChar)
 			}
 		})
-		log.Infof("radical[%+v]", rc)
+		if debug {
+			log.Infof("radical[%+v]", rc)
+		}
 	})
 	return
 }
@@ -243,7 +251,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
 			if e != nil {
@@ -263,7 +273,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
 			if e != nil {
@@ -283,7 +295,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
@@ -303,7 +317,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
 			if e != nil {
@@ -345,7 +361,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
