@@ -40,7 +40,7 @@ type Character struct {
 type ParseFunc func(*Character, int, string)
 
 var charList = map[string]ParseFunc{
-	"部首:":     parseBuShou,
+	"部首:":     parseKangxiBuShou,
 	"简体部首:":   parseSimple,
 	"繁体部首:":   parseTraditional,
 	"康熙字典笔画:": parseKangXi,
@@ -127,14 +127,16 @@ func parseKangXi(c *Character, index int, input string) {
 	default:
 	}
 }
-func parseBuShou(c *Character, index int, input string) {
+func parseKangxiBuShou(c *Character, index int, input string) {
 	log.With("index", index, "input", input).Info("bushou")
 	switch index {
 	case 1:
+		c.KangXi = input
 		c.Radical = input
 	case 3:
 		parseNumber(&c.RadicalStroke, input)
 	case 5:
+		parseNumber(&c.KangXiStroke, input)
 		parseNumber(&c.Stroke, input)
 	default:
 		//log.Error("bushou")

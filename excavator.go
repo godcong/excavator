@@ -182,8 +182,9 @@ func TrimSlash(s string) string {
 	return s
 }
 
-func getCharacter(document *goquery.Document) *Character {
+func getCharacter(document *goquery.Document, kangxi bool) *Character {
 	ch := NewCharacter()
+	ch.IsKangXi = kangxi
 	document.Find("div.hanyu-tujie.mui-clearfix > div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
 		e := parseKangXiCharacter(i, selection, ch)
 		if e != nil {
