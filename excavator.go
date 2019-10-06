@@ -3,6 +3,7 @@ package excavator
 import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/godcong/excavator/net"
+	"github.com/godcong/go-trait"
 	"os"
 	"path/filepath"
 	"strings"
