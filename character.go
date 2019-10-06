@@ -122,6 +122,9 @@ func parseKangXi(c *Character, index int, input string) {
 				//c.KangXi = c.Ch
 				//c.KangXiStroke = c.Stroke
 			}
+			if len(s) > 1 {
+				log.Warn(s)
+			}
 		}
 
 	default:
