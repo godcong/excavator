@@ -224,7 +224,7 @@ ParseEnd:
 				log.Error(e)
 				continue
 			}
-			character := getCharacter(document)
+			character := getCharacter(document, isKangxi(exc.radicalType))
 			character.Ch = c.Zi
 			_, e = character.InsertIfNotExist(exc.db.Where(""))
 			if e != nil {
