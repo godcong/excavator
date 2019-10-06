@@ -111,7 +111,9 @@ func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalChara
 			if e != nil {
 				return e
 			}
-			log.With("num", one).Info(rc)
+			if debug {
+				log.With("num", one).Info(rc)
+			}
 		}
 	}
 	return nil
@@ -126,7 +128,9 @@ func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
 		log.Error(e)
 		return
 	}
-	log.With("total", i).Info("total char")
+	if debug {
+		log.With("total", i).Info("total char")
+	}
 	for x := int64(0); x < i; x += 500 {
 		rc := new([]RadicalCharacter)
 		e := exc.db.Where("char_type = ?", radicalCharType(exc.radicalType)).Limit(500, int(x)).Find(rc)

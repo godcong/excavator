@@ -102,7 +102,9 @@ func parseDummy(c *Character, index int, input string) {
 	log.With("character", c, "index", index, "input", input).Warn("dummy")
 }
 func parseKangXi(c *Character, index int, input string) {
-	log.With("index", index, "input", input).Info("kangxi")
+	if debug {
+		log.With("index", index, "input", input).Info("kangxi")
+	}
 	switch index {
 	case 2:
 		input = strings.ReplaceAll(input, "(", " ")
@@ -180,10 +182,13 @@ func parseKangXiCharacter(i int, selection *goquery.Selection, ch *Character) (e
 			f = v
 		}
 	}
-
-	log.With("index", i, "source", v).Info("first")
+	if debug {
+		log.With("index", i, "source", v).Info("first")
+	}
 	selection.Contents().Each(func(i int, selection *goquery.Selection) {
-		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
+		if debug {
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
+		}
 		text := StringClearUp(selection.Text())
 		f(ch, i, text)
 	})
@@ -204,7 +209,9 @@ func parseNumber(source *int, input string) {
 func parsePinYin(c *Character, index int, input string) {
 	switch index {
 	case 1, 5:
-		log.With("index", index, "input", input).Info("pinyin")
+		if debug {
+			log.With("index", index, "input", input).Info("pinyin")
+		}
 		input = strings.ReplaceAll(input, "[", "")
 		input = strings.ReplaceAll(input, "]", "")
 		parseArray(&c.PinYin, input)
@@ -214,7 +221,9 @@ func parsePinYin(c *Character, index int, input string) {
 
 }
 func parseBuShouBracket(input string, radical *string, stroke *int) {
-	log.With("input", input).Info("bushou bracket")
+	if debug {
+		log.With("input", input).Info("bushou bracket")
+	}
 	input = strings.ReplaceAll(input, "(", " ")
 	input = strings.ReplaceAll(input, ")", " ")
 	input = strings.TrimSpace(input)
@@ -239,42 +248,56 @@ var infoList2 = map[string]ParseFunc{
 }
 
 func parseVariantCharacter(c *Character, index int, input string) {
-	log.With("input", input).Info("var char")
+	if debug {
+		log.With("input", input).Info("var char")
+	}
 	if input != "" {
 		c.VariantCharacter = append(c.VariantCharacter, input)
 	}
 }
 func parseTraditionalCharacter(c *Character, index int, input string) {
-	log.With("input", input).Info("trad char")
+	if debug {
+		log.With("input", input).Info("trad char")
+	}
 	if input != "" {
 		c.TraditionalCharacter = append(c.TraditionalCharacter, input)
 	}
 }
 func parseRegular(c *Character, index int, input string) {
-	log.With("input", input).Info("regular")
+	if debug {
+		log.With("input", input).Info("regular")
+	}
 	if input == "是" {
 		c.Regular = true
 	}
 }
 func parseNameScience(c *Character, index int, input string) {
-	log.With("input", input).Info("name science")
+	if debug {
+		log.With("input", input).Info("name science")
+	}
 	if input == "是" {
 		c.NameScience = true
 	}
 }
 func parseLucy(c *Character, index int, input string) {
-	log.With("input", input).Info("lucky")
+	if debug {
+		log.With("input", input).Info("lucky")
+	}
 	c.Lucky = input
 }
 func parseWuXing(c *Character, index int, input string) {
-	log.With("input", input).Info("wuxing")
+	if debug {
+		log.With("input", input).Info("wuxing")
+	}
 	c.WuXing = input
 }
 func parseDictInformation(selection *goquery.Selection, ch *Character) (e error) {
 	fn := parseDummy
 
 	selection.Find("li").Contents().Each(func(i int, selection *goquery.Selection) {
-		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
+		if debug {
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
+		}
 		tx := selection.Text()
 		if selection.Index() == 0 {
 			fn = parseDummy
@@ -290,7 +313,9 @@ func parseDictInformation(selection *goquery.Selection, ch *Character) (e error)
 	})
 
 	selection.Find("li").Each(func(i int, selection *goquery.Selection) {
-		log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
+		if debug {
+			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
+		}
 		tx := selection.Find("span").Text()
 		if v, b := infoList2[tx]; b {
 			selection.Find("a").Each(func(i int, selection *goquery.Selection) {
@@ -301,7 +326,9 @@ func parseDictInformation(selection *goquery.Selection, ch *Character) (e error)
 	return
 }
 func parseComment(c *Character, index int, input string) {
-	log.With("input", input).Info("comment")
+	if debug {
+		log.With("input", input).Info("comment")
+	}
 	if input == "" {
 		return
 	}

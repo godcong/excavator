@@ -139,13 +139,19 @@ func copyRadicalCharacter(tg, src *RadicalCharacter) {
 func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 	document.Find("#segmentedControls > ul > li.mui-table-view-cell.mui-collapse").Each(func(i int, selection *goquery.Selection) {
 		alphabet := selection.Find("a.mui-navigate-right").Text()
-		log.Info(selection.Html())
+		if debug {
+			log.Info(selection.Html())
+		}
 		selection.Find("div > a[data-action]").Each(func(i int, selection *goquery.Selection) {
-			log.With("index", i, "text", selection.Text()).Info("pinyin")
+			if debug {
+				log.With("index", i, "text", selection.Text()).Info("pinyin")
+			}
 			radChar := new(RadicalCharacter)
 			radChar.Alphabet = alphabet
 			radChar.PinYin, _ = selection.Attr("data-action")
-			log.With("pinyin", radChar.PinYin).Info("pinyin")
+			if debug {
+				log.With("pinyin", radChar.PinYin).Info("pinyin")
+			}
 			if radChar.PinYin != "" {
 				rc = append(rc, radChar)
 			}
