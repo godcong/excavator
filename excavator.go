@@ -96,7 +96,9 @@ func (exc *Excavator) Run() error {
 	return nil
 }
 func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalCharacter) (err error) {
-	log.Infof("%+v", radical)
+	if debug {
+		log.Infof("%+v", radical)
+	}
 	for _, tmp := range *(*[]RadicalUnion)(radical) {
 		for i := range tmp.RadicalCharacterArray {
 			rc := tmp.RadicalCharacterArray[i]

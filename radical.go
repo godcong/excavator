@@ -157,7 +157,9 @@ func analyzePinyinRadical(document *goquery.Document) (rc []*RadicalCharacter) {
 			}
 		})
 	})
-	log.Infof("radical[%+v]", rc)
+	if debug {
+		log.Infof("radical[%+v]", rc)
+	}
 	return
 }
 func analyzeBushouRadical(document *goquery.Document) (rc []*RadicalCharacter) {
@@ -321,7 +323,9 @@ func grabRadicalList(exc *Excavator) (e error) {
 		if e != nil {
 			return e
 		}
-		log.With("size", len(rc)).Info(string(bytes))
+		if debug {
+			log.With("size", len(rc)).Info(string(bytes))
+		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
 			if e != nil {
