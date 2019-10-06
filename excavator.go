@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-xorm/xorm"
-	"github.com/godcong/go-trait"
 )
 
 var log = trait.NewZapFileSugar("excavator.log")
@@ -200,7 +199,9 @@ func getCharacter(document *goquery.Document, kangxi bool) *Character {
 
 	document.Find("div > ul.hanyu-cha-info.mui-clearfix").Each(func(i int, selection *goquery.Selection) {
 		e := parseDictInformation(selection, ch)
-		log.Infof("%+v", ch)
+		if debug {
+			log.Infof("%+v", ch)
+		}
 		if e != nil {
 			log.Error(e)
 		}
