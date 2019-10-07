@@ -192,6 +192,7 @@ func getCharacter(document *goquery.Document, c *RadicalCharacter, kangxi bool) 
 	ch := NewCharacter()
 	ch.IsKangXi = kangxi
 	ch.Ch = c.Zi
+	ch.KangXi = c.Zi
 	document.Find("div.hanyu-tujie.mui-clearfix > div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
 		if ch.IsKangXi {
 			e := parseKangXiCharacter(i, selection, ch)

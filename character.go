@@ -154,7 +154,6 @@ func parseKangxiBuShou(c *Character, index int, input string) {
 	case 3:
 		parseNumber(&c.RadicalStroke, input)
 	case 5:
-		c.KangXi = c.Ch
 		parseNumber(&c.KangXiStroke, input)
 		parseNumber(&c.Stroke, input)
 	default:

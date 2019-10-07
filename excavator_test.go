@@ -24,7 +24,7 @@ func TestGetCharacter(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	character := getCharacter(document, true)
+	character := getCharacter(document, &RadicalCharacter{}, true)
 	log.Info(character)
 	//http://hy.httpcn.com/html/kangxi/35/KOILPWUYXVXVUYDPW
 }
