@@ -44,6 +44,12 @@ func URLArgs(url string) ExArgs {
 	}
 }
 
+func DBArgs(engine *xorm.Engine) ExArgs {
+	return func(exc *Excavator) {
+		exc.db = engine
+	}
+}
+
 func ActionArgs(act ...RadicalType) ExArgs {
 	return func(exc *Excavator) {
 		exc.action = act
