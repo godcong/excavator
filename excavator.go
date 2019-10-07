@@ -188,9 +188,10 @@ func TrimSlash(s string) string {
 	return s
 }
 
-func getCharacter(document *goquery.Document, kangxi bool) *Character {
+func getCharacter(document *goquery.Document, c *RadicalCharacter, kangxi bool) *Character {
 	ch := NewCharacter()
 	ch.IsKangXi = kangxi
+	ch.Ch = c.Zi
 	document.Find("div.hanyu-tujie.mui-clearfix > div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
 		if ch.IsKangXi {
 			e := parseKangXiCharacter(i, selection, ch)
@@ -239,8 +240,7 @@ ParseEnd:
 				log.Error(e)
 				continue
 			}
-			character := getCharacter(document, isKangxi(exc.radicalType))
-			character.Ch = c.Zi
+			character := getCharacter(document, c, isKangxi(exc.radicalType))
 			_, e = character.InsertIfNotExist(exc.db.Where(""))
 			if e != nil {
 				return e
