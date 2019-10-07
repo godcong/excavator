@@ -150,11 +150,11 @@ func parseKangxiBuShou(c *Character, index int, input string) {
 	}
 	switch index {
 	case 1:
-		c.KangXi = input
 		c.Radical = input
 	case 3:
 		parseNumber(&c.RadicalStroke, input)
 	case 5:
+		c.KangXi = c.Ch
 		parseNumber(&c.KangXiStroke, input)
 		parseNumber(&c.Stroke, input)
 	default:
