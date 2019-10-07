@@ -124,7 +124,7 @@ func parseKangXi(c *Character, index int, input string) {
 		s := strings.Split(strings.TrimSpace(input), ";")
 		if len(s) > 0 {
 			vv := strings.Split(strings.TrimSpace(s[0]), ":")
-			if len(vv) == 2 && (vv[0] != c.Ch) {
+			if len(vv) == 2 {
 				c.KangXi = vv[0]
 				i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
 				if e != nil {
