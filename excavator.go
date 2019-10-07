@@ -242,7 +242,7 @@ ParseEnd:
 				continue
 			}
 			character := getCharacter(document, c, isKangxi(exc.radicalType))
-			_, e = character.InsertIfNotExist(exc.db.Where(""))
+			_, e = character.InsertOrUpdate(exc.db.Where(""))
 			if e != nil {
 				return e
 			}

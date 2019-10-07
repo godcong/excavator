@@ -6,25 +6,29 @@ import (
 )
 
 func TestExcavator_Run(t *testing.T) {
-	excK := New(RadicalTypeKangXiPinyin, ActionArgs(RadicalTypeKangXiPinyin, RadicalTypeKangXiBihua, RadicalTypeKangXiBushou))
-	e1 := excK.Run()
-	if e1 != nil {
-		t.Fatal(e1)
-	}
 	excH := New(RadicalTypeHanChengPinyin, ActionArgs(RadicalTypeHanChengPinyin, RadicalTypeHanChengBihua, RadicalTypeHanChengBushou))
 	e2 := excH.Run()
 	if e2 != nil {
 		t.Fatal(e2)
 	}
+	excK := New(RadicalTypeKangXiPinyin, ActionArgs(RadicalTypeKangXiPinyin, RadicalTypeKangXiBihua, RadicalTypeKangXiBushou))
+	e1 := excK.Run()
+	if e1 != nil {
+		t.Fatal(e1)
+	}
 }
 
 func TestGetCharacter(t *testing.T) {
+	db := InitMysql("localhost:3306", "root", "111111")
+	e := db.Sync(&Character{})
+	t.Log(e)
 	debug = true
-	document, e := net.CacheQuery("http://hy.httpcn.com/html/kangxi/35/KOILPWUYXVXVUYDPW")
+	document, e := net.CacheQuery("http://hy.httpcn.com/html/kangxi/16/CQUYKOTBILKOCAZIL")
 	if e != nil {
 		t.Fatal(e)
 	}
-	character := getCharacter(document, &RadicalCharacter{}, true)
+	character := getCharacter(document, &RadicalCharacter{Zi: "㰄"}, true)
 	log.Info(character)
-	//http://hy.httpcn.com/html/kangxi/35/KOILPWUYXVXVUYDPW
+	i, e := character.InsertOrUpdate(db.Where(""))
+	t.Log(i, e)
 }

@@ -2,6 +2,7 @@ package excavator
 
 import (
 	"github.com/go-xorm/xorm"
+	"github.com/godcong/excavator/net"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,7 @@ type CharacterFunc func(character *Character) error
 
 //Character 字符
 type Character struct {
+	Hash                     string   `xorm:"pk hash"`
 	PinYin                   []string `xorm:"default() notnull pin_yin"`                     //拼音
 	Ch                       string   `xorm:"default() notnull ch"`                          //字符
 	Radical                  string   `xorm:"default() notnull radical"`                     //部首
@@ -83,6 +85,10 @@ func NewCharacter() *Character {
 	}
 }
 
+func (c *Character) BeforeInsert() {
+	c.Hash = net.Hash(c.Ch)
+}
+
 // Clone ...
 func (c *Character) Clone() (char *Character) {
 	char = new(Character)
@@ -91,10 +97,10 @@ func (c *Character) Clone() (char *Character) {
 	return char
 }
 
-// InsertIfNotExist ...
-func (c *Character) InsertIfNotExist(session *xorm.Session) (i int64, e error) {
+// InsertOrUpdate ...
+func (c *Character) InsertOrUpdate(session *xorm.Session) (i int64, e error) {
 	tmp := new(Character)
-	b, e := session.Table(&Character{}).Where("ch = ?", c.Ch).Get(tmp)
+	b, e := session.Where("hash = ?", net.Hash(c.Ch)).Get(tmp)
 	if e != nil {
 		return 0, e
 	}

@@ -51,7 +51,7 @@ func threadLoop(radical *excavator.Radical, rc *excavator.RadicalCharacter, ch c
 	//	ch <- false
 	//	return
 	//}
-	//err := db.InsertIfNotExist("character", c)
+	//err := db.InsertOrUpdate("character", c)
 	//if err != nil {
 	//	ch <- false
 	//	log.Println(err)
