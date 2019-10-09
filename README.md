@@ -14,9 +14,8 @@
 	}
 ```
 	
-	this tool used mysql address localhost:3306/root/111111 with default database.	
-	
-	if want change db address use:
+### this tool used mysql address localhost:3306/root/111111 with default database.	
+### if want change db address use:
 	
 ```go
    exc :=New(RadicalTypeHanChengPinyin, DBArgs(#db#))
