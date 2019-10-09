@@ -1,6 +1,5 @@
 # excavator
 
-
 How to use
 ```
 	excH := New(RadicalTypeHanChengPinyin, ActionArgs(RadicalTypeHanChengPinyin, RadicalTypeHanChengBihua, RadicalTypeHanChengBushou))
@@ -14,9 +13,13 @@ How to use
 		t.Fatal(e1)
 	}
 ```
+this tool used mysql address localhost:3306/root/111111 with default database.
 if want change db address use:
 ```
    exc :=New(RadicalTypeHanChengPinyin, DBArgs(#db#))
    or
    exc.SetDB(#db#)
 ```
+if you want to change the database mssql/postgre...
+new a engine with xorm by yourself 
+then add it by DBArgs().
