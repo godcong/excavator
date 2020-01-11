@@ -23,7 +23,7 @@ func TestGetCharacter(t *testing.T) {
 	e := db.Sync(&Character{})
 	t.Log(e)
 	debug = true
-	document, e := net.CacheQuery("http://hy.httpcn.com/html/kangxi/16/CQUYKOTBILKOCAZIL")
+	document, e := net.CacheQuery("http://hy.httpcn.com/html/kangxi/26/PWUYUYUYPWTBKODAZ/")
 	if e != nil {
 		t.Fatal(e)
 	}

@@ -24,17 +24,6 @@ func InitSqlite3(name string) *xorm.Engine {
 		log.Fatal(e)
 	}
 	return eng
-	//log.Info("result:", result)
-	//for idx, val := range syncTable {
-	//	log.Info("syncing ", idx)
-	//	e := eng.Sync2(val)
-	//	if e != nil {
-	//		return e
-	//	}
-	//}
-	//
-	//db = eng
-	//return nil
 }
 
 const sqlURL = "%s:%s@tcp(%s)/%s?loc=%s&charset=utf8mb4&parseTime=true"
