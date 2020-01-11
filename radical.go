@@ -2,6 +2,7 @@ package excavator
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-xorm/xorm"
 	"github.com/godcong/excavator/net"
@@ -242,15 +243,27 @@ func getMainURL(radicalType RadicalType, url string) string {
 		return url + KangXiPinyin
 	case RadicalTypeKangXiBushou:
 		return url + KangXiBushou
+		//case RadicalTypeKangXiSo:
+		//	return url + "/so/kangxi/"
+		//case RadicalTypeHanChengSo:
+		//	return url + "/so"
 	}
 	return ""
 }
 
 func grabRadicalList(exc *Excavator) (e error) {
-	document, e := net.CacheQuery(getMainURL(exc.radicalType, exc.url))
-	if e != nil {
-		return e
+	mainURL := getMainURL(exc.radicalType, exc.url)
+	if mainURL == "" && exc.radicalType != RadicalTypeKangXiSo || exc.radicalType != RadicalTypeKangXiSo {
+		return errors.New("wrong type")
 	}
+	var document *goquery.Document
+	if mainURL != "" {
+		document, e = net.CacheQuery(mainURL)
+		if e != nil {
+			return e
+		}
+	}
+
 	var rc []*RadicalCharacter
 	switch exc.radicalType {
 	case RadicalTypeHanChengPinyin:
@@ -385,6 +398,8 @@ func grabRadicalList(exc *Excavator) (e error) {
 				continue
 			}
 		}
+	case RadicalTypeKangXiSo:
+	case RadicalTypeHanChengSo:
 	}
 	return nil
 }
