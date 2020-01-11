@@ -19,6 +19,7 @@ const (
 	RadicalTypeKangXiPinyin
 	RadicalTypeKangXiBushou
 	RadicalTypeKangXiBihua
+	RadicalTypeSo
 )
 
 // RadicalCharacter ...
