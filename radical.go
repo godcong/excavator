@@ -24,6 +24,19 @@ const (
 	RadicalTypeKangXiSo
 )
 
+type SoCharacter struct {
+	Zi     string `json:"zi"`
+	URL    string `json:"url"`
+	Py     string `json:"py"`
+	Bushou string `json:"bushou"`
+	Num    string `json:"num"`
+}
+
+type SoCharacterElement struct {
+	Integer     *int64
+	SoCharacter *SoCharacter
+}
+
 // RadicalCharacter ...
 type RadicalCharacter struct {
 	Hash       string `json:"hash" xorm:"pk hash"`
@@ -399,6 +412,19 @@ func grabRadicalList(exc *Excavator) (e error) {
 			}
 		}
 	case RadicalTypeKangXiSo:
+		for idx := range rc {
+			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
+			if e != nil {
+				return e
+			}
+			char := rc[idx]
+			char.CharType = "kangxi"
+			e = fillRadicalDetail(exc, radical, char)
+			if e != nil {
+				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
+				continue
+			}
+		}
 	case RadicalTypeHanChengSo:
 	}
 	return nil
