@@ -21,9 +21,18 @@ const tmpFile = "tmp"
 type Excavator struct {
 	Workspace   string `json:"workspace"`
 	db          *xorm.Engine
+	soList      []string
 	url         string
 	action      []RadicalType
 	radicalType RadicalType
+}
+
+func (exc *Excavator) SoList() []string {
+	return exc.soList
+}
+
+func (exc *Excavator) SetSoList(soList []string) {
+	exc.soList = soList
 }
 
 // DB ...
