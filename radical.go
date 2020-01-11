@@ -16,10 +16,11 @@ const (
 	RadicalTypeHanChengPinyin RadicalType = iota
 	RadicalTypeHanChengBushou
 	RadicalTypeHanChengBihua
+	RadicalTypeHanChengSo
 	RadicalTypeKangXiPinyin
 	RadicalTypeKangXiBushou
 	RadicalTypeKangXiBihua
-	RadicalTypeSo
+	RadicalTypeKangXiSo
 )
 
 // RadicalCharacter ...
