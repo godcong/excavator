@@ -43,7 +43,7 @@ type RadicalCharacter struct {
 	CharType   string `json:"char_type" json:"char_type"`
 	Zi         string `json:"zi" xorm:"zi"`
 	Alphabet   string `json:"alphabet" xorm:"alphabet"`
-	PinYin     string `json:"pinyin" xorm:"pinyin"`
+	PinYin     string `json:"pinyin" json:"py" xorm:"pinyin"`
 	BiHua      string `json:"bihua" xorm:"bihua"`
 	BuShou     string `json:"bushou" xorm:"bushou"`
 	TotalBiHua string `json:"total_bihua" xorm:"total_bihua"`
