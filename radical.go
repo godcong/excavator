@@ -412,20 +412,37 @@ func grabRadicalList(exc *Excavator) (e error) {
 			}
 		}
 	case RadicalTypeKangXiSo:
-		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
+		for _, wd := range exc.SoList() {
+			radical, e := RadicalReader(exc.radicalType, wd, "")
 			if e != nil {
 				return e
 			}
-			char := rc[idx]
+			char := &RadicalCharacter{
+				Zi: wd,
+			}
 			char.CharType = "kangxi"
 			e = fillRadicalDetail(exc, radical, char)
 			if e != nil {
-				log.With("bushou", rc[idx].BuShou, "pinyin", rc[idx].PinYin).Error(e)
+				log.With("so", wd).Error(e)
 				continue
 			}
 		}
 	case RadicalTypeHanChengSo:
+		for _, wd := range exc.SoList() {
+			radical, e := RadicalReader(exc.radicalType, wd, "")
+			if e != nil {
+				return e
+			}
+			char := &RadicalCharacter{
+				Zi: wd,
+			}
+			char.CharType = "kangxi"
+			e = fillRadicalDetail(exc, radical, char)
+			if e != nil {
+				log.With("so", wd).Error(e)
+				continue
+			}
+		}
 	}
 	return nil
 }
