@@ -266,7 +266,7 @@ func getMainURL(radicalType RadicalType, url string) string {
 
 func grabRadicalList(exc *Excavator) (e error) {
 	mainURL := getMainURL(exc.radicalType, exc.url)
-	if mainURL == "" && exc.radicalType != RadicalTypeKangXiSo || exc.radicalType != RadicalTypeKangXiSo {
+	if mainURL == "" && (exc.radicalType != RadicalTypeKangXiSo && exc.radicalType != RadicalTypeHanChengSo) {
 		return errors.New("wrong type")
 	}
 	var document *goquery.Document
