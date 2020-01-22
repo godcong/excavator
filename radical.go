@@ -281,12 +281,11 @@ func grabRadicalList(exc *Excavator) (e error) {
 	switch exc.radicalType {
 	case RadicalTypeHanChengPinyin:
 		rc = analyzePinyinRadical(document)
-		bytes, e := json.Marshal(rc)
-		if e != nil {
-			return e
-		}
 		if debug {
-			log.With("size", len(rc)).Info(string(bytes))
+			bytes, e := json.Marshal(rc)
+			if e == nil {
+				log.With("size", len(rc)).Info(string(bytes))
+			}
 		}
 		for idx := range rc {
 			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
