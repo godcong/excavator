@@ -62,6 +62,22 @@ func (r *RadicalCharacter) GenHash() string {
 	return net.Hash(r.CharType + "_" + r.Zi)
 }
 
+func RadicalReaderSo(radicalType RadicalType, wd string, qb string) (*RadicalSo, error) {
+	reader, e := NewQuery().Grab(radicalType)(wd, qb)
+	if e != nil {
+		return nil, e
+	}
+
+	bytes, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	if debug {
+		log.With("info", string(bytes)).Info("radical reader")
+	}
+	return UnmarshalRadicalSo(bytes)
+}
+
 func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, error) {
 	reader, e := NewQuery().Grab(radicalType)(wd, qb)
 	if e != nil {
@@ -84,6 +100,23 @@ type Radical []RadicalUnion
 // UnmarshalRadical ...
 func UnmarshalRadical(data []byte) (*Radical, error) {
 	var r Radical
+	err := json.Unmarshal(data, &r)
+	return &r, err
+}
+
+type RadicalSo [][]RadicalSoElement
+
+func (so *RadicalSo) Radical() *Radical {
+	return &Radical{}
+}
+
+type RadicalSoElement struct {
+	Integer      *int64
+	RadicalUnion *RadicalUnion
+}
+
+func UnmarshalRadicalSo(data []byte) (*RadicalSo, error) {
+	var r RadicalSo
 	err := json.Unmarshal(data, &r)
 	return &r, err
 }
@@ -412,7 +445,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 		}
 	case RadicalTypeKangXiSo:
 		for _, wd := range exc.SoList() {
-			radical, e := RadicalReader(exc.radicalType, wd, "")
+			radical, e := RadicalReaderSo(exc.radicalType, wd, "")
 			if e != nil {
 				return e
 			}
@@ -420,7 +453,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 				Zi: wd,
 			}
 			char.CharType = "kangxi"
-			e = fillRadicalDetail(exc, radical, char)
+			e = fillRadicalDetail(exc, radical.Radical(), char)
 			if e != nil {
 				log.With("so", wd).Error(e)
 				continue
@@ -428,7 +461,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 		}
 	case RadicalTypeHanChengSo:
 		for _, wd := range exc.SoList() {
-			radical, e := RadicalReader(exc.radicalType, wd, "")
+			radical, e := RadicalReaderSo(exc.radicalType, wd, "")
 			if e != nil {
 				return e
 			}
@@ -436,7 +469,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 				Zi: wd,
 			}
 			char.CharType = "kangxi"
-			e = fillRadicalDetail(exc, radical, char)
+			e = fillRadicalDetail(exc, radical.Radical(), char)
 			if e != nil {
 				log.With("so", wd).Error(e)
 				continue
