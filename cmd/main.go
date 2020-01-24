@@ -11,7 +11,22 @@ import (
 func main() {
 	fromDB := excavator.InitMysql("127.0.0.1:3306", "root", "111111")
 
-	db := fate.InitDatabaseFromConfig(config.Config{})
+	db := fate.InitDatabaseFromConfig(config.Config{
+		Database: config.Database{
+			Host:         "localhost",
+			Port:         "3306",
+			User:         "root",
+			Pwd:          "111111",
+			Name:         "fate",
+			MaxIdleCon:   0,
+			MaxOpenCon:   0,
+			Driver:       "mysql",
+			File:         "",
+			Dsn:          "",
+			ShowSQL:      true,
+			ShowExecTime: false,
+		},
+	})
 
 	chars := make(chan *excavator.Character)
 
