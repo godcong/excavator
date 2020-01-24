@@ -107,7 +107,16 @@ func UnmarshalRadical(data []byte) (*Radical, error) {
 type RadicalSo [][]RadicalSoElement
 
 func (so *RadicalSo) Radical() *Radical {
-	return &Radical{}
+	if so == nil || ([][]RadicalSoElement)(*so)[0] == nil || len(([][]RadicalSoElement)(*so)[0]) < 2 {
+		return nil
+	}
+
+	elements := ([][]RadicalSoElement)(*so)[0][1]
+
+	return &Radical{
+		*elements.RadicalUnion,
+	}
+
 }
 
 type RadicalSoElement struct {
