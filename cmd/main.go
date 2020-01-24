@@ -1,93 +1,116 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-	"sort"
-
+	"github.com/go-xorm/xorm"
 	"github.com/godcong/excavator"
-	"github.com/urfave/cli"
+	"github.com/godcong/excavator/net"
+	"github.com/godcong/fate"
+	"github.com/godcong/fate/config"
 )
 
 func main() {
-	app := cli.App{
-		Version: "v0.0.1",
-		Name:    "excavator",
-		Usage:   "excavator a dictionary",
-		Action: func(c *cli.Context) error {
-			url := ""
-			if c.NArg() > 0 {
-				url = c.Args().Get(0)
+	fromDB := excavator.InitMysql("127.0.0.1:3306", "root", "111111")
+
+	db := fate.InitDatabaseFromConfig(config.Config{})
+
+	chars := make(chan *excavator.Character)
+
+	go getCharacters(fromDB, chars)
+
+	for char := range chars {
+
+		fc, e := db.GetCharacter(fate.Char(char.Ch))
+
+		if e != nil {
+			c := fate.Character{
+				Hash:                     net.Hash(char.Ch),
+				PinYin:                   char.PinYin,
+				Ch:                       char.Ch,
+				Radical:                  char.Radical,
+				RadicalStroke:            char.RadicalStroke,
+				Stroke:                   char.Stroke,
+				IsKangXi:                 char.IsKangXi,
+				KangXi:                   char.KangXi,
+				KangXiStroke:             char.KangXiStroke,
+				SimpleRadical:            char.SimpleRadical,
+				SimpleRadicalStroke:      char.SimpleRadicalStroke,
+				SimpleTotalStroke:        char.SimpleTotalStroke,
+				TraditionalRadical:       char.TraditionalRadical,
+				TraditionalRadicalStroke: char.TraditionalRadicalStroke,
+				TraditionalTotalStroke:   char.TraditionalTotalStroke,
+				NameScience:              char.NameScience,
+				WuXing:                   char.WuXing,
+				Lucky:                    char.Lucky,
+				Regular:                  char.Regular,
+				TraditionalCharacter:     char.TraditionalCharacter,
+				VariantCharacter:         char.VariantCharacter,
+				Comment:                  char.Comment,
 			}
-			exc := excavator.New(url, "")
-			header := make(http.Header)
-			header.Set("Cookie", "hy_so_4=%255B%257B%2522zi%2522%253A%2522%25E8%2592%258B%2522%252C%2522url%2522%253A%252234%252FKOKORNKOCQXVILXVB%252F%2522%252C%2522py%2522%253A%2522ji%25C7%258Eng%252C%2522%252C%2522bushou%2522%253A%2522%25E8%2589%25B9%2522%252C%2522num%2522%253A%252217%2522%257D%255D; ASP.NET_SessionId=zilmx52mwtr3xsq5i212pd5a; UM_distinctid=16c2efb5e9e134-0cfc801ee6ae06-353166-1fa400-16c2efb5e9f3c8; CNZZDATA1267010321=1299014713-1564151968-%7C1564151968; Hm_lvt_cd7ed86134e0e3138a7cf1994e6966c8=1564156322; Hm_lpvt_cd7ed86134e0e3138a7cf1994e6966c8=1564156322")
-			header.Set("Origin", "http://hy.httpcn.com")
-			header.Set("Accept-Encoding", "gzip, deflate")
-			header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,ja;q=0.7,zh-TW;q=0.6")
-			header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Mobile Safari/537.36")
-			header.Set("Content-Type", "application/x-www-form-urlencoded")
-			header.Set("Accept", "application/json")
-			header.Set("Referer", "http://hy.httpcn.com/bushou/kangxi/")
-			header.Set("X-Requested-With", "XMLHttpRequest")
-			header.Set("Connection", "keep-alive")
-			exc.SetHeader(header)
-
-			exc.SetStep(excavator.Step(c.String("step")))
-
-			exc.Run()
-
-			r := exc.Radical()
-			cr := exc.Character()
-			if r != nil {
-				for {
-					select {
-					case rr := <-r:
-						if rr == nil {
-							goto END
-						}
-					}
-				}
+			fixStroke(&c)
+			_, e := db.Database().(*xorm.Engine).InsertOne(&c)
+			if e != nil {
+				panic(e)
 			}
-
-			if cr != nil {
-				for {
-					select {
-					case ccr := <-cr:
-						if ccr == nil {
-							fmt.Println("end")
-							goto END
-						}
-						fmt.Println(ccr.Ch, "inserted")
-					}
-				}
-			}
-		END:
-			return nil
-		},
-		Flags: mainFlags(),
+			continue
+		}
+		fc.Hash = net.Hash(char.Ch)
+		fc.PinYin = char.PinYin
+		fc.Ch = char.Ch
+		fc.Radical = char.Radical
+		fc.RadicalStroke = char.RadicalStroke
+		fc.Stroke = char.Stroke
+		fc.IsKangXi = char.IsKangXi
+		fc.KangXi = char.KangXi
+		fc.KangXiStroke = char.KangXiStroke
+		fc.SimpleRadical = char.SimpleRadical
+		fc.SimpleRadicalStroke = char.SimpleRadicalStroke
+		fc.SimpleTotalStroke = char.SimpleTotalStroke
+		fc.TraditionalRadical = char.TraditionalRadical
+		fc.TraditionalRadicalStroke = char.TraditionalRadicalStroke
+		fc.TraditionalTotalStroke = char.TraditionalTotalStroke
+		fc.NameScience = char.NameScience
+		fc.WuXing = char.WuXing
+		fc.Lucky = char.Lucky
+		fc.Regular = char.Regular
+		fc.TraditionalCharacter = char.TraditionalCharacter
+		fc.VariantCharacter = char.VariantCharacter
+		fc.Comment = char.Comment
+		fixStroke(fc)
+		_, e = db.Database().(*xorm.Engine).Where("hash =?", fc.Hash).Update(fc)
+		if e != nil {
+			panic(e)
+		}
 	}
-	app.Commands = []cli.Command{}
 
-	sort.Sort(cli.FlagsByName(app.Flags))
-	sort.Sort(cli.CommandsByName(app.Commands))
-	err := app.Run(os.Args)
-	if err != nil {
-		return
-	}
 }
 
-func mainFlags() (flags []cli.Flag) {
-	flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "workspace",
-			Usage: "set workspace to storage temp file",
-		},
-		cli.StringFlag{
-			Name:  "step",
-			Usage: "set the run step",
-		},
+func getCharacters(engine *xorm.Engine, c chan<- *excavator.Character) (e error) {
+	rows, e := engine.Rows(&excavator.Character{})
+	if e != nil {
+		return e
 	}
-	return flags
+
+	for rows.Next() {
+		var c excavator.Character
+		e := rows.Scan(&c)
+		if e != nil {
+			return e
+		}
+	}
+	close(c)
+	return nil
+}
+func fixStroke(character *fate.Character) bool {
+	if character.KangXiStroke != 0 {
+		character.ScienceStroke = character.KangXiStroke
+	} else if character.TraditionalTotalStroke != 0 {
+		character.ScienceStroke = character.TraditionalTotalStroke
+	} else if character.Stroke != 0 {
+		character.ScienceStroke = character.Stroke
+	} else if character.SimpleTotalStroke != 0 {
+		character.ScienceStroke = character.SimpleTotalStroke
+	} else {
+		return false
+	}
+	return true
 }
