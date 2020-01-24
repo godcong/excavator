@@ -43,7 +43,7 @@ type RadicalCharacter struct {
 	CharType   string `json:"char_type" json:"char_type"`
 	Zi         string `json:"zi" xorm:"zi"`
 	Alphabet   string `json:"alphabet" xorm:"alphabet"`
-	PinYin     string `json:"pinyin" json:"py" xorm:"pinyin"`
+	PinYin     string `json:"pinyin" xorm:"pinyin"`
 	BiHua      string `json:"bihua" xorm:"bihua"`
 	BuShou     string `json:"bushou" xorm:"bushou"`
 	TotalBiHua string `json:"total_bihua" xorm:"total_bihua"`
@@ -52,6 +52,99 @@ type RadicalCharacter struct {
 	QBNum      string `json:"qb_num" xorm:"qb_num"`
 	Num        string `json:"num" xorm:"num"`
 	URL        string `json:"url" xorm:"url"`
+}
+
+// RadicalUnion ...
+type RadicalUnion struct {
+	String                *string
+	RadicalCharacterArray []RadicalCharacter
+}
+
+// Radical ...
+type Radical []RadicalUnion
+
+type RadicalSo [][]RadicalSoElement
+
+type RadicalSoClass struct {
+	Zi     string `json:"zi"`
+	URL    string `json:"url"`
+	Py     string `json:"py"`
+	Bushou string `json:"bushou"`
+	Num    string `json:"num"`
+}
+
+type RadicalSoElement struct {
+	Integer        *int64
+	RadicalSoClass *RadicalSoClass
+}
+
+func (x *RadicalSoElement) UnmarshalJSON(data []byte) error {
+	x.RadicalSoClass = nil
+	var c RadicalSoClass
+	object, err := unmarshalUnion(data, &x.Integer, nil, nil, nil, false, nil, true, &c, false, nil, false, nil, false)
+	if err != nil {
+		return err
+	}
+	if object {
+		x.RadicalSoClass = &c
+	}
+	return nil
+}
+
+func (x *RadicalSoElement) MarshalJSON() ([]byte, error) {
+	return marshalUnion(x.Integer, nil, nil, nil, false, nil, x.RadicalSoClass != nil, x.RadicalSoClass, false, nil, false, nil, false)
+}
+
+// UnmarshalRadical ...
+func UnmarshalRadical(data []byte) (*Radical, error) {
+	var r Radical
+	err := json.Unmarshal(data, &r)
+	return &r, err
+}
+
+func UnmarshalRadicalSo(data []byte) (*RadicalSo, error) {
+	var r RadicalSo
+	err := json.Unmarshal(data, &r)
+	return &r, err
+}
+
+func (r *RadicalSo) Marshal() ([]byte, error) {
+	return json.Marshal(r)
+}
+func (so *RadicalSo) Radical() *Radical {
+	if so == nil || len(([][]RadicalSoElement)(*so)) < 2 || len(([][]RadicalSoElement)(*so)[1]) == 0 {
+		return nil
+	}
+
+	elements := ([][]RadicalSoElement)(*so)[1]
+
+	var rs []RadicalCharacter
+
+	for _, s := range elements {
+		rs = append(rs, RadicalCharacter{
+			Hash:       "",
+			CharType:   "",
+			Zi:         s.RadicalSoClass.Zi,
+			Alphabet:   "",
+			PinYin:     s.RadicalSoClass.Py,
+			BiHua:      "",
+			BuShou:     s.RadicalSoClass.Bushou,
+			TotalBiHua: "",
+			QiBi:       "",
+			BHNum:      "",
+			QBNum:      "",
+			Num:        s.RadicalSoClass.Num,
+			URL:        s.RadicalSoClass.URL,
+		})
+	}
+
+	return &Radical{
+		RadicalUnion{
+			String:                nil,
+			RadicalCharacterArray: rs,
+		},
+	}
+
 }
 
 func (r *RadicalCharacter) BeforeInsert() {
@@ -94,51 +187,9 @@ func RadicalReader(radicalType RadicalType, wd string, qb string) (*Radical, err
 	return UnmarshalRadical(bytes)
 }
 
-// Radical ...
-type Radical []RadicalUnion
-
-// UnmarshalRadical ...
-func UnmarshalRadical(data []byte) (*Radical, error) {
-	var r Radical
-	err := json.Unmarshal(data, &r)
-	return &r, err
-}
-
-type RadicalSo [][]RadicalSoElement
-
-func (so *RadicalSo) Radical() *Radical {
-	if so == nil || ([][]RadicalSoElement)(*so)[0] == nil || len(([][]RadicalSoElement)(*so)[0]) < 2 {
-		return nil
-	}
-
-	elements := ([][]RadicalSoElement)(*so)[0][1]
-
-	return &Radical{
-		*elements.RadicalUnion,
-	}
-
-}
-
-type RadicalSoElement struct {
-	Integer      *int64
-	RadicalUnion *RadicalUnion
-}
-
-func UnmarshalRadicalSo(data []byte) (*RadicalSo, error) {
-	var r RadicalSo
-	err := json.Unmarshal(data, &r)
-	return &r, err
-}
-
 // Marshal ...
 func (r *Radical) Marshal() ([]byte, error) {
 	return json.Marshal(r)
-}
-
-// RadicalUnion ...
-type RadicalUnion struct {
-	String                *string
-	RadicalCharacterArray []RadicalCharacter
 }
 
 // UnmarshalJSON ...
