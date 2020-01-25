@@ -1,12 +1,18 @@
 package main
 
 import (
-	"github.com/go-xorm/xorm"
 	"github.com/godcong/excavator"
 	"github.com/godcong/excavator/net"
 	"github.com/godcong/fate"
 	"github.com/godcong/fate/config"
+	"github.com/goextension/log"
+	"github.com/goextension/log/zap"
+	"github.com/xormsharp/xorm"
 )
+
+func init() {
+	zap.InitZapFileSugar()
+}
 
 func main() {
 	fromDB := excavator.InitMysql("127.0.0.1:3306", "root", "111111")
@@ -33,7 +39,7 @@ func main() {
 	go getCharacters(fromDB, chars)
 
 	for char := range chars {
-
+		log.Infow("update", "character", char)
 		fc, e := db.GetCharacter(fate.Char(char.Ch))
 
 		if e != nil {
@@ -106,11 +112,12 @@ func getCharacters(engine *xorm.Engine, c chan<- *excavator.Character) (e error)
 	}
 
 	for rows.Next() {
-		var c excavator.Character
-		e := rows.Scan(&c)
+		var ec excavator.Character
+		e := rows.Scan(&ec)
 		if e != nil {
 			return e
 		}
+		c <- &ec
 	}
 	close(c)
 	return nil

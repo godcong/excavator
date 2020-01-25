@@ -8,6 +8,7 @@ require (
 	github.com/go-xorm/xorm v0.7.8
 	github.com/godcong/fate v0.0.0-20200124191318-b8b115f5d715
 	github.com/godcong/go-trait v0.0.0-20190816072228-f216e906756e
+	github.com/goextension/log v0.0.2
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/olivere/elastic v6.2.23+incompatible // indirect
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
