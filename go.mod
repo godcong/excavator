@@ -14,6 +14,7 @@ require (
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/pkg/errors v0.8.1
 	github.com/tebeka/selenium v0.9.4
+	github.com/xormsharp/xorm v1.0.0
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 )

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-xorm/xorm"
+	"github.com/xormsharp/xorm"
 )
 
 var log = trait.NewZapFileSugar("excavator.log")
