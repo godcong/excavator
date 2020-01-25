@@ -108,12 +108,13 @@ func UnmarshalRadicalSo(data []byte) (*RadicalSo, error) {
 	return &r, err
 }
 
-func (r *RadicalSo) Marshal() ([]byte, error) {
-	return json.Marshal(r)
+func (so *RadicalSo) Marshal() ([]byte, error) {
+	return json.Marshal(so)
 }
-func (so *RadicalSo) Radical() *Radical {
+func (so *RadicalSo) Radical() (r *Radical) {
+	r = &Radical{}
 	if so == nil || len(([][]RadicalSoElement)(*so)) < 2 || len(([][]RadicalSoElement)(*so)[1]) == 0 {
-		return nil
+		return r
 	}
 
 	elements := ([][]RadicalSoElement)(*so)[1]
