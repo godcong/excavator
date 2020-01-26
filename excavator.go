@@ -89,14 +89,12 @@ func (exc *Excavator) init() {
 }
 
 // Run ...
-func (exc *Excavator) Run() error {
+func (exc Excavator) Run() error {
 	log.Info("excavator run")
 	exc.init()
 
 	for _, act := range exc.action {
-		excClone := *exc
-		excClone.radicalType = act
-		e := grabRadicalList(&excClone)
+		e := grabRadicalList(&exc, act)
 		if e != nil {
 			log.Error(e)
 			panic(e)
