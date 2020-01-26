@@ -373,7 +373,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 	}
 
 	var rc []*RadicalCharacter
-	switch exc.radicalType {
+	switch radicalType {
 	case RadicalTypeHanChengPinyin:
 		rc = analyzePinyinRadical(document)
 		if debug {
@@ -383,7 +383,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			}
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
+			radical, e := RadicalReader(radicalType, rc[idx].PinYin, "")
 			if e != nil {
 				return e
 			}
@@ -405,7 +405,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			log.With("size", len(rc)).Info(string(bytes))
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
+			radical, e := RadicalReader(radicalType, rc[idx].BuShou, "")
 			if e != nil {
 				return e
 			}
@@ -427,7 +427,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			log.With("size", len(rc)).Info(string(bytes))
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
+			radical, e := RadicalReader(radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
 				return e
 			}
@@ -449,7 +449,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			log.With("size", len(rc)).Info(string(bytes))
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].BuShou, "")
+			radical, e := RadicalReader(radicalType, rc[idx].BuShou, "")
 			if e != nil {
 				return e
 			}
@@ -471,7 +471,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			log.With("size", len(rc)).Info(string(bytes))
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].PinYin, "")
+			radical, e := RadicalReader(radicalType, rc[idx].PinYin, "")
 			if e != nil {
 				return e
 			}
@@ -493,7 +493,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 			log.With("size", len(rc)).Info(string(bytes))
 		}
 		for idx := range rc {
-			radical, e := RadicalReader(exc.radicalType, rc[idx].BHNum, rc[idx].QBNum)
+			radical, e := RadicalReader(radicalType, rc[idx].BHNum, rc[idx].QBNum)
 			if e != nil {
 				return e
 			}
@@ -507,7 +507,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 		}
 	case RadicalTypeKangXiSo:
 		for _, wd := range exc.SoList() {
-			radical, e := RadicalReaderSo(exc.radicalType, wd, "")
+			radical, e := RadicalReaderSo(radicalType, wd, "")
 			if e != nil {
 				return e
 			}
@@ -523,7 +523,7 @@ func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
 		}
 	case RadicalTypeHanChengSo:
 		for _, wd := range exc.SoList() {
-			radical, e := RadicalReaderSo(exc.radicalType, wd, "")
+			radical, e := RadicalReaderSo(radicalType, wd, "")
 			if e != nil {
 				return e
 			}

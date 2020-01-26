@@ -135,11 +135,11 @@ func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalChara
 	return nil
 }
 
-func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
+func findRadical(exc *Excavator, rt RadicalType, characters chan<- *RadicalCharacter) {
 	defer func() {
 		characters <- nil
 	}()
-	i, e := exc.db.Where("char_type = ?", radicalCharType(exc.radicalType)).Count(RadicalCharacter{})
+	i, e := exc.db.Where("char_type = ?", radicalCharType(rt)).Count(RadicalCharacter{})
 	if e != nil || i == 0 {
 		log.Error(e)
 		return
@@ -149,7 +149,7 @@ func findRadical(exc *Excavator, characters chan<- *RadicalCharacter) {
 	}
 	for x := int64(0); x < i; x += 500 {
 		rc := new([]RadicalCharacter)
-		e := exc.db.Where("char_type = ?", radicalCharType(exc.radicalType)).Limit(500, int(x)).Find(rc)
+		e := exc.db.Where("char_type = ?", radicalCharType(rt)).Limit(500, int(x)).Find(rc)
 		if e != nil {
 			log.Error(e)
 			continue
@@ -241,7 +241,7 @@ func getCharacter(document *goquery.Document, c *RadicalCharacter, kangxi bool) 
 
 func parseCharacter(exc *Excavator, radicalType RadicalType) (e error) {
 	ch := make(chan *RadicalCharacter)
-	go findRadical(exc, ch)
+	go findRadical(exc, radicalType, ch)
 ParseEnd:
 	for {
 		select {
