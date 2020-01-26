@@ -89,22 +89,24 @@ func (exc *Excavator) init() {
 }
 
 // Run ...
-func (exc Excavator) Run() error {
+func (exc Excavator) Run() (e error) {
 	log.Info("excavator run")
 	exc.init()
 
 	for _, act := range exc.action {
-		e := grabRadicalList(&exc, act)
+		e = grabRadicalList(&exc, act)
 		if e != nil {
 			log.Error(e)
 			panic(e)
 		}
+
+		e = parseCharacter(&exc, act)
+		if e != nil {
+			return e
+		}
+
 	}
 
-	e := parseCharacter(exc)
-	if e != nil {
-		return e
-	}
 	return nil
 }
 func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalCharacter) (err error) {
@@ -237,7 +239,7 @@ func getCharacter(document *goquery.Document, c *RadicalCharacter, kangxi bool) 
 	return ch
 }
 
-func parseCharacter(exc *Excavator) (e error) {
+func parseCharacter(exc *Excavator, radicalType RadicalType) (e error) {
 	ch := make(chan *RadicalCharacter)
 	go findRadical(exc, ch)
 ParseEnd:
@@ -248,12 +250,12 @@ ParseEnd:
 				break ParseEnd
 			}
 			log.With("url", c.URL).Info("character")
-			document, e := net.CacheQuery(characterURL(exc, c.URL))
+			document, e := net.CacheQuery(characterURL(exc.url, radicalType, c.URL))
 			if e != nil {
 				log.Error(e)
 				continue
 			}
-			character := getCharacter(document, c, isKangxi(exc.radicalType))
+			character := getCharacter(document, c, isKangxi(radicalType))
 			_, e = character.InsertOrUpdate(exc.db.Where(""))
 			if e != nil {
 				return e
@@ -263,13 +265,12 @@ ParseEnd:
 	return nil
 }
 
-func characterURL(excavator *Excavator, url string) string {
-	switch excavator.radicalType {
+func characterURL(m string, rt RadicalType, url string) string {
+	switch rt {
 	case RadicalTypeKangXiPinyin, RadicalTypeKangXiBushou, RadicalTypeKangXiBihua:
-		return URL(excavator.url, "html/kangxi", url)
-	default:
-		return URL(excavator.url, "html/zi", url)
+		return URL(m, "html/kangxi", url)
 	}
+	return URL(m, "html/zi", url)
 }
 func radicalCharType(radicalType RadicalType) string {
 	switch radicalType {
