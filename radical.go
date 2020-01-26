@@ -330,6 +330,7 @@ func isKangxi(radicalType RadicalType) bool {
 	switch radicalType {
 	case RadicalTypeKangXiBihua,
 		RadicalTypeKangXiPinyin,
+		RadicalTypeKangXiSo,
 		RadicalTypeKangXiBushou:
 		return true
 	}
@@ -529,7 +530,7 @@ func grabRadicalList(exc *Excavator) (e error) {
 			char := &RadicalCharacter{
 				Zi: wd,
 			}
-			char.CharType = "kangxi"
+			char.CharType = "hancheng"
 			e = fillRadicalDetail(exc, radical.Radical(), char)
 			if e != nil {
 				log.With("so", wd).Error(e)
