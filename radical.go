@@ -359,9 +359,9 @@ func getMainURL(radicalType RadicalType, url string) string {
 	return ""
 }
 
-func grabRadicalList(exc *Excavator) (e error) {
-	mainURL := getMainURL(exc.radicalType, exc.url)
-	if mainURL == "" && (exc.radicalType != RadicalTypeKangXiSo && exc.radicalType != RadicalTypeHanChengSo) {
+func grabRadicalList(exc *Excavator, radicalType RadicalType) (e error) {
+	mainURL := getMainURL(radicalType, exc.url)
+	if mainURL == "" && (radicalType != RadicalTypeKangXiSo && radicalType != RadicalTypeHanChengSo) {
 		return errors.New("wrong type")
 	}
 	var document *goquery.Document
