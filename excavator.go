@@ -274,7 +274,7 @@ func characterURL(m string, rt RadicalType, url string) string {
 }
 func radicalCharType(radicalType RadicalType) string {
 	switch radicalType {
-	case RadicalTypeHanChengPinyin, RadicalTypeHanChengBushou, RadicalTypeHanChengBihua:
+	case RadicalTypeHanChengPinyin, RadicalTypeHanChengBushou, RadicalTypeHanChengBihua, RadicalTypeHanChengSo:
 		return "hancheng"
 	default:
 		//RadicalTypeKangXiBihua, RadicalTypeKangXiPinyin, RadicalTypeKangXiBushou:
