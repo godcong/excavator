@@ -19,12 +19,12 @@ const tmpFile = "tmp"
 
 // Excavator ...
 type Excavator struct {
-	Workspace   string `json:"workspace"`
-	db          *xorm.Engine
-	soList      []string
-	url         string
-	action      []RadicalType
-	radicalType RadicalType
+	Workspace string `json:"workspace"`
+	db        *xorm.Engine
+	soList    []string
+	url       string
+	action    []RadicalType
+	//radicalType RadicalType
 }
 
 func (exc *Excavator) SoList() []string {
@@ -66,11 +66,10 @@ func ActionArgs(act ...RadicalType) ExArgs {
 }
 
 // New ...
-func New(radicalType RadicalType, args ...ExArgs) *Excavator {
+func New(args ...ExArgs) *Excavator {
 	exc := &Excavator{
-		radicalType: radicalType,
-		Workspace:   getDefaultPath(),
-		url:         DefaultMainPage,
+		Workspace: getDefaultPath(),
+		url:       DefaultMainPage,
 	}
 	for _, arg := range args {
 		arg(exc)
