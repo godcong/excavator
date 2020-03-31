@@ -1,6 +1,7 @@
 package excavator
 
 import (
+	"fmt"
 	"github.com/godcong/excavator/net"
 	"github.com/xormsharp/xorm"
 	"strconv"
@@ -104,6 +105,7 @@ func (c *Character) InsertOrUpdate(session *xorm.Session) (i int64, e error) {
 	if e != nil {
 		return 0, e
 	}
+	fmt.Printf("char:%+v hash:%s\n", c, net.Hash(c.Ch))
 	if !b {
 		i, e = session.InsertOne(c)
 		return
