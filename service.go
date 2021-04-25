@@ -15,11 +15,11 @@ func StartService() {
 		<-time.After(5 * time.Second)
 		err := browser.OpenURL("http://localhost:8080")
 		if err != nil {
-			log.Error(err)
+			Log.Error(err)
 		}
 	}()
 
 	if err := engine.Run(); err != nil {
-		log.Fatal(err)
+		Log.Fatal(err)
 	}
 }

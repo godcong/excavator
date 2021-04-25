@@ -1,284 +1,258 @@
 package excavator
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/godcong/excavator/net"
-	"github.com/godcong/go-trait"
-	"os"
-	"path/filepath"
-	"strings"
+	"errors"
+	"excavator/config"
+	"excavator/models"
+	"excavator/net"
+	"fmt"
+	"strconv"
 
-	"github.com/xormsharp/xorm"
+	"github.com/antchfx/htmlquery"
+	"github.com/godcong/go-trait"
+	"golang.org/x/net/html"
+	"xorm.io/xorm"
 )
 
-var log = trait.NewZapFileSugar("excavator.log")
-var db *xorm.Engine
-var debug = false
+var Log = trait.NewZapFileSugar("excavator.log")
 
-const tmpFile = "tmp"
+var debug = false
 
 // Excavator ...
 type Excavator struct {
-	Workspace string `json:"workspace"`
-	db        *xorm.Engine
-	soList    []string
-	url       string
-	action    []RadicalType
-	//radicalType RadicalType
-}
-
-func (exc *Excavator) SoList() []string {
-	return exc.soList
-}
-
-func (exc *Excavator) SetSoList(soList []string) {
-	exc.soList = soList
-}
-
-// DB ...
-func (exc *Excavator) DB() *xorm.Engine {
-	return exc.db
-}
-
-// SetDB ...
-func (exc *Excavator) SetDB(db *xorm.Engine) {
-	exc.db = db
-}
-
-type ExArgs func(exc *Excavator)
-
-func URLArgs(url string) ExArgs {
-	return func(exc *Excavator) {
-		exc.url = url
-	}
-}
-
-func DBArgs(engine *xorm.Engine) ExArgs {
-	return func(exc *Excavator) {
-		exc.db = engine
-	}
-}
-
-func ActionArgs(act ...RadicalType) ExArgs {
-	return func(exc *Excavator) {
-		exc.action = act
-	}
+	Db           *xorm.Engine
+	DbFate       *xorm.Engine
+	base_url     string
+	unicode_file string
+	cache        *net.Cache
+	action       string
 }
 
 // New ...
-func New(args ...ExArgs) *Excavator {
+func New(args ...func(exc *Excavator)) *Excavator {
+	cfg := config.LoadConfig()
+
 	exc := &Excavator{
-		Workspace: getDefaultPath(),
-		url:       DefaultMainPage,
+		Db:           InitXorm(&cfg.DatabaseExc),
+		DbFate:       InitXorm(&cfg.DatabaseFate),
+		base_url:     cfg.BaseUrl,
+		unicode_file: cfg.UnicodeFile,
+		cache:        net.NewCache(cfg.TmpDir),
 	}
+
 	for _, arg := range args {
 		arg(exc)
 	}
 	return exc
 }
 
-// init ...
-func (exc *Excavator) init() {
-	if exc.db == nil {
-		exc.db = InitMysql("localhost:3306", "root", "111111")
-	}
-	e := exc.db.Sync2(&RadicalCharacter{}, &Character{})
-	if e != nil {
-		panic(e)
-	}
-}
-
 // Run ...
-func (exc Excavator) Run() (e error) {
-	log.Info("excavator run")
-	exc.init()
+func (exc *Excavator) Run() (e error) {
+	if exc.Db == nil {
+		panic("没有初始化")
+	}
 
-	for _, act := range exc.action {
-		e = grabRadicalList(&exc, act)
+	Log.Info("excavator run")
+
+	switch exc.action {
+	case config.ActionGrab:
+		e = grabHanChengList(exc)
 		if e != nil {
-			log.Error(e)
+			Log.Error(e)
 			panic(e)
 		}
 
-		e = parseCharacter(&exc, act)
+		ResetExc(exc.Db)
+		ResetFate(exc.DbFate)
+
+		e = parseCharacter(exc)
 		if e != nil {
 			return e
 		}
 
-	}
-
-	return nil
-}
-func fillRadicalDetail(exc *Excavator, radical *Radical, character *RadicalCharacter) (err error) {
-	if debug {
-		log.Infof("%+v", radical)
-	}
-	for _, tmp := range *(*[]RadicalUnion)(radical) {
-		for i := range tmp.RadicalCharacterArray {
-			rc := tmp.RadicalCharacterArray[i]
-			rc.Alphabet = character.Alphabet
-			rc.BiHua = character.BiHua
-			rc.QiBi = character.QiBi
-			rc.QBNum = character.QBNum
-			rc.BHNum = character.BHNum
-			rc.TotalBiHua = character.TotalBiHua
-			rc.CharType = character.CharType
-			one, e := insertOrUpdateRadicalCharacter(exc.db, &rc)
-			if e != nil {
-				return e
-			}
-			if debug {
-				log.With("num", one).Info(rc)
-			}
+		e = variantChars(exc)
+		if e != nil {
+			return e
 		}
+
+		e = simplifyChars(exc)
+		if e != nil {
+			return e
+		}
+	case config.ActionParse:
+		ResetExc(exc.Db)
+		ResetFate(exc.DbFate)
+
+		e = parseCharacter(exc)
+		if e != nil {
+			return e
+		}
+
+		e = variantChars(exc)
+		if e != nil {
+			return e
+		}
+
+		e = simplifyChars(exc)
+		if e != nil {
+			return e
+		}
+	case config.ActionVariant:
+		ResetFate(exc.DbFate)
+
+		e = variantChars(exc)
+		if e != nil {
+			return e
+		}
+
+		e = simplifyChars(exc)
+		if e != nil {
+			return e
+		}
+	case config.ActionSimplify:
+		ResetFate(exc.DbFate)
+
+		e = simplifyChars(exc)
+		if e != nil {
+			return e
+		}
+	default:
+		fmt.Printf("设置config.json中的action。有五种选择“%s”，“%s”，“%s”，“%s”，“”\n", config.ActionSimplify,
+			config.ActionVariant, config.ActionParse, config.ActionGrab)
 	}
+
 	return nil
 }
 
-func findRadical(exc *Excavator, rt RadicalType, characters chan<- *RadicalCharacter) {
+//从数据库取出汉程字符链接
+func getHanChengFromDB(exc *Excavator, hanCheng chan<- *models.HanChengChar) {
 	defer func() {
-		characters <- nil
+		hanCheng <- nil
 	}()
-	i, e := exc.db.Where("char_type = ?", radicalCharType(rt)).Count(RadicalCharacter{})
+	i, e := exc.Db.Count(models.HanChengChar{})
 	if e != nil || i == 0 {
-		log.Error(e)
+		Log.Error(e)
 		return
 	}
 	if debug {
-		log.With("total", i).Info("total char")
+		Log.With("total", i).Info("total char")
 	}
-	for x := int64(0); x < i; x += 500 {
-		rc := new([]RadicalCharacter)
-		e := exc.db.Where("char_type = ?", radicalCharType(rt)).Limit(500, int(x)).Find(rc)
+	for x := 0; x < int(i); x += 500 {
+		rc := new([]models.HanChengChar)
+		e := exc.Db.Limit(500, x).Find(rc)
 		if e != nil {
-			log.Error(e)
+			Log.Error(e)
 			continue
 		}
 		for i := range *rc {
-			characters <- &(*rc)[i]
+			hanCheng <- &(*rc)[i]
 		}
 	}
 }
 
-// IsExist ...
-func (exc *Excavator) IsExist(name string) bool {
-	_, e := os.Open(name)
-	return e == nil || os.IsExist(e)
-}
+//解析汉程桌面版的文字信息
+func getCharacter(exc *Excavator, unid int, html_node *html.Node) (err error) {
+	he_xin_block := htmlquery.FindOne(html_node, "//p[contains(@class, 'text15')]")
 
-// GetPath ...
-func getDefaultPath() string {
-	wd, e := os.Getwd()
-	if e != nil {
-		panic(e)
-	}
-	return filepath.Join(wd, tmpFile)
-}
-
-/*URL 拼接地址 */
-func URL(prefix string, uris ...string) string {
-	end := len(prefix)
-	if end > 1 && prefix[end-1] == '/' {
-		prefix = prefix[:end-1]
+	if he_xin_block == nil {
+		return errors.New("核心区找不到")
 	}
 
-	var url = []string{prefix}
-	for _, v := range uris {
-		url = append(url, TrimSlash(v))
+	//基本解释
+	ji_ben_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'content16')]/span[contains(text(), '基')]/..")
+
+	if ji_ben_block == nil {
+		panic("基本解释区找不到")
 	}
-	return strings.Join(url, "/")
-}
 
-// TrimSlash ...
-func TrimSlash(s string) string {
-	if size := len(s); size > 1 {
-		if s[size-1] == '/' {
-			s = s[:size-1]
-		}
-		if s[0] == '/' {
-			s = s[1:]
-		}
+	err = parseComment(exc, unid, html_node, ji_ben_block)
+
+	if err == nil {
+		parseJiBenVariant(exc, unid, html_node, ji_ben_block)
 	}
-	return s
-}
 
-func getCharacter(document *goquery.Document, c *RadicalCharacter, kangxi bool) *Character {
-	ch := NewCharacter()
-	ch.IsKangXi = kangxi
-	ch.Ch = c.Zi
-	document.Find("div.hanyu-tujie.mui-clearfix > div.info > p.mui-ellipsis").Each(func(i int, selection *goquery.Selection) {
-		if ch.IsKangXi {
-			ch.KangXi = c.Zi
-			e := parseKangXiCharacter(i, selection, ch)
-			if e != nil {
-				log.Error(e)
-			}
-		} else {
-			e := parseZiCharacter(i, selection, ch)
-			if e != nil {
-				log.Error(e)
-			}
-		}
-	})
+	parseVariant(exc, unid, html_node, he_xin_block, ji_ben_block)
 
-	document.Find("div > ul.hanyu-cha-info.mui-clearfix").Each(func(i int, selection *goquery.Selection) {
-		e := parseDictInformation(selection, ch)
-		if debug {
-			log.Infof("%+v", ch)
-		}
-		if e != nil {
-			log.Error(e)
-		}
-	})
-	document.Find("div > ul.hanyu-cha-ul").Each(func(i int, selection *goquery.Selection) {
-		e := parseDictComment(selection, ch)
-		if e != nil {
-			log.Error(e)
-		}
-	})
-	return ch
-}
+	kang := parseKangXiStroke(unid, he_xin_block)
 
-func parseCharacter(exc *Excavator, radicalType RadicalType) (e error) {
-	ch := make(chan *RadicalCharacter)
-	go findRadical(exc, radicalType, ch)
-ParseEnd:
-	for {
-		select {
-		case c := <-ch:
-			if c == nil {
-				break ParseEnd
-			}
-			log.With("url", c.URL).Info("character")
-			document, e := net.CacheQuery(characterURL(exc.url, radicalType, c.URL))
-			if e != nil {
-				log.Error(e)
-				continue
-			}
-			character := getCharacter(document, c, isKangxi(radicalType))
-			_, e = character.InsertOrUpdate(exc.db.Where(""))
-			if e != nil {
-				return e
-			}
-		}
+	glyph := models.Glyph{
+		Unid: unid,
 	}
+
+	parseZiCharacter(exc, &glyph, unid, html_node, he_xin_block, ji_ben_block)
+
+	parseKangXi(exc, unid, &glyph, html_node, kang)
+
+	parseBianMa(exc, unid, html_node)
+
+	parseDictInformation(exc, unid, html_node)
+
+	parseYinYun(exc, unid, html_node, he_xin_block)
+
+	parseSuoYin(exc, unid, html_node)
+
+	parseXiangXi(exc, unid, html_node)
+
+	parseHanYuDaZiDian(exc, unid, html_node)
+
+	shuo_wen_block := htmlquery.FindOne(html_node, "//div[@id='div_a5']")
+
+	parseShuoWenJieZi(exc, unid, html_node, shuo_wen_block)
+
+	parseYanBian(exc, unid, html_node, shuo_wen_block)
+
+	cis := map[string]bool{}
+
+	parseChengYu(exc, unid, html_node, cis)
+
+	parseShiCi(exc, unid, html_node, cis)
+
+	parseCiYu(exc, unid, html_node, cis)
+
 	return nil
 }
 
-func characterURL(m string, rt RadicalType, url string) string {
-	switch rt {
-	case RadicalTypeKangXiPinyin, RadicalTypeKangXiBushou, RadicalTypeKangXiBihua:
-		return URL(m, "html/kangxi", url)
+//从汉程解析每一个字
+func parseCharacter(exc *Excavator) (err error) {
+	hcc := make(chan *models.HanChengChar, 100)
+	go getHanChengFromDB(exc, hcc)
+
+	invalids := map[int]bool{}
+
+	for {
+		c := <-hcc
+		if c == nil {
+			break
+		}
+		Log.With("url", c.Url).Info("character")
+
+		html_node, e := net.CacheQuery(UrlMerge(exc.base_url, c.Url))
+
+		//document, e := net.CacheQuery(characterURL(exc.url, radicalType, c.URL))
+		if e != nil {
+			Log.Error(e)
+			continue
+		}
+
+		e = getCharacter(exc, c.Unid, html_node)
+		// _, e = InsertOrUpdate(character, exc.db.Where(""))
+		if e != nil {
+			if e.Error() == "核心区找不到" || e.Error() == "基本解释同义字格式不对" {
+				invalids[c.Unid] = true
+				continue
+			} else if e.Error() == "没有部首信息" {
+				invalids[c.Unid] = true
+				continue
+			}
+			return e
+		}
 	}
-	return URL(m, "html/zi", url)
-}
-func radicalCharType(radicalType RadicalType) string {
-	switch radicalType {
-	case RadicalTypeHanChengPinyin, RadicalTypeHanChengBushou, RadicalTypeHanChengBihua, RadicalTypeHanChengSo:
-		return "hancheng"
-	default:
-		//RadicalTypeKangXiBihua, RadicalTypeKangXiPinyin, RadicalTypeKangXiBushou:
-		return "kangxi"
+
+	for k := range invalids {
+		fmt.Println(strconv.FormatUint(uint64(k), 16), " ", string(rune(k)))
 	}
-	//return ""
+
+	fmt.Println(len(invalids))
+
+	return nil
 }

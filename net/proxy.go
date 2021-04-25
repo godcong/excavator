@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-var log = trait.NewZapSugar()
+var Log = trait.NewZapSugar()
 var cli *http.Client
 
 type ProxyArgs func(cli *http.Client)

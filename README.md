@@ -1,27 +1,57 @@
 # excavator
 
+从ipfs下载：[数据包](https://ipfs.io/ipfs/QmbNk3bHLxVNeigWHvpRXAwVG5mCXb7oiniLZkJeuMxjpM?filename=excavator_unzip.exe)
+
+此链接不能用浏览器打开，可以找一个ipfs工具（如ipfs-desktop），获取链接中的CID，检查文件，然后下载
+
+推荐使用数据包，因为重新捕获数据对网站压力很大。
+
+数据包在win10命名为exe可以自解压，linux需要使用带zstd的codec的7zip工具解压。
+
+数据包内容：
+```
+.
+└── Temp
+    ├── GB.txt （Unicode列表）
+    ├── config.json （配置文件）
+    ├── exc.db （excavator的sqlite文件）
+    ├── ft.db （fate的sqlite文件）
+    ├── tool.httpcn.com （字的页面缓存）
+    └── unicode （万国码列表对应的页面缓存）
+```
+
+查看sqlite内容可以用sqlitestudio：
+
+```powershell
+choco install sqlitestudio -y
+```
+
 ## How to use
-```go
-	excH := New(RadicalTypeHanChengPinyin, ActionArgs(RadicalTypeHanChengPinyin, RadicalTypeHanChengBihua, RadicalTypeHanChengBushou))
-	e2 := excH.Run()
-	if e2 != nil {
-		t.Fatal(e2)
-	}
-	excK := New(RadicalTypeKangXiPinyin, ActionArgs(RadicalTypeKangXiPinyin, RadicalTypeKangXiBihua, RadicalTypeKangXiBushou))
-	e1 := excK.Run()
-	if e1 != nil {
-		t.Fatal(e1)
-	}
+
+由于使用sqlite，请确保PATH中能搜索到gcc
+
+程序运行需要使config.json存储余当前路径。（把数据包放在NVME或者RAMDISK可以明显加速，实测40分钟可以完成）
+
+```bash
+go test -timeout 3600s -run ^TestExcavator_Run$ excavator -v
 ```
-	
-### this tool used mysql address localhost:3306/root/111111 with default database.	
-### if want change db address use:
-	
-```go
-   exc :=New(RadicalTypeHanChengPinyin, DBArgs(#db#))
-   //or
-   exc.SetDB(#db#)
+
+In path `regular/`, there is another patch tool for regular.
+
+```bash
+go test -timeout 30s -run ^TestNew$ excavator/regular -v
 ```
-if you want to change the database mssql/postgre...
-new a engine with xorm by yourself 
-then add it by DBArgs().
+
+In path `strokefix/`, there is another patch tool for regular.
+
+```bash
+go test -timeout 30s -run ^TestNumberChar$ excavator/strokefix -v
+```
+
+
+### this tool used `exc.db` and `ft.db` as sqlite database storage.
+
+###if you want to change the database
+
+change the definition in `config.json`
+when created them with sql file in path `data/`.

@@ -1,412 +1,484 @@
 package excavator
 
 import (
-	"fmt"
-	"github.com/godcong/excavator/net"
-	"github.com/xormsharp/xorm"
+	"errors"
+	"excavator/models"
+	"math/bits"
 	"strconv"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/antchfx/htmlquery"
+	"golang.org/x/exp/utf8string"
+	"golang.org/x/net/html"
 )
 
-// CharacterFunc ...
-type CharacterFunc func(character *Character) error
-
-//Character 字符
-type Character struct {
-	Hash                     string   `xorm:"pk hash"`
-	PinYin                   []string `xorm:"default() notnull pin_yin"`                     //拼音
-	Ch                       string   `xorm:"default() notnull ch"`                          //字符
-	Radical                  string   `xorm:"default() notnull radical"`                     //部首
-	RadicalStroke            int      `xorm:"default(0) notnull radical_stroke"`             //部首笔画
-	Stroke                   int      `xorm:"default() notnull stroke"`                      //总笔画数
-	IsKangXi                 bool     `xorm:"default(0) notnull is_kang_xi"`                 //是否康熙字典
-	KangXi                   string   `xorm:"default() notnull kang_xi"`                     //康熙
-	KangXiStroke             int      `xorm:"default(0) notnull kang_xi_stroke"`             //康熙笔画
-	SimpleRadical            string   `xorm:"default() notnull simple_radical"`              //简体部首
-	SimpleRadicalStroke      int      `xorm:"default(0) notnull simple_radical_stroke"`      //简体部首笔画
-	SimpleTotalStroke        int      `xorm:"default(0) notnull simple_total_stroke"`        //简体笔画
-	TraditionalRadical       string   `xorm:"default() notnull traditional_radical"`         //繁体部首
-	TraditionalRadicalStroke int      `xorm:"default(0) notnull traditional_radical_stroke"` //繁体部首笔画
-	TraditionalTotalStroke   int      `xorm:"default(0) notnull traditional_total_stroke"`   //简体部首笔画
-	NameScience              bool     `xorm:"default(0) notnull name_science"`               //姓名学
-	WuXing                   string   `xorm:"default() notnull wu_xing"`                     //五行
-	Lucky                    string   `xorm:"default() notnull lucky"`                       //吉凶寓意
-	Regular                  bool     `xorm:"default(0) notnull regular"`                    //常用
-	TraditionalCharacter     []string `xorm:"default() notnull traditional_character"`       //繁体字
-	VariantCharacter         []string `xorm:"default() notnull variant_character"`           //异体字
-	Comment                  []string `xorm:"default() notnull comment"`                     //解释
-}
-
-// ParseFunc ...
-type ParseFunc func(*Character, int, string)
-
-var charKangxiList = map[string]ParseFunc{
-	"部首:":     parseKangxiBuShou,
-	"简体部首:":   parseSimple,
-	"繁体部首:":   parseTraditional,
-	"康熙字典笔画:": parseKangXi,
-	"拼音":      parsePinYin,
-}
-var charZiList = map[string]ParseFunc{
-	"部首:":     parseZiBuShou,
-	"简体部首:":   parseSimple,
-	"繁体部首:":   parseTraditional,
-	"康熙字典笔画:": parseKangXi,
-	"拼音":      parsePinYin,
-}
-
-func initStringArray() []string {
-	return *new([]string)
-}
-
-func NewCharacter() *Character {
-	return &Character{
-		PinYin:                   initStringArray(),
-		Ch:                       "",
-		Radical:                  "",
-		RadicalStroke:            0,
-		IsKangXi:                 false,
-		KangXi:                   "",
-		KangXiStroke:             0,
-		SimpleRadical:            "",
-		SimpleRadicalStroke:      0,
-		SimpleTotalStroke:        0,
-		TraditionalRadical:       "",
-		TraditionalRadicalStroke: 0,
-		TraditionalTotalStroke:   0,
-		NameScience:              false,
-		WuXing:                   "",
-		Lucky:                    "",
-		Regular:                  false,
-		TraditionalCharacter:     initStringArray(),
-		VariantCharacter:         initStringArray(),
-		Comment:                  initStringArray(),
+//康熙字典 & 姓名学笔画
+func parseKangXi(exc *Excavator, unid int, glyph *models.Glyph, html_node *html.Node, stroke_kang map[rune]int) (err error) {
+	science_stroke := models.ScienceStroke{
+		Unid: unid,
 	}
-}
 
-func (c *Character) BeforeInsert() {
-	c.Hash = net.Hash(c.Ch)
-}
+	if len(stroke_kang) > 0 {
+		if kang_stroke, has := stroke_kang[rune(unid)]; has {
+			if len(stroke_kang) > 1 {
+				panic("输入的康熙笔画异常")
+			}
 
-// Clone ...
-func (c *Character) Clone() (char *Character) {
-	char = new(Character)
-	*char = *c
-	copy(char.PinYin, c.PinYin)
-	return char
-}
+			science_stroke.ScienceStroke = kang_stroke
 
-// InsertOrUpdate ...
-func (c *Character) InsertOrUpdate(session *xorm.Session) (i int64, e error) {
-	tmp := new(Character)
-	b, e := session.Where("hash = ?", net.Hash(c.Ch)).Get(tmp)
-	if e != nil {
-		return 0, e
-	}
-	fmt.Printf("char:%+v hash:%s\n", c, net.Hash(c.Ch))
-	if !b {
-		i, e = session.InsertOne(c)
-		return
-	}
-	if tmp.IsKangXi {
-		log.With("zi", tmp.Ch).Warn("skip update")
-		return
-	}
-	i, e = session.Where("ch = ?", c.Ch).Update(c)
-	return
-}
-
-func parseDummy(c *Character, index int, input string) {
-	log.With("character", c, "index", index, "input", input).Warn("dummy")
-}
-func parseKangXi(c *Character, index int, input string) {
-	if debug {
-		log.With("index", index, "input", input).Info("kangxi")
-	}
-	switch index {
-	case 2:
-		input = strings.ReplaceAll(input, "(", " ")
-		input = strings.ReplaceAll(input, ")", " ")
-		s := strings.Split(strings.TrimSpace(input), ";")
-		if len(s) > 0 {
-			vv := strings.Split(strings.TrimSpace(s[0]), ":")
-			if len(vv) == 2 {
-				c.KangXi = vv[0]
-				i, e := strconv.Atoi(strings.TrimSpace(vv[1]))
-				if e != nil {
-					log.Error(e)
-					return
-				}
-				c.KangXiStroke = i
+			parseDictComment(exc, unid, html_node, false)
+		} else {
+			if len(stroke_kang) > 1 {
+				kang_stroke, _ := parseDictComment(exc, unid, html_node, true)
+				science_stroke.ScienceStroke = kang_stroke
 			} else {
-				//c.KangXi = c.Ch
-				//c.KangXiStroke = c.Stroke
-			}
-			if len(s) > 1 {
-				log.Warn(s)
+				for _, my_stroke := range stroke_kang {
+					science_stroke.ScienceStroke = my_stroke
+				}
 			}
 		}
 
-	default:
-	}
-}
-func parseKangxiBuShou(c *Character, index int, input string) {
-	if debug {
-		log.With("index", index, "input", input).Info("bushou")
-	}
-	switch index {
-	case 1:
-		c.Radical = input
-	case 3:
-		parseNumber(&c.RadicalStroke, input)
-	case 5:
-		parseNumber(&c.KangXiStroke, input)
-		parseNumber(&c.Stroke, input)
-	default:
-		//log.Error("bushou")
-	}
-}
-
-func parseZiBuShou(c *Character, index int, input string) {
-	if debug {
-		log.With("index", index, "input", input).Info("bushou")
-	}
-	switch index {
-	case 1:
-		c.Radical = input
-	case 3:
-		parseNumber(&c.RadicalStroke, input)
-	case 5:
-		parseNumber(&c.Stroke, input)
-	default:
-		//log.Error("bushou")
-	}
-}
-func parseSimple(c *Character, index int, input string) {
-	if debug {
-		log.With("index", index, "input", input).Info("simple")
-	}
-	switch index {
-	case 1:
-		parseBuShouBracket(input, &c.SimpleRadical, &c.SimpleRadicalStroke)
-	case 3:
-		parseNumber(&c.SimpleTotalStroke, input)
-	default:
-		//log.Error("simple")
-	}
-}
-
-func parseTraditional(c *Character, index int, input string) {
-	if debug {
-		log.With("index", index, "input", input).Info("traditional")
-	}
-	switch index {
-	case 1:
-		parseBuShouBracket(input, &c.TraditionalRadical, &c.TraditionalRadicalStroke)
-	case 3:
-		parseNumber(&c.TraditionalTotalStroke, input)
-	default:
-		//log.Error("traditional")
-	}
-}
-
-func parseZiCharacter(i int, selection *goquery.Selection, character *Character) interface{} {
-	f := parseDummy
-	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
-	if i == 0 {
-		f = parsePinYin
 	} else {
-		if v, b := charZiList[v]; b {
-			f = v
+		//当康熙笔画列表中为空
+		if glyph.TraditionalTotalStroke == 0 {
+			if glyph.Stroke == 0 {
+				panic("非康熙字部首笔画异常")
+			}
+			science_stroke.ScienceStroke = glyph.Stroke
+		} else {
+			science_stroke.ScienceStroke = glyph.TraditionalTotalStroke
 		}
 	}
-	if debug {
-		log.With("index", i, "source", v).Info("first")
+
+	err = InsertOrUpdate(exc.Db, &science_stroke)
+	if err != nil {
+		panic(err)
 	}
-	selection.Contents().Each(func(i int, selection *goquery.Selection) {
-		if debug {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
-		}
-		text := StringClearUp(selection.Text())
-		f(character, i, text)
-	})
-	return nil
-}
-func parseKangXiCharacter(i int, selection *goquery.Selection, character *Character) (e error) {
-	f := parseDummy
-	v := StringClearUp(selection.Find("font.colred").Contents().First().Text())
-	if i == 0 {
-		f = parsePinYin
-	} else {
-		if v, b := charKangxiList[v]; b {
-			f = v
-		}
-	}
-	if debug {
-		log.With("index", i, "source", v).Info("first")
-	}
-	selection.Contents().Each(func(i int, selection *goquery.Selection) {
-		if debug {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("colred")
-		}
-		text := StringClearUp(selection.Text())
-		f(character, i, text)
-	})
+
 	return nil
 }
 
-func parseArray(source *[]string, input string) {
-	*source = append(*source, input)
-}
-func parseNumber(source *int, input string) {
-	i, e := strconv.Atoi(strings.ReplaceAll(input, "画", ""))
-	if e != nil {
-		log.With("input", input).Error(e)
-		return
-	}
-	*source = i
-}
-func parsePinYin(c *Character, index int, input string) {
-	switch index {
-	case 1, 5:
-		if debug {
-			log.With("index", index, "input", input).Info("pinyin")
+func parseZiBuShou(glyph *models.Glyph, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
+	radical_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '部首：') and not(contains(text(), '简')) and not(contains(text(), '繁'))]/following-sibling::span[1]/following-sibling::text()[1]")
+
+	if radical_stroke != nil {
+		radical_stroke_str := strings.TrimSpace(htmlquery.InnerText(radical_stroke))
+		radical_stroke_num, err := strconv.ParseUint(radical_stroke_str, 10, bits.UintSize)
+		if err != nil {
+			panic(err)
 		}
-		input = strings.ReplaceAll(input, "[", "")
-		input = strings.ReplaceAll(input, "]", "")
-		parseArray(&c.PinYin, input)
-	default:
-
+		glyph.RadicalStroke = int(radical_stroke_num)
 	}
 
-}
-func parseBuShouBracket(input string, radical *string, stroke *int) {
-	if debug {
-		log.With("input", input).Info("bushou bracket")
-	}
-	input = strings.ReplaceAll(input, "(", " ")
-	input = strings.ReplaceAll(input, ")", " ")
-	input = strings.TrimSpace(input)
-	s := strings.Split(input, " ")
-	if len(s) == 2 {
-		*radical = s[0]
-		*stroke, _ = strconv.Atoi(s[1])
-	}
-}
+	stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '部首：') and not(contains(text(), '简')) and not(contains(text(), '繁'))]/following-sibling::span[2]/following-sibling::text()[1]")
 
-var infoList = map[string]ParseFunc{
-	"汉字五行：":   parseWuXing,
-	"吉凶寓意：":   parseLucy,
-	"姓名学：":    parseNameScience,
-	"是否为常用字：": parseRegular,
-	//"繁体字集：":   parseTraditionalCharacter,
-	//"异体字集：":   parseVariantCharacter,
-}
-var infoList2 = map[string]ParseFunc{
-	"繁体字集：": parseTraditionalCharacter,
-	"异体字集：": parseVariantCharacter,
-}
-
-func parseVariantCharacter(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("var char")
-	}
-	if input != "" {
-		c.VariantCharacter = append(c.VariantCharacter, input)
-	}
-}
-func parseTraditionalCharacter(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("trad char")
-	}
-	if input != "" {
-		c.TraditionalCharacter = append(c.TraditionalCharacter, input)
-	}
-}
-func parseRegular(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("regular")
-	}
-	if input == "是" {
-		c.Regular = true
-	}
-}
-func parseNameScience(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("name science")
-	}
-	if input == "是" {
-		c.NameScience = true
-	}
-}
-func parseLucy(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("lucky")
-	}
-	c.Lucky = input
-}
-func parseWuXing(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("wuxing")
-	}
-	c.WuXing = input
-}
-func parseDictInformation(selection *goquery.Selection, ch *Character) (e error) {
-	fn := parseDummy
-
-	selection.Find("li").Contents().Each(func(i int, selection *goquery.Selection) {
-		if debug {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li")
+	if stroke != nil {
+		stroke_num_str := strings.TrimSpace(htmlquery.InnerText(stroke))
+		stroke_num, err := strconv.ParseUint(stroke_num_str, 10, bits.UintSize)
+		if err != nil {
+			panic(err)
 		}
-		tx := selection.Text()
-		if selection.Index() == 0 {
-			fn = parseDummy
-			if v, b := infoList[tx]; b {
-				fn = v
+		glyph.Stroke = int(stroke_num)
+	} else {
+		ji_ben_stroke := htmlquery.FindOne(ji_ben_block, "./text()[contains(., '笔画数：')]")
+
+		if ji_ben_stroke != nil {
+			ji_ben_stroke_str := strings.TrimSpace(htmlquery.InnerText(ji_ben_stroke))
+			ji_ben_stroke_str_num := strings.TrimSpace(strings.Split(strings.Split(ji_ben_stroke_str, "笔画数：")[1], "；")[0])
+
+			ji_ben_stroke_num, err := strconv.ParseUint(ji_ben_stroke_str_num, 10, bits.UintSize)
+			if err != nil {
+				panic(err)
 			}
-			return
+			glyph.Stroke = int(ji_ben_stroke_num)
 		}
 
-		if goquery.NodeName(selection) == "#text" {
-			fn(ch, i, StringClearUp(tx))
-		}
-	})
-
-	selection.Find("li").Each(func(i int, selection *goquery.Selection) {
-		if debug {
-			log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li2")
-		}
-		tx := selection.Find("span").Text()
-		if v, b := infoList2[tx]; b {
-			selection.Find("a").Each(func(i int, selection *goquery.Selection) {
-				v(ch, selection.Index(), selection.Text())
-			})
-		}
-	})
-	return
-}
-func parseComment(c *Character, index int, input string) {
-	if debug {
-		log.With("input", input).Info("comment")
 	}
-	if input == "" {
-		return
-	}
-	c.Comment = append(c.Comment, StringClearUp(input))
-}
 
-func parseDictComment(selection *goquery.Selection, character *Character) (e error) {
-	tx := StringClearUp(selection.Find("li > a").Text())
-	if tx == "康熙字典解释" {
-		selection.Find("li > div").Contents().Each(func(i int, selection *goquery.Selection) {
-			if debug {
-				log.With("text", selection.Text(), "index", selection.Index(), "num", i).Info("li3")
+	radical := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '部首：') and not(contains(text(), '简')) and not(contains(text(), '繁'))]/following-sibling::text()[1]")
+
+	if radical != nil {
+		glyph.Radical = strings.TrimSpace(htmlquery.InnerText(radical))
+		if len(glyph.Radical) == 0 {
+			if len(glyph.ShouWei) == 0 {
+				return errors.New("没有部首信息")
 			}
-			parseComment(character, i, selection.Text())
-		})
+			glyph.Radical = string(([]rune(glyph.ShouWei))[0])
+		}
+	} else {
+		ji_ben_radical := htmlquery.FindOne(ji_ben_block, "./text()[contains(., '部首：') and not(contains(., '难检字'))]")
+
+		if ji_ben_radical != nil {
+			ji_ben_radical_str := strings.TrimSpace(htmlquery.InnerText(ji_ben_radical))
+			ji_ben_radical_str_inner := strings.TrimSpace(strings.Split(strings.Split(ji_ben_radical_str, "部首：")[1], "；")[0])
+
+			glyph.Radical = ji_ben_radical_str_inner
+		}
 	}
 
-	return
+	return nil
+}
+
+func parseSimple(glyph *models.Glyph, he_xin_block *html.Node) {
+	simplified_radical := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体部首：')]/following-sibling::text()[1]")
+
+	if simplified_radical != nil {
+		glyph.SimplifiedRadical = strings.TrimSpace(htmlquery.InnerText(simplified_radical))
+		if !strings.Contains(glyph.SimplifiedRadical, "难检字") {
+			glyph.SimplifiedRadical = ""
+		}
+	}
+
+	simplified_radical_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体部首：')]/following-sibling::span[1]/following-sibling::text()[1]")
+
+	if simplified_radical_stroke != nil {
+		simplified_radical_stroke_num_str := strings.TrimSpace(htmlquery.InnerText(simplified_radical_stroke))
+		if len(simplified_radical_stroke_num_str) > 0 {
+			simplified_radical_stroke_num, err := strconv.ParseUint(simplified_radical_stroke_num_str, 10, bits.UintSize)
+			if err != nil {
+				panic(err)
+			}
+			glyph.SimplifiedRadicalStroke = int(simplified_radical_stroke_num)
+		}
+	}
+
+	simplified_total_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体部首：')]/following-sibling::span[2]/following-sibling::text()[1]")
+
+	if simplified_total_stroke != nil {
+		simplified_total_stroke_num, err := strconv.ParseUint(strings.TrimSpace(htmlquery.InnerText(simplified_total_stroke)), 10, bits.UintSize)
+		if err != nil {
+			panic(err)
+		}
+		glyph.SimplifiedTotalStroke = int(simplified_total_stroke_num)
+	}
+}
+
+func parseTraditional(glyph *models.Glyph, he_xin_block *html.Node) {
+	traditional_radical := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体部首：')]/following-sibling::text()[1]")
+
+	if traditional_radical != nil {
+		glyph.TraditionalRadical = strings.TrimSpace(htmlquery.InnerText(traditional_radical))
+	}
+
+	traditional_radical_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体部首：')]/following-sibling::span[1]/following-sibling::text()[1]")
+
+	if traditional_radical_stroke != nil {
+		traditional_radical_stroke_num, err := strconv.ParseUint(strings.TrimSpace(htmlquery.InnerText(traditional_radical_stroke)), 10, bits.UintSize)
+		if err != nil {
+			panic(err)
+		}
+		glyph.TraditionalRadicalStroke = int(traditional_radical_stroke_num)
+	}
+
+	traditional_total_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体部首：')]/following-sibling::span[2]/following-sibling::text()[1]")
+
+	if traditional_total_stroke != nil {
+		traditional_total_stroke_num, err := strconv.ParseUint(strings.TrimSpace(htmlquery.InnerText(traditional_total_stroke)), 10, bits.UintSize)
+		if err != nil {
+			panic(err)
+		}
+		glyph.TraditionalTotalStroke = int(traditional_total_stroke_num)
+	}
+}
+
+//字形
+func parseZiCharacter(exc *Excavator, glyph *models.Glyph, unid int, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
+	zi_xing_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '字形')]/..")
+
+	if zi_xing_block == nil {
+		panic("字形结构区找不到")
+	}
+
+	shou_wei := htmlquery.FindOne(zi_xing_block, ".//span[contains(text(), '分')]/following-sibling::text()[1]")
+
+	if shou_wei != nil {
+		shou_wei_str := strings.TrimSpace(htmlquery.InnerText(shou_wei))
+		glyph.ShouWei = strings.TrimSpace(strings.Split(strings.Split(shou_wei_str, "]：")[1], "[")[0])
+	}
+
+	bu_jian := htmlquery.FindOne(zi_xing_block, ".//span[contains(text(), '件')]/following-sibling::text()[1]")
+
+	if bu_jian != nil {
+		bu_jian_str := strings.TrimSpace(htmlquery.InnerText(bu_jian))
+		glyph.BuJian = strings.TrimSpace(strings.Split(bu_jian_str, "]：")[1])
+	}
+
+	bi_shun := htmlquery.FindOne(zi_xing_block, ".//span[contains(text(), '号')]/following-sibling::text()[1]")
+
+	if bi_shun != nil {
+		bi_shun_str := strings.TrimSpace(htmlquery.InnerText(bi_shun))
+		glyph.BiHao = strings.TrimSpace(strings.Split(bi_shun_str, "]：")[1])
+	}
+
+	bi_du := htmlquery.FindOne(zi_xing_block, ".//span[contains(text(), '写')]/following-sibling::text()[1]")
+
+	if bi_du != nil {
+		bi_du_str := strings.TrimSpace(htmlquery.InnerText(bi_du))
+		glyph.BiDu = strings.TrimSpace(strings.Split(bi_du_str, "]：")[1])
+	}
+
+	parseSimple(glyph, he_xin_block)
+
+	parseTraditional(glyph, he_xin_block)
+
+	err = parseZiBuShou(glyph, he_xin_block, ji_ben_block)
+
+	ji_ben_radical_is := htmlquery.FindOne(ji_ben_block, "./text()[contains(., '作偏旁') or contains(., '汉字部首')]")
+
+	glyph.AsRadical = false
+
+	if ji_ben_radical_is != nil {
+		glyph.AsRadical = true
+	} else {
+		unid_char := string(rune(unid))
+		if len(glyph.Radical) > 0 {
+			if unid_char == glyph.Radical {
+				glyph.AsRadical = true
+			}
+		} else {
+			if glyph.SimplifiedTotalStroke > 0 || glyph.TraditionalTotalStroke > 0 || glyph.Stroke > 0 {
+				if unid_char == glyph.SimplifiedRadical || unid_char == glyph.TraditionalRadical || unid_char == glyph.Radical {
+					glyph.AsRadical = true
+				}
+			} else {
+				panic("没有部首信息")
+			}
+		}
+	}
+
+	err = InsertOrUpdate(exc.Db, glyph)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
+func parseRegular(wu_xing_ji_xiong_regular_str string) (chang_yong string) {
+	if strings.Contains(wu_xing_ji_xiong_regular_str, "常用字：") {
+		chang_yong = utf8string.NewString(strings.TrimSpace(strings.Split(wu_xing_ji_xiong_regular_str, "常用字：")[1])).Slice(0, 1)
+	} else {
+		chang_yong = ""
+	}
+
+	return chang_yong
+}
+
+func parseNameScience(min_su *models.MinSu, min_su_block *html.Node) {
+	xing_ming_xue := htmlquery.FindOne(min_su_block, ".//text()[contains(., '姓名学：')]")
+
+	if xing_ming_xue != nil {
+		xing_ming_xue_str := strings.TrimSpace(htmlquery.InnerText(xing_ming_xue))
+
+		if strings.Contains(xing_ming_xue_str, "非") {
+			min_su.IsSurname = false
+			if strings.Contains(xing_ming_xue_str, "男") {
+				min_su.SurnameGender = "男"
+			} else if strings.Contains(xing_ming_xue_str, "女") {
+				min_su.SurnameGender = "女"
+			} else {
+				min_su.SurnameGender = "_"
+			}
+		} else {
+			min_su.IsSurname = true
+			if strings.Contains(xing_ming_xue_str, "男") {
+				min_su.SurnameGender = "男"
+			} else if strings.Contains(xing_ming_xue_str, "女") {
+				min_su.SurnameGender = "女"
+			} else {
+				min_su.SurnameGender = "_"
+			}
+		}
+	}
+
+}
+func parseLucky(wu_xing_ji_xiong_regular_str string) (ji_xiong string) {
+	if strings.Contains(wu_xing_ji_xiong_regular_str, "寓意：") {
+		ji_xiong = utf8string.NewString(strings.TrimSpace(strings.Split(wu_xing_ji_xiong_regular_str, "寓意：")[1])).Slice(0, 1)
+	} else {
+		ji_xiong = "_"
+	}
+
+	return ji_xiong
+}
+func parseWuXing(wu_xing_ji_xiong_regular_str string) (wu_xing string) {
+	if strings.Contains(wu_xing_ji_xiong_regular_str, "五行：") {
+		wu_xing = utf8string.NewString(strings.TrimSpace(strings.Split(wu_xing_ji_xiong_regular_str, "五行：")[1])).Slice(0, 1)
+	} else {
+		wu_xing = "_"
+	}
+
+	if wu_xing == "岁" {
+		wu_xing = "水"
+	}
+
+	return wu_xing
+}
+
+//民俗 汉字五行： 吉凶寓意： 姓名学： 是否为常用字：
+func parseDictInformation(exc *Excavator, unid int, html_node *html.Node) (err error) {
+	min_su_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '俗')]/..")
+
+	if min_su_block == nil {
+		panic("民俗参考区找不到")
+	}
+
+	wu_xing_ji_xiong_regular := htmlquery.FindOne(min_su_block, ".//text()[contains(., '常用字：')]")
+
+	min_su := &models.MinSu{}
+
+	if wu_xing_ji_xiong_regular != nil {
+		wu_xing_ji_xiong_regular_str := string([]rune(strings.TrimSpace(htmlquery.InnerText(wu_xing_ji_xiong_regular))))
+
+		wu_xing := parseWuXing(wu_xing_ji_xiong_regular_str)
+
+		ji_xiong := parseLucky(wu_xing_ji_xiong_regular_str)
+
+		chang_yong := parseRegular(wu_xing_ji_xiong_regular_str)
+
+		min_su = &models.MinSu{
+			WuXing: wu_xing,
+			Lucky:  ji_xiong,
+		}
+
+		if chang_yong == "是" {
+			min_su.Regular = true
+		} else {
+			min_su.Regular = false
+		}
+	}
+
+	parseNameScience(min_su, min_su_block)
+
+	if min_su != nil {
+		err = InsertOrUpdate(exc.Db, min_su)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err := exc.Db.Get(min_su)
+		if err != nil {
+			panic(err)
+		}
+
+		min_su_idr := models.MinSuId{
+			Msid: min_su.Msid,
+			Unid: unid,
+		}
+
+		err = InsertOrUpdate(exc.Db, &min_su_idr)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return nil
+}
+
+//基本解释
+func parseComment(exc *Excavator, unid int, html_node *html.Node, ji_ben_block *html.Node) (err error) {
+	ji_ben_empty := htmlquery.FindOne(ji_ben_block, "./font")
+
+	hanCheng := &models.HanCheng{
+		Unid: unid,
+	}
+
+	if ji_ben_empty == nil {
+		ji_ben := htmlquery.Find(ji_ben_block, "./text()[not(normalize-space(.)='') and not(contains(., '笔画')) and not(contains(., '部首')) and not(contains(., '笔顺'))]")
+
+		content_strs := []string{}
+
+		for _, content := range ji_ben {
+			content_line := strings.TrimSpace(htmlquery.InnerText(content))
+			content_strs = append(content_strs, content_line)
+		}
+
+		//fix content mistake
+		switch string(rune(unid)) {
+		case "只":
+			for idx, content_strs_line := range content_strs {
+				if strings.Contains(content_strs_line, "（祇）") {
+					content_strs[idx] = strings.ReplaceAll(content_strs_line, "（祇）", "（衹）")
+				}
+			}
+		case "么":
+			for idx, content_strs_line := range content_strs {
+				if strings.Contains(content_strs_line, "（麽）") {
+					content_strs[idx] = strings.ReplaceAll(content_strs_line, "（麽）", "（麼）")
+				}
+			}
+		}
+
+		if len(content_strs) > 0 {
+			hanCheng.Content = content_strs
+
+			err = InsertOrUpdate(exc.Db, hanCheng)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+	} else {
+		return errors.New("基本解释为空")
+	}
+
+	return nil
+}
+
+//康熙字典解释
+func parseDictComment(exc *Excavator, unid int, html_node *html.Node, touch bool) (kang_stroke int, err error) {
+
+	kang_xi_dict := htmlquery.FindOne(html_node, "//div[@id='div_a4']/span[contains(text(), '康熙字典解释')]/..")
+
+	if kang_xi_dict == nil {
+		panic("康熙字典部分解析不到啦")
+	}
+
+	kang_xi_dict_brief := htmlquery.FindOne(kang_xi_dict, ".//strong")
+
+	if kang_xi_dict_brief == nil {
+		panic("康熙字典的brief解析不到")
+	}
+
+	kang_xi_dict_brief_str := strings.TrimSpace(htmlquery.InnerText(kang_xi_dict_brief))
+
+	kang_xi_dict_brief_str_arr := strings.Split(kang_xi_dict_brief_str, "康熙笔画：")
+
+	kang_xi_dict_brief_str_tail_arr := strings.Split(kang_xi_dict_brief_str_arr[1], "；")
+
+	kang_xi_stroke_num, err := strconv.ParseUint(kang_xi_dict_brief_str_tail_arr[0], 10, bits.UintSize)
+	if err != nil {
+		panic(err)
+	}
+
+	kang_xi_stroke_num_int := int(kang_xi_stroke_num)
+
+	if !touch {
+		kang_xi_dict_brief_str_front_arr := strings.Split(kang_xi_dict_brief_str_arr[0], string(rune(unid)))
+
+		kang_xi_dict_url := htmlquery.FindOne(kang_xi_dict_brief, ".//a")
+
+		kang_xi_dict_content := htmlquery.Find(kang_xi_dict, ".//strong/following-sibling::text()[not(normalize-space(.)='')]")
+
+		kang_xi_dict_content_strs := []string{}
+
+		for _, kang_xi_dict_content_line := range kang_xi_dict_content {
+			kang_xi_dict_content_strs = append(kang_xi_dict_content_strs, strings.TrimSpace(htmlquery.InnerText(kang_xi_dict_content_line)))
+		}
+
+		kang_xi := models.KangXi{
+			Unid:    unid,
+			Stroke:  kang_xi_stroke_num_int,
+			Brief:   strings.TrimSpace(kang_xi_dict_brief_str_front_arr[0]),
+			Content: kang_xi_dict_content_strs,
+			Url:     htmlquery.SelectAttr(kang_xi_dict_url, "href"),
+		}
+
+		err = InsertOrUpdate(exc.Db, &kang_xi)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return kang_xi_stroke_num_int, nil
 }
