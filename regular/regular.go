@@ -57,18 +57,6 @@ func (r *regular) Run() {
 
 	for ch_uni := range RegularList {
 		ch := string(rune(ch_uni))
-		my_char := fate.Character{
-			Ch: ch,
-		}
-
-		has, err := excavator.GetFateChar(r.exc.Db, ch_uni, &my_char)
-		if err != nil || !has {
-			if err.Error() != "这是偏旁部首" {
-				continue
-			}
-		}
-
-		excavator.InsertOrUpdate(r.exc.DbFate, &my_char)
 
 		r.total++
 		fmt.Printf("character %s is fixing\n", ch)
