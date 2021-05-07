@@ -4,11 +4,11 @@ import (
 	"errors"
 	"excavator/config"
 	"excavator/models"
-	"excavator/net"
 	"fmt"
 	"strconv"
 
 	"github.com/antchfx/htmlquery"
+	"github.com/godcong/cachenet"
 	"github.com/godcong/go-trait"
 	"golang.org/x/net/html"
 	"xorm.io/xorm"
@@ -24,7 +24,7 @@ type Excavator struct {
 	DbFate       *xorm.Engine
 	base_url     string
 	unicode_file string
-	cache        *net.Cache
+	cache        *cachenet.Cache
 	action       string
 }
 
@@ -37,7 +37,7 @@ func New(args ...func(exc *Excavator)) *Excavator {
 		DbFate:       InitXorm(&cfg.DatabaseFate),
 		base_url:     cfg.BaseUrl,
 		unicode_file: cfg.UnicodeFile,
-		cache:        net.NewCache(cfg.TmpDir),
+		cache:        cachenet.NewCache(cfg.TmpDir),
 	}
 
 	for _, arg := range args {
@@ -226,7 +226,7 @@ func parseCharacter(exc *Excavator) (err error) {
 		}
 		Log.With("url", c.Url).Info("character")
 
-		html_node, e := net.CacheQuery(UrlMerge(exc.base_url, c.Url))
+		html_node, e := cachenet.CacheQuery(cachenet.UrlMerge(exc.base_url, c.Url))
 
 		//document, e := net.CacheQuery(characterURL(exc.url, radicalType, c.URL))
 		if e != nil {

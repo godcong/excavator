@@ -3,10 +3,11 @@ package excavator
 import (
 	"excavator/config"
 	"excavator/models"
-	"excavator/net"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/godcong/cachenet"
 )
 
 func TestExcavator_Run(t *testing.T) {
@@ -91,7 +92,7 @@ func TestGetCharacter(t *testing.T) {
 			continue
 		}
 
-		html_node, e := net.CacheQuery(UrlMerge(excH.base_url, rc.Url))
+		html_node, e := cachenet.CacheQuery(cachenet.UrlMerge(excH.base_url, rc.Url))
 
 		if e != nil {
 			panic(e)

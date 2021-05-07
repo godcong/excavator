@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"errors"
 	"excavator/models"
-	"excavator/net"
 	"fmt"
 	"math/bits"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
+	"github.com/godcong/cachenet"
 	"golang.org/x/net/html"
 )
 
@@ -79,7 +80,13 @@ func grabHanChengList(exc *Excavator) (err error) {
 			panic(err)
 		}
 
-		html_node, err := net.CacheUnicode(exc.base_url, char.UnicodeHex)
+		data := url.Values{
+			"Tid": {"10"},
+			"wd":  {char.UnicodeHex},
+		}
+		dataStr := data.Encode()
+
+		html_node, err := cachenet.CacheDataQuery(exc.base_url, dataStr)
 		if err != nil {
 			panic(err)
 		}

@@ -1,7 +1,6 @@
 package excavator
 
 import (
-	"net/url"
 	"regexp"
 	"strings"
 )
@@ -26,14 +25,6 @@ func URL(prefix string, uris ...string) string {
 		url = append(url, TrimSlash(v))
 	}
 	return strings.Join(url, "/")
-}
-
-//URL拼接
-func UrlMerge(base_url string, wd_url string) string {
-	u, _ := url.ParseRequestURI(base_url)
-	u.Path = wd_url
-
-	return u.String()
 }
 
 // TrimSlash ...
