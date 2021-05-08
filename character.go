@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/antchfx/htmlquery"
+	xt "github.com/free-utils-go/xorm_type_assist"
 	"golang.org/x/exp/utf8string"
 	"golang.org/x/net/html"
 )
@@ -221,29 +222,14 @@ func parseZiCharacter(exc *Excavator, glyph *models.Glyph, unid int, html_node *
 
 	parseTraditional(glyph, he_xin_block)
 
-	err = parseZiBuShou(glyph, he_xin_block, ji_ben_block)
+	parseZiBuShou(glyph, he_xin_block, ji_ben_block)
 
 	ji_ben_radical_is := htmlquery.FindOne(ji_ben_block, "./text()[contains(., '作偏旁') or contains(., '汉字部首')]")
 
-	glyph.AsRadical = false
+	glyph.AsRadical = xt.FALSE
 
 	if ji_ben_radical_is != nil {
-		glyph.AsRadical = true
-	} else {
-		unid_char := string(rune(unid))
-		if len(glyph.Radical) > 0 {
-			if unid_char == glyph.Radical {
-				glyph.AsRadical = true
-			}
-		} else {
-			if glyph.SimplifiedTotalStroke > 0 || glyph.TraditionalTotalStroke > 0 || glyph.Stroke > 0 {
-				if unid_char == glyph.SimplifiedRadical || unid_char == glyph.TraditionalRadical || unid_char == glyph.Radical {
-					glyph.AsRadical = true
-				}
-			} else {
-				panic("没有部首信息")
-			}
-		}
+		glyph.AsRadical = xt.TRUE
 	}
 
 	err = InsertOrUpdate(exc.Db, glyph)
@@ -271,7 +257,7 @@ func parseNameScience(min_su *models.MinSu, min_su_block *html.Node) {
 		xing_ming_xue_str := strings.TrimSpace(htmlquery.InnerText(xing_ming_xue))
 
 		if strings.Contains(xing_ming_xue_str, "非") {
-			min_su.IsSurname = false
+			min_su.IsSurname = xt.FALSE
 			if strings.Contains(xing_ming_xue_str, "男") {
 				min_su.SurnameGender = "男"
 			} else if strings.Contains(xing_ming_xue_str, "女") {
@@ -280,7 +266,7 @@ func parseNameScience(min_su *models.MinSu, min_su_block *html.Node) {
 				min_su.SurnameGender = "_"
 			}
 		} else {
-			min_su.IsSurname = true
+			min_su.IsSurname = xt.TRUE
 			if strings.Contains(xing_ming_xue_str, "男") {
 				min_su.SurnameGender = "男"
 			} else if strings.Contains(xing_ming_xue_str, "女") {
@@ -342,9 +328,9 @@ func parseDictInformation(exc *Excavator, unid int, html_node *html.Node) (err e
 		}
 
 		if chang_yong == "是" {
-			min_su.Regular = true
+			min_su.Regular = xt.TRUE
 		} else {
-			min_su.Regular = false
+			min_su.Regular = xt.FALSE
 		}
 	}
 

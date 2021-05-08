@@ -1,10 +1,11 @@
-module excavator
+module github.com/godcong/excavator
 
 require (
 	github.com/antchfx/htmlquery v1.2.3
+	github.com/free-utils-go/cachenet v0.0.0-20210507230213-b162ba0f9c57
+	github.com/free-utils-go/xorm_type_assist v0.0.0-20210507214645-5c65059bdc6a
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/godcong/cachenet v0.0.0-00010101000000-000000000000
 	github.com/godcong/fate v0.0.0-00010101000000-000000000000
 	github.com/godcong/go-trait v0.0.0-20190816072228-f216e906756e
 	github.com/goextension/log v0.0.2
@@ -19,8 +20,6 @@ require (
 go 1.16
 
 replace (
-	github.com/godcong/cachenet => ../cachenet // fortune-fun/cachenet
-	github.com/godcong/excavator => ../excavator
 	github.com/godcong/fate => ../fate
 	github.com/godcong/yi => ../yi
 )

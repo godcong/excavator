@@ -1,12 +1,12 @@
--- CREATE DATABASE `excavator` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
--- use excavator;
+CREATE DATABASE `excavator` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+use excavator;
 
 -- 先由GB.txt生成，之后查出HanCheng的每个字的url，有就设置，没有就忽略
 CREATE TABLE unihan_char ( unid INT (32) PRIMARY KEY COMMENT 'Unicode' ,
 unicode_hex VARCHAR (6) NOT NULL UNIQUE COMMENT 'Unicode十六进制表示' ) COMMENT 'Unicode';
 
 -- 只保留在汉程有unicode收录的字
-CREATE TABLE han_cheng_char ( unid INT (32) PRIMARY KEY COMMENT 'Unicode',
+CREATE TABLE han_cheng_char ( unid INT (32) PRIMARY KEY COMMENT 'Unicode' ,
 url TEXT NOT NULL UNIQUE COMMENT '汉程链接',
 FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE ) COMMENT '汉程链接';
 
@@ -41,11 +41,11 @@ gui_fan TEXT COMMENT '规范汉字码',
 FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE ) COMMENT '常用编码表';
 
 CREATE TABLE min_su ( msid INTEGER PRIMARY KEY auto_increment,
-is_surname BOOLEAN COMMENT '姓名学（姓氏）' ,
+is_surname VARCHAR (1) COMMENT '姓名学（姓氏）,~bool' ,
 surname_gender VARCHAR (1) COMMENT '姓氏性别' ,
 wu_xing VARCHAR (1) COMMENT '五行' ,
 lucky VARCHAR (4) COMMENT '幸运' ,
-regular BOOLEAN COMMENT '常用' ) COMMENT '民俗';
+regular VARCHAR (1) COMMENT '常用,~bool' ) COMMENT '民俗';
 
 CREATE TABLE min_su_id ( rid INTEGER PRIMARY KEY auto_increment,
 msid INT (11) NOT NULL COMMENT '民俗id',
@@ -54,7 +54,7 @@ FOREIGN KEY (msid) REFERENCES min_su (msid) ON UPDATE CASCADE ON DELETE CASCADE,
 FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE ) COMMENT '民俗关联';
 
 CREATE TABLE glyph ( unid INT (32) PRIMARY KEY COMMENT 'Unicode',
-as_radical BOOLEAN COMMENT '用作偏旁' ,
+as_radical VARCHAR (1) COMMENT '用作偏旁,~bool' ,
 radical VARCHAR (1) COMMENT '部首' ,
 radical_stroke TINYINT COMMENT '部首笔画' ,
 stroke INTEGER COMMENT '总笔画' ,

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/antchfx/htmlquery"
+	xt "github.com/free-utils-go/xorm_type_assist"
 	"github.com/godcong/fate"
 	"golang.org/x/net/html"
 	"xorm.io/xorm"
@@ -495,9 +496,9 @@ func GetFateChar(exc_db *xorm.Engine, unid int, my_char *fate.Character) (bool, 
 	my_char.PinYin = pin_yin_gots
 
 	if len(pin_yin_gots) > 1 {
-		my_char.IsDuoYin = true
+		my_char.IsDuoYin = xt.TRUE
 	} else if len(pin_yin_gots) == 1 {
-		my_char.IsDuoYin = false
+		my_char.IsDuoYin = xt.FALSE
 	} else {
 		return false, errors.New("没有拼音")
 	}
@@ -571,7 +572,7 @@ func GetFateChar(exc_db *xorm.Engine, unid int, my_char *fate.Character) (bool, 
 		my_char.Stroke = glyph_got.Stroke
 	}
 
-	if !glyph_got.AsRadical {
+	if glyph_got.AsRadical == xt.FALSE {
 		return true, nil
 	} else {
 		return false, errors.New("这是偏旁部首")

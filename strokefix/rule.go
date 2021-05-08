@@ -17,6 +17,11 @@ func NumberChar(exc *excavator.Excavator) {
 
 		exc.DbFate.Get(&my_char)
 
+		has, err := excavator.GetFateChar(exc.Db, int(num_char), &my_char)
+		if err != nil || !has {
+			panic(err)
+		}
+
 		my_char.ScienceStroke = 1 + idx
 
 		excavator.InsertOrUpdate(exc.DbFate, &my_char)

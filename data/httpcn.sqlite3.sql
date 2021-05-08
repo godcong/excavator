@@ -70,16 +70,16 @@ FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CAS
 -- COMMENT '常用编码表';
 
 CREATE TABLE min_su ( msid INTEGER PRIMARY KEY AUTOINCREMENT,
-is_surname BOOLEAN,
--- COMMENT '姓名学（姓氏）' ,
+is_surname VARCHAR (1),
+-- COMMENT '姓名学（姓氏）,~bool' ,
 surname_gender VARCHAR (1),
 -- COMMENT '姓氏性别' ,
 wu_xing VARCHAR (1),
 -- COMMENT '五行' ,
 lucky VARCHAR (4),
 -- COMMENT '幸运' ,
-regular BOOLEAN
--- COMMENT '常用' 
+regular VARCHAR (1)
+-- COMMENT '常用,~bool' 
 );
 -- COMMENT '民俗';
 
@@ -95,8 +95,8 @@ FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CAS
 
 CREATE TABLE glyph ( unid INT (32) PRIMARY KEY,
 -- COMMENT 'Unicode',
-as_radical BOOLEAN,
--- COMMENT '用作偏旁' ,
+as_radical VARCHAR (1),
+-- COMMENT '用作偏旁,~bool' ,
 radical VARCHAR (1),
 -- COMMENT '部首' ,
 radical_stroke TINYINT,

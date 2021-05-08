@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/godcong/cachenet"
+	"github.com/free-utils-go/cachenet"
 	"github.com/godcong/go-trait"
 	"golang.org/x/net/html"
 	"xorm.io/xorm"

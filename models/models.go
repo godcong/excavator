@@ -1,5 +1,7 @@
 package models
 
+import xt "github.com/free-utils-go/xorm_type_assist"
+
 //Unicode
 type UnihanChar struct {
 	Unid       int    `xorm:"not null pk comment('Unicode') INT(32)"`
@@ -49,12 +51,12 @@ type BianMa struct {
 
 //民俗
 type MinSu struct {
-	Msid          int    `xorm:"not null pk autoincr INT(11)"`
-	IsSurname     bool   `xorm:"comment('姓名学（姓氏）') TINYINT(1)"`
-	SurnameGender string `xorm:"comment('姓氏性别') VARCHAR(1)"`
-	WuXing        string `xorm:"comment('五行') VARCHAR(1)"`
-	Lucky         string `xorm:"comment('幸运') VARCHAR(4)"`
-	Regular       bool   `xorm:"comment('常用') TINYINT(1)"`
+	Msid          int         `xorm:"not null pk autoincr INT(11)"`
+	IsSurname     xt.BoolType `xorm:"comment('姓名学（姓氏）,~bool') VARCHAR(1)"`
+	SurnameGender string      `xorm:"comment('姓氏性别') VARCHAR(1)"`
+	WuXing        string      `xorm:"comment('五行') VARCHAR(1)"`
+	Lucky         string      `xorm:"comment('幸运') VARCHAR(4)"`
+	Regular       xt.BoolType `xorm:"comment('常用,~bool') VARCHAR(1)"`
 }
 
 //民俗关联
@@ -66,21 +68,21 @@ type MinSuId struct {
 
 //字形结构
 type Glyph struct {
-	Unid                     int    `xorm:"not null pk comment('Unicode') INT(32)"`
-	AsRadical                bool   `xorm:"comment('用作偏旁') TINYINT(1)"`
-	Radical                  string `xorm:"comment('部首') VARCHAR(1)"`
-	RadicalStroke            int    `xorm:"comment('部首笔画') TINYINT(4)"`
-	Stroke                   int    `xorm:"comment('总笔画') INT(11)"`
-	SimplifiedRadical        string `xorm:"comment('简体部首') VARCHAR(1)"`
-	SimplifiedRadicalStroke  int    `xorm:"comment('简体部首笔画') TINYINT(4)"`
-	SimplifiedTotalStroke    int    `xorm:"comment('简体总笔画') INT(11)"`
-	TraditionalRadical       string `xorm:"comment('繁体部首') VARCHAR(1)"`
-	TraditionalRadicalStroke int    `xorm:"comment('繁体部首笔画') TINYINT(4)"`
-	TraditionalTotalStroke   int    `xorm:"comment('总笔画') INT(11)"`
-	ShouWei                  string `xorm:"not null comment('首尾分解查字') TEXT"`
-	BuJian                   string `xorm:"comment('汉字部件构造') TEXT"`
-	BiHao                    string `xorm:"comment('笔顺编号') TEXT"`
-	BiDu                     string `xorm:"comment('笔顺读写') TEXT"`
+	Unid                     int         `xorm:"not null pk comment('Unicode') INT(32)"`
+	AsRadical                xt.BoolType `xorm:"comment('用作偏旁,~bool') VARCHAR(1)"`
+	Radical                  string      `xorm:"comment('部首') VARCHAR(1)"`
+	RadicalStroke            int         `xorm:"comment('部首笔画') TINYINT(4)"`
+	Stroke                   int         `xorm:"comment('总笔画') INT(11)"`
+	SimplifiedRadical        string      `xorm:"comment('简体部首') VARCHAR(1)"`
+	SimplifiedRadicalStroke  int         `xorm:"comment('简体部首笔画') TINYINT(4)"`
+	SimplifiedTotalStroke    int         `xorm:"comment('简体总笔画') INT(11)"`
+	TraditionalRadical       string      `xorm:"comment('繁体部首') VARCHAR(1)"`
+	TraditionalRadicalStroke int         `xorm:"comment('繁体部首笔画') TINYINT(4)"`
+	TraditionalTotalStroke   int         `xorm:"comment('总笔画') INT(11)"`
+	ShouWei                  string      `xorm:"not null comment('首尾分解查字') TEXT"`
+	BuJian                   string      `xorm:"comment('汉字部件构造') TEXT"`
+	BiHao                    string      `xorm:"comment('笔顺编号') TEXT"`
+	BiDu                     string      `xorm:"comment('笔顺读写') TEXT"`
 }
 
 //姓名学笔画数

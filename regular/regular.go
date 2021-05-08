@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	xt "github.com/free-utils-go/xorm_type_assist"
 	"github.com/godcong/fate"
 	"xorm.io/xorm"
 )
@@ -94,12 +95,12 @@ func fixRegular(db *xorm.Engine, ch string) bool {
 			fmt.Printf("%s not found\n", ch)
 			return false
 		}
-		if my_char.IsRegular {
+		if my_char.IsRegular == xt.TRUE {
 			return false
 		}
 	}
 
-	my_char.IsRegular = true
+	my_char.IsRegular = xt.TRUE
 	e := excavator.InsertOrUpdate(db, &my_char)
 
 	if e != nil {

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/godcong/cachenet"
+	"github.com/free-utils-go/cachenet"
 )
 
 func TestExcavator_Run(t *testing.T) {
@@ -15,7 +15,9 @@ func TestExcavator_Run(t *testing.T) {
 
 	excH := New()
 
+	//excH.action = config.ActionGrab
 	excH.action = config.ActionParse
+	//excH.action = config.ActionSimplify
 
 	e2 := excH.Run()
 	if e2 != nil {

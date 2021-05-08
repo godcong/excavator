@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/godcong/cachenet"
+	"github.com/free-utils-go/cachenet"
 	"golang.org/x/net/html"
 )
 
