@@ -3,7 +3,6 @@ package excavator
 import (
 	"bufio"
 	"errors"
-	"excavator/models"
 	"fmt"
 	"math/bits"
 	"net/url"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/antchfx/htmlquery"
 	"github.com/free-utils-go/cachenet"
+	"github.com/godcong/excavator/models"
 	"golang.org/x/net/html"
 )
 
@@ -51,7 +51,7 @@ func getHanChengChars(exc *Excavator, c chan<- *models.UnihanChar) (e error) {
 		}
 
 		uc := models.UnihanChar{
-			Unid:       int(unicode_int64),
+			Unid:       rune(unicode_int64),
 			UnicodeHex: unicode_hex,
 		}
 

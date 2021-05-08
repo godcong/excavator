@@ -17,7 +17,7 @@ func NumberChar(exc *excavator.Excavator) {
 
 		exc.DbFate.Get(&my_char)
 
-		has, err := excavator.GetFateChar(exc.Db, int(num_char), &my_char)
+		has, err := excavator.GetFateChar(exc.Db, num_char, &my_char)
 		if err != nil || !has {
 			panic(err)
 		}

@@ -2,19 +2,19 @@ package excavator
 
 import (
 	"errors"
-	"excavator/models"
 	"math/bits"
 	"strconv"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
 	xt "github.com/free-utils-go/xorm_type_assist"
+	"github.com/godcong/excavator/models"
 	"golang.org/x/exp/utf8string"
 	"golang.org/x/net/html"
 )
 
 //康熙字典 & 姓名学笔画
-func parseKangXi(exc *Excavator, unid int, glyph *models.Glyph, html_node *html.Node, stroke_kang map[rune]int) (err error) {
+func parseKangXi(exc *Excavator, unid rune, glyph *models.Glyph, html_node *html.Node, stroke_kang map[rune]int) (err error) {
 	science_stroke := models.ScienceStroke{
 		Unid: unid,
 	}
@@ -183,7 +183,7 @@ func parseTraditional(glyph *models.Glyph, he_xin_block *html.Node) {
 }
 
 //字形
-func parseZiCharacter(exc *Excavator, glyph *models.Glyph, unid int, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
+func parseZiCharacter(exc *Excavator, glyph *models.Glyph, unid rune, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
 	zi_xing_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '字形')]/..")
 
 	if zi_xing_block == nil {
@@ -302,7 +302,7 @@ func parseWuXing(wu_xing_ji_xiong_regular_str string) (wu_xing string) {
 }
 
 //民俗 汉字五行： 吉凶寓意： 姓名学： 是否为常用字：
-func parseDictInformation(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func parseDictInformation(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 	min_su_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '俗')]/..")
 
 	if min_su_block == nil {
@@ -362,7 +362,7 @@ func parseDictInformation(exc *Excavator, unid int, html_node *html.Node) (err e
 }
 
 //基本解释
-func parseComment(exc *Excavator, unid int, html_node *html.Node, ji_ben_block *html.Node) (err error) {
+func parseComment(exc *Excavator, unid rune, html_node *html.Node, ji_ben_block *html.Node) (err error) {
 	ji_ben_empty := htmlquery.FindOne(ji_ben_block, "./font")
 
 	hanCheng := &models.HanCheng{
@@ -412,7 +412,7 @@ func parseComment(exc *Excavator, unid int, html_node *html.Node, ji_ben_block *
 }
 
 //康熙字典解释
-func parseDictComment(exc *Excavator, unid int, html_node *html.Node, touch bool) (kang_stroke int, err error) {
+func parseDictComment(exc *Excavator, unid rune, html_node *html.Node, touch bool) (kang_stroke int, err error) {
 
 	kang_xi_dict := htmlquery.FindOne(html_node, "//div[@id='div_a4']/span[contains(text(), '康熙字典解释')]/..")
 

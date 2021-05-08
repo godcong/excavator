@@ -1,16 +1,17 @@
 package excavator
 
 import (
-	"excavator/models"
 	"fmt"
 	"strings"
+
+	"github.com/godcong/excavator/models"
 
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 )
 
 //常用编码
-func parseBianMa(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func parseBianMa(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 
 	bian_ma_block := htmlquery.FindOne(html_node, "//p[contains(@class, 'text16')]")
 
@@ -86,7 +87,7 @@ func parseBianMa(exc *Excavator, unid int, html_node *html.Node) (err error) {
 }
 
 //音韵
-func parseYinYun(exc *Excavator, unid int, html_node *html.Node, he_xin_block *html.Node) (err error) {
+func parseYinYun(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *html.Node) (err error) {
 	yin_yun_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '音韵')]/..")
 
 	if yin_yun_block != nil {
@@ -309,7 +310,7 @@ func parseYinYun(exc *Excavator, unid int, html_node *html.Node, he_xin_block *h
 }
 
 //索引参考
-func parseSuoYin(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func parseSuoYin(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 
 	suo_yin_block := htmlquery.FindOne(html_node, "//div[contains(@class, 'text16')]/span[contains(text(), '索引')]/..")
 
@@ -376,7 +377,7 @@ func parseSuoYin(exc *Excavator, unid int, html_node *html.Node) (err error) {
 }
 
 //详细解释，新华字典
-func parseXiangXi(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func parseXiangXi(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 
 	xin_hua_block := htmlquery.FindOne(html_node, "//div[@id='div_a2']")
 
@@ -403,7 +404,7 @@ func parseXiangXi(exc *Excavator, unid int, html_node *html.Node) (err error) {
 }
 
 //汉语字典
-func parseHanYuDaZiDian(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func parseHanYuDaZiDian(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 	han_yu_block := htmlquery.FindOne(html_node, "//div[@id='div_a3']")
 
 	han_yu_empty := htmlquery.FindOne(han_yu_block, ".//font")
@@ -429,7 +430,7 @@ func parseHanYuDaZiDian(exc *Excavator, unid int, html_node *html.Node) (err err
 }
 
 //说文解字
-func parseShuoWenJieZi(exc *Excavator, unid int, html_node *html.Node, shuo_wen_block *html.Node) (err error) {
+func parseShuoWenJieZi(exc *Excavator, unid rune, html_node *html.Node, shuo_wen_block *html.Node) (err error) {
 	shuo_wen_font_new := htmlquery.FindOne(shuo_wen_block, ".//span[boolean(@style)]")
 
 	shuo_wen_font_old := htmlquery.FindOne(shuo_wen_block, ".//img")
@@ -481,7 +482,7 @@ func parseShuoWenJieZi(exc *Excavator, unid int, html_node *html.Node, shuo_wen_
 }
 
 //+ 字源演变
-func parseYanBian(exc *Excavator, unid int, html_node *html.Node, shuo_wen_block *html.Node) (err error) {
+func parseYanBian(exc *Excavator, unid rune, html_node *html.Node, shuo_wen_block *html.Node) (err error) {
 	jia_gu_pic := htmlquery.FindOne(shuo_wen_block, ".//li/text()[contains(., '甲骨')]/../p")
 
 	jin_wen_pic := htmlquery.FindOne(shuo_wen_block, ".//li/text()[contains(., '金文')]/../p")
@@ -530,7 +531,7 @@ func parseYanBian(exc *Excavator, unid int, html_node *html.Node, shuo_wen_block
 }
 
 //成语
-func parseChengYu(exc *Excavator, unid int, html_node *html.Node, cis map[string]bool) (err error) {
+func parseChengYu(exc *Excavator, unid rune, html_node *html.Node, cis map[string]bool) (err error) {
 
 	cheng_yu_links := htmlquery.Find(html_node, "//ul[contains(@class, 'chengyu')]//a")
 
@@ -595,7 +596,7 @@ func parseChengYu(exc *Excavator, unid int, html_node *html.Node, cis map[string
 }
 
 //诗词
-func parseShiCi(exc *Excavator, unid int, html_node *html.Node, cis map[string]bool) (err error) {
+func parseShiCi(exc *Excavator, unid rune, html_node *html.Node, cis map[string]bool) (err error) {
 	shi_ci_links := htmlquery.Find(html_node, "//ul[contains(@class, 'shici')]//a")
 
 	for _, shi_ci_link := range shi_ci_links {
@@ -664,7 +665,7 @@ func parseShiCi(exc *Excavator, unid int, html_node *html.Node, cis map[string]b
 }
 
 //词语
-func parseCiYu(exc *Excavator, unid int, html_node *html.Node, cis map[string]bool) (err error) {
+func parseCiYu(exc *Excavator, unid rune, html_node *html.Node, cis map[string]bool) (err error) {
 	ci_yu_links := htmlquery.Find(html_node, "//ul[contains(@class, 'ciyu')]//a")
 
 	for _, ci_yu_link := range ci_yu_links {

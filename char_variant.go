@@ -2,7 +2,6 @@ package excavator
 
 import (
 	"errors"
-	"excavator/models"
 	"fmt"
 	"math/bits"
 	"strconv"
@@ -10,13 +9,14 @@ import (
 
 	"github.com/antchfx/htmlquery"
 	xt "github.com/free-utils-go/xorm_type_assist"
+	"github.com/godcong/excavator/models"
 	"github.com/godcong/fate"
 	"golang.org/x/net/html"
 	"xorm.io/xorm"
 )
 
 //基本解释中的异体字信息
-func parseJiBenVariant(exc *Excavator, unid int, html_node *html.Node, ji_ben_block *html.Node) (err error) {
+func parseJiBenVariant(exc *Excavator, unid rune, html_node *html.Node, ji_ben_block *html.Node) (err error) {
 	variant_tongs := htmlquery.Find(ji_ben_block, "./text()[(contains(., '同“') and not(contains(., '古同“'))) or contains(., '见“')]")
 
 	for _, variant_tong := range variant_tongs {
@@ -40,7 +40,7 @@ func parseJiBenVariant(exc *Excavator, unid int, html_node *html.Node, ji_ben_bl
 			}
 		}
 
-		v_char_str_unicode := int(([]rune(v_char_str))[0])
+		v_char_str_unicode := ([]rune(v_char_str))[0]
 
 		v_char_str_unicode_str := strings.ToUpper(strconv.FormatUint(uint64(v_char_str_unicode), 16))
 
@@ -93,7 +93,7 @@ func parseJiBenVariant(exc *Excavator, unid int, html_node *html.Node, ji_ben_bl
 			v_char_str = strings.TrimSpace(strings.Split(variant_gu_break_str, "”")[0])
 		}
 
-		v_char_str_unicode := int(([]rune(v_char_str))[0])
+		v_char_str_unicode := ([]rune(v_char_str))[0]
 
 		v_char_str_unicode_str := strings.ToUpper(strconv.FormatUint(uint64(v_char_str_unicode), 16))
 
@@ -122,17 +122,17 @@ func parseJiBenVariant(exc *Excavator, unid int, html_node *html.Node, ji_ben_bl
 }
 
 //简体字，繁体字集 和 异体字集
-func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
+func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
 	jian_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体字：')]/following-sibling::a")
 
 	jian_yi_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体字：')]/following-sibling::span[contains(@class, 'b') and contains(text(), '异')]/following-sibling::a")
 
-	gu_list := map[int]*html.Node{}
+	gu_list := map[rune]*html.Node{}
 
 	if jian_ti_list != nil {
 		jian_ti := jian_ti_list[0]
 		jian_ti_str := strings.TrimSpace(htmlquery.InnerText(jian_ti))
-		j_unid := int(([]rune(jian_ti_str))[0])
+		j_unid := ([]rune(jian_ti_str))[0]
 
 		if jian_yi_ti_list != nil {
 			if len(jian_ti_list)-len(jian_yi_ti_list) > 1 {
@@ -141,7 +141,7 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 			for _, yi_ti := range jian_yi_ti_list {
 				yi_ti_str := strings.TrimSpace(htmlquery.InnerText(yi_ti))
 
-				v_unid := int(([]rune(yi_ti_str))[0])
+				v_unid := ([]rune(yi_ti_str))[0]
 
 				if v_unid == j_unid {
 					continue
@@ -182,7 +182,7 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 		}
 	}
 
-	fan_list := map[int]*html.Node{}
+	fan_list := map[rune]*html.Node{}
 
 	fan_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体字：')]/following-sibling::a")
 
@@ -199,12 +199,12 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 			for _, yi_ti := range fan_yi_ti_list {
 				yi_ti_str := strings.TrimSpace(htmlquery.InnerText(yi_ti))
 
-				v_unid := int(([]rune(yi_ti_str))[0])
+				v_unid := ([]rune(yi_ti_str))[0]
 
 				var is_fan_ti bool = false
 				for _, fan_ti := range fan_ti_list {
 					fan_ti_str := strings.TrimSpace(htmlquery.InnerText(fan_ti))
-					f_unid := int(([]rune(fan_ti_str))[0])
+					f_unid := ([]rune(fan_ti_str))[0]
 
 					if v_unid == f_unid {
 						is_fan_ti = true
@@ -223,7 +223,7 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 		for _, yi_ti := range fan_ti_list {
 			yi_ti_str := strings.TrimSpace(htmlquery.InnerText(yi_ti))
 
-			v_unid := int(([]rune(yi_ti_str))[0])
+			v_unid := ([]rune(yi_ti_str))[0]
 
 			fan_list[v_unid] = yi_ti
 		}
@@ -236,13 +236,13 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 		for _, yi_ti := range yi_ti_list {
 			yi_ti_str := strings.TrimSpace(htmlquery.InnerText(yi_ti))
 
-			v_unid := int(([]rune(yi_ti_str))[0])
+			v_unid := ([]rune(yi_ti_str))[0]
 
 			gu_list[v_unid] = yi_ti
 		}
 	}
 
-	yi_list := map[int]*html.Node{}
+	yi_list := map[rune]*html.Node{}
 
 	for uid, gu_ti := range gu_list {
 		yi_list[uid] = gu_ti
@@ -298,7 +298,7 @@ func parseVariant(exc *Excavator, unid int, html_node *html.Node, he_xin_block *
 
 //从康熙笔画列表中解析出姓名学笔画对应的字和笔画
 //如果结果有多个字，那么解析结果依赖于页面中康熙字典的对应字段
-func parseKangXiStroke(unid int, he_xin_block *html.Node) (kang map[rune]int) {
+func parseKangXiStroke(unid rune, he_xin_block *html.Node) (kang map[rune]int) {
 	kang_xi_stroke := htmlquery.FindOne(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '康')]/following-sibling::text()[1]")
 
 	if kang_xi_stroke != nil {
@@ -472,7 +472,7 @@ func simplifyChars(exc *Excavator) (err error) {
 }
 
 //取最简字且常用字，必须有拼音、五行、姓名学笔画，不可以是偏旁字
-func GetFateChar(exc_db *xorm.Engine, unid int, my_char *fate.Character) (bool, error) {
+func GetFateChar(exc_db *xorm.Engine, unid rune, my_char *fate.Character) (bool, error) {
 
 	pin_yin_id_gots := []models.PinYinId{}
 

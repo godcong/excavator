@@ -3,12 +3,12 @@ package excavator
 //database
 
 import (
-	"excavator/models"
 	"fmt"
 	"net/url"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/godcong/excavator/models"
 	"github.com/godcong/fate"
 	"github.com/godcong/fate/config"
 	_ "github.com/mattn/go-sqlite3"
@@ -102,36 +102,37 @@ func ResetFate(engine *xorm.Engine) error {
 // InsertOrUpdate
 func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 
-	var has bool
+	has := false
+	var unid rune
 	var id int
 
 	switch v := c.(type) {
 	case *models.UnihanChar:
-		id = c.(*models.UnihanChar).Unid
+		unid = c.(*models.UnihanChar).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.UnihanChar).Unid
+			unid = c.(*models.UnihanChar).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.UnihanChar{})
+			has, err = engine.ID(unid).Get(&models.UnihanChar{})
 		}
 	case *models.HanChengChar:
-		id = c.(*models.HanChengChar).Unid
+		unid = c.(*models.HanChengChar).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.HanChengChar).Unid
+			unid = c.(*models.HanChengChar).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.HanChengChar{})
+			has, err = engine.ID(unid).Get(&models.HanChengChar{})
 		}
 	case *models.HanCheng:
-		id = c.(*models.HanCheng).Unid
+		unid = c.(*models.HanCheng).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.HanCheng).Unid
+			unid = c.(*models.HanCheng).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.HanCheng{})
+			has, err = engine.ID(unid).Get(&models.HanCheng{})
 		}
 	case *models.TraditionalId:
 		id = c.(*models.TraditionalId).Rid
@@ -152,10 +153,10 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 			has, err = engine.ID(id).Get(&models.VariantId{})
 		}
 	case *models.VariantGu:
-		id = c.(*models.VariantGu).Unid
+		unid = c.(*models.VariantGu).Unid
 
-		if id != 0 {
-			has, err = engine.ID(id).Get(&models.VariantGu{})
+		if unid != 0 {
+			has, err = engine.ID(unid).Get(&models.VariantGu{})
 		}
 
 		if err != nil {
@@ -172,13 +173,13 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 
 		return nil
 	case *models.BianMa:
-		id = c.(*models.BianMa).Unid
+		unid = c.(*models.BianMa).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.BianMa).Unid
+			unid = c.(*models.BianMa).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.BianMa{})
+			has, err = engine.ID(unid).Get(&models.BianMa{})
 		}
 	case *models.MinSu:
 		id = c.(*models.MinSu).Msid
@@ -199,31 +200,31 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 			has, err = engine.ID(id).Get(&models.MinSuId{})
 		}
 	case *models.Glyph:
-		id = c.(*models.Glyph).Unid
+		unid = c.(*models.Glyph).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.Glyph).Unid
+			unid = c.(*models.Glyph).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.Glyph{})
+			has, err = engine.ID(unid).Get(&models.Glyph{})
 		}
 	case *models.ScienceStroke:
-		id = c.(*models.ScienceStroke).Unid
+		unid = c.(*models.ScienceStroke).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.ScienceStroke).Unid
+			unid = c.(*models.ScienceStroke).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.ScienceStroke{})
+			has, err = engine.ID(unid).Get(&models.ScienceStroke{})
 		}
 	case *models.YinYun:
-		id = c.(*models.YinYun).Unid
+		unid = c.(*models.YinYun).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.YinYun).Unid
+			unid = c.(*models.YinYun).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.YinYun{})
+			has, err = engine.ID(unid).Get(&models.YinYun{})
 		}
 	case *models.PinYin:
 		id = c.(*models.PinYin).Pid
@@ -325,58 +326,58 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 			has, err = engine.ID(id).Get(&models.MinNanYinId{})
 		}
 	case *models.SuoYin:
-		id = c.(*models.SuoYin).Unid
+		unid = c.(*models.SuoYin).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.SuoYin).Unid
+			unid = c.(*models.SuoYin).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.SuoYin{})
+			has, err = engine.ID(unid).Get(&models.SuoYin{})
 		}
 	case *models.XinHua:
-		id = c.(*models.XinHua).Unid
+		unid = c.(*models.XinHua).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.XinHua).Unid
+			unid = c.(*models.XinHua).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.XinHua{})
+			has, err = engine.ID(unid).Get(&models.XinHua{})
 		}
 	case *models.HanDa:
-		id = c.(*models.HanDa).Unid
+		unid = c.(*models.HanDa).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.HanDa).Unid
+			unid = c.(*models.HanDa).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.HanDa{})
+			has, err = engine.ID(unid).Get(&models.HanDa{})
 		}
 	case *models.KangXi:
-		id = c.(*models.KangXi).Unid
+		unid = c.(*models.KangXi).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.KangXi).Unid
+			unid = c.(*models.KangXi).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.KangXi{})
+			has, err = engine.ID(unid).Get(&models.KangXi{})
 		}
 	case *models.ShuoWen:
-		id = c.(*models.ShuoWen).Unid
+		unid = c.(*models.ShuoWen).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.ShuoWen).Unid
+			unid = c.(*models.ShuoWen).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.ShuoWen{})
+			has, err = engine.ID(unid).Get(&models.ShuoWen{})
 		}
 	case *models.YanBian:
-		id = c.(*models.YanBian).Unid
+		unid = c.(*models.YanBian).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.YanBian).Unid
+			unid = c.(*models.YanBian).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.YanBian{})
+			has, err = engine.ID(unid).Get(&models.YanBian{})
 		}
 	case *models.ChengYu:
 		id = c.(*models.ChengYu).Cyid
@@ -433,13 +434,13 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 			has, err = engine.ID(id).Get(&models.CiYuId{})
 		}
 	case *models.HanChar:
-		id = c.(*models.HanChar).Unid
+		unid = c.(*models.HanChar).Unid
 
-		if id == 0 {
+		if unid == 0 {
 			has, err = engine.Get(c)
-			id = c.(*models.HanChar).Unid
+			unid = c.(*models.HanChar).Unid
 		} else {
-			has, err = engine.ID(id).Get(&models.HanChar{})
+			has, err = engine.ID(unid).Get(&models.HanChar{})
 		}
 	case *fate.Character:
 		id := c.(*fate.Character).Ch
@@ -479,7 +480,11 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 	}
 
 	if has {
-		_, err = engine.ID(id).Update(c)
+		if unid == rune(0) {
+			_, err = engine.ID(id).Update(c)
+		} else {
+			_, err = engine.ID(unid).Update(c)
+		}
 	} else {
 		_, err = engine.InsertOne(c)
 	}

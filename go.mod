@@ -20,6 +20,7 @@ require (
 go 1.16
 
 replace (
+	github.com/godcong/excavator => ../excavator
 	github.com/godcong/fate => ../fate
 	github.com/godcong/yi => ../yi
 )

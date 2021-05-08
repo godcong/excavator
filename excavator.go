@@ -2,13 +2,13 @@ package excavator
 
 import (
 	"errors"
-	"excavator/config"
-	"excavator/models"
 	"fmt"
 	"strconv"
 
 	"github.com/antchfx/htmlquery"
 	"github.com/free-utils-go/cachenet"
+	"github.com/godcong/excavator/config"
+	"github.com/godcong/excavator/models"
 	"github.com/godcong/go-trait"
 	"golang.org/x/net/html"
 	"xorm.io/xorm"
@@ -151,7 +151,7 @@ func getHanChengFromDB(exc *Excavator, hanCheng chan<- *models.HanChengChar) {
 }
 
 //解析汉程桌面版的文字信息
-func getCharacter(exc *Excavator, unid int, html_node *html.Node) (err error) {
+func getCharacter(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 	he_xin_block := htmlquery.FindOne(html_node, "//p[contains(@class, 'text15')]")
 
 	if he_xin_block == nil {
@@ -217,7 +217,7 @@ func parseCharacter(exc *Excavator) (err error) {
 	hcc := make(chan *models.HanChengChar, 100)
 	go getHanChengFromDB(exc, hcc)
 
-	invalids := map[int]bool{}
+	invalids := map[rune]bool{}
 
 	for {
 		c := <-hcc
@@ -228,14 +228,12 @@ func parseCharacter(exc *Excavator) (err error) {
 
 		html_node, e := cachenet.CacheQuery(cachenet.UrlMerge(exc.base_url, c.Url))
 
-		//document, e := net.CacheQuery(characterURL(exc.url, radicalType, c.URL))
 		if e != nil {
 			Log.Error(e)
 			continue
 		}
 
 		e = getCharacter(exc, c.Unid, html_node)
-		// _, e = InsertOrUpdate(character, exc.db.Where(""))
 		if e != nil {
 			if e.Error() == "核心区找不到" || e.Error() == "基本解释同义字格式不对" {
 				invalids[c.Unid] = true

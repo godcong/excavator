@@ -1,13 +1,13 @@
 package excavator
 
 import (
-	"excavator/config"
-	"excavator/models"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/free-utils-go/cachenet"
+	"github.com/godcong/excavator/config"
+	"github.com/godcong/excavator/models"
 )
 
 func TestExcavator_Run(t *testing.T) {
@@ -16,8 +16,8 @@ func TestExcavator_Run(t *testing.T) {
 	excH := New()
 
 	//excH.action = config.ActionGrab
-	excH.action = config.ActionParse
-	//excH.action = config.ActionSimplify
+	//excH.action = config.ActionParse
+	excH.action = config.ActionSimplify
 
 	e2 := excH.Run()
 	if e2 != nil {
@@ -80,7 +80,7 @@ func TestGetCharacter(t *testing.T) {
 		}
 
 		rc := models.HanChengChar{
-			Unid: int(([]rune(so))[0]),
+			Unid: ([]rune(so))[0],
 		}
 		has, err := excH.Db.Get(&rc)
 
