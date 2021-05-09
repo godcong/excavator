@@ -1,8 +1,7 @@
 package strokefix
 
 import (
-	"excavator"
-
+	"github.com/godcong/excavator"
 	"github.com/godcong/fate"
 )
 

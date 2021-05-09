@@ -1,10 +1,11 @@
 package regular
 
 import (
-	"excavator"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/godcong/excavator"
 )
 
 // TestNew ...

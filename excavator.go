@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/free-utils-go/cachenet"
+	"github.com/godcong/cachenet"
 	"github.com/godcong/excavator/config"
 	"github.com/godcong/excavator/models"
 	"github.com/godcong/go-trait"

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	xt "github.com/free-utils-go/xorm_type_assist"
 	"github.com/godcong/fate"
 	"github.com/goextension/log"
 	"xorm.io/xorm"
@@ -76,7 +77,7 @@ func verifySub(db fate.Database, m map[string][]string, wx string) error {
 					//IsSurname:              true,
 					WuXing:    wx,
 					Lucky:     "",
-					IsRegular: false,
+					IsRegular: xt.FALSE,
 				}
 				_, e := eng.InsertOne(ch)
 				if e != nil {

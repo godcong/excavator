@@ -2,13 +2,13 @@ package regular
 
 import (
 	"bufio"
-	"excavator"
 	"fmt"
 	"math/bits"
 	"strconv"
 	"strings"
 
 	xt "github.com/free-utils-go/xorm_type_assist"
+	"github.com/godcong/excavator"
 	"github.com/godcong/fate"
 	"xorm.io/xorm"
 )

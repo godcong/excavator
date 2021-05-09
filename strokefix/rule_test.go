@@ -1,10 +1,11 @@
 package strokefix
 
 import (
-	"excavator"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/godcong/excavator"
 )
 
 func TestNumberChar(t *testing.T) {

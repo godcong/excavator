@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/godcong/excavator/models"
-
 	"github.com/antchfx/htmlquery"
+	"github.com/godcong/excavator/models"
 	"golang.org/x/net/html"
 )
 

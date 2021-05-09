@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/free-utils-go/cachenet"
+	"github.com/godcong/cachenet"
 	"github.com/godcong/excavator/config"
 	"github.com/godcong/excavator/models"
 )
