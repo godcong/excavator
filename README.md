@@ -1,6 +1,6 @@
 # excavator
 
-从ipfs下载：[数据包](https://ipfs.io/ipfs/QmbNk3bHLxVNeigWHvpRXAwVG5mCXb7oiniLZkJeuMxjpM?filename=excavator_unzip.exe)
+从ipfs下载：[数据包](https://ipfs.io/ipfs/QmZXYMee9TfSYsd7AUHfXa6vCuzr7fJVFBgMmJZ6czwT8Y?filename=excavator_unzip.exe)
 
 此链接不能用浏览器打开，可以找一个ipfs工具（如ipfs-desktop），获取链接中的CID，检查文件，然后下载
 
@@ -16,8 +16,7 @@
     ├── config.json （配置文件）
     ├── exc.db （excavator的sqlite文件）
     ├── ft.db （fate的sqlite文件）
-    ├── tool.httpcn.com （字的页面缓存）
-    └── unicode （万国码列表对应的页面缓存）
+    └── tool.httpcn.com （页面缓存）
 ```
 
 查看sqlite内容可以用sqlitestudio：
@@ -51,7 +50,7 @@ go test -timeout 30s -run ^TestNumberChar$ excavator/strokefix -v
 
 ### this tool used `exc.db` and `ft.db` as sqlite database storage.
 
-###if you want to change the database
+### if you want to change the database
 
 change the definition in `config.json`
 when created them with sql file in path `data/`.
