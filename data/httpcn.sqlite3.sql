@@ -49,9 +49,22 @@ FOREIGN KEY (unid_s) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE C
 -- 包含“古同”
 CREATE TABLE variant_gu ( unid INT (32) PRIMARY KEY,
 -- COMMENT 'Unicode' ,
+ch VARCHAR (1) NOT NULL UNIQUE,
+-- COMMENT '汉字' ,
 FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE 
 ) WITHOUT ROWID;
 -- COMMENT '古异体字';
+
+-- 包含“古同”
+CREATE TABLE variant_gu_id ( rid INTEGER PRIMARY KEY AUTOINCREMENT,
+unid INT (32) NOT NULL,
+-- COMMENT 'Unicode' ,
+unid_s INT (32) NOT NULL,
+-- COMMENT '最简字Unicode' ,
+FOREIGN KEY (unid) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE ,
+FOREIGN KEY (unid_s) REFERENCES unihan_char (unid) ON UPDATE CASCADE ON DELETE CASCADE 
+);
+-- COMMENT '古异体字映射';
 
 CREATE TABLE bian_ma ( unid INT (32) PRIMARY KEY,
 -- COMMENT 'Unicode',

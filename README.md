@@ -1,6 +1,6 @@
 # excavator
 
-从ipfs下载：[数据包](https://ipfs.io/ipfs/QmZXYMee9TfSYsd7AUHfXa6vCuzr7fJVFBgMmJZ6czwT8Y?filename=excavator_unzip.exe)
+从ipfs下载：[数据包](https://ipfs.io/ipfs/QmPkaqXo3DUrowfjfxPUkQMfK1mRo9HN9T2NQd74mDrzjz?filename=excavator_unzip.exe)
 
 此链接不能用浏览器打开，可以找一个ipfs工具（如ipfs-desktop），获取链接中的CID，检查文件，然后下载
 

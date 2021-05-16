@@ -36,7 +36,15 @@ type VariantId struct {
 
 //古异体字
 type VariantGu struct {
-	Unid rune `xorm:"not null pk comment('Unicode') INT(32)"`
+	Unid rune   `xorm:"not null pk comment('Unicode') INT(32)"`
+	Ch   string `xorm:"not null comment('汉字') unique VARCHAR(1)"`
+}
+
+//古异体字映射
+type VariantGuId struct {
+	Rid   int  `xorm:"not null pk autoincr INT(11)"`
+	Unid  rune `xorm:"not null comment('Unicode') INT(32)"`
+	UnidS rune `xorm:"not null comment('最简字Unicode') index INT(32)"`
 }
 
 //常用编码表

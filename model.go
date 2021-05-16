@@ -155,23 +155,21 @@ func InsertOrUpdate(engine *xorm.Engine, c interface{}) (err error) {
 	case *models.VariantGu:
 		unid = c.(*models.VariantGu).Unid
 
-		if unid != 0 {
+		if unid == 0 {
+			has, err = engine.Get(c)
+			unid = c.(*models.VariantGu).Unid
+		} else {
 			has, err = engine.ID(unid).Get(&models.VariantGu{})
 		}
+	case *models.VariantGuId:
+		unid = c.(*models.VariantGuId).Unid
 
-		if err != nil {
-			panic(err)
+		if unid == 0 {
+			has, err = engine.Get(c)
+			unid = c.(*models.VariantGuId).Unid
+		} else {
+			has, err = engine.ID(unid).Get(&models.VariantGuId{})
 		}
-
-		if !has {
-			_, err = engine.InsertOne(c)
-		}
-
-		if err != nil {
-			panic(err)
-		}
-
-		return nil
 	case *models.BianMa:
 		unid = c.(*models.BianMa).Unid
 

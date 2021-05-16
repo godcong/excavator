@@ -16,6 +16,7 @@ import (
 )
 
 //基本解释中的异体字信息
+//古同部分仅做存储，不做整理
 func parseJiBenVariant(exc *Excavator, unid rune, html_node *html.Node, ji_ben_block *html.Node) (err error) {
 	variant_tongs := htmlquery.Find(ji_ben_block, "./text()[(contains(., '同“') and not(contains(., '古同“'))) or contains(., '见“')]")
 
@@ -70,6 +71,7 @@ func parseJiBenVariant(exc *Excavator, unid rune, html_node *html.Node, ji_ben_b
 	for _, variant_gu := range variant_gus {
 		v_gu := models.VariantGu{
 			Unid: unid,
+			Ch:   string(unid),
 		}
 
 		err = InsertOrUpdate(exc.Db, &v_gu)
@@ -107,12 +109,12 @@ func parseJiBenVariant(exc *Excavator, unid rune, html_node *html.Node, ji_ben_b
 			panic(err)
 		}
 
-		v_idr := models.VariantId{
+		v_gu_idr := models.VariantGuId{
 			Unid:  unid,
 			UnidS: v_char_str_unicode,
 		}
 
-		err = InsertOrUpdate(exc.Db, &v_idr)
+		err = InsertOrUpdate(exc.Db, &v_gu_idr)
 		if err != nil {
 			panic(err)
 		}
@@ -127,7 +129,7 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 
 	jian_yi_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体字：')]/following-sibling::span[contains(@class, 'b') and contains(text(), '异')]/following-sibling::a")
 
-	gu_list := map[rune]*html.Node{}
+	yi_list := map[rune]*html.Node{}
 
 	if jian_ti_list != nil {
 		jian_ti := jian_ti_list[0]
@@ -147,7 +149,7 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 					continue
 				}
 
-				gu_list[v_unid] = yi_ti
+				yi_list[v_unid] = yi_ti
 			}
 		}
 
@@ -213,11 +215,9 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 				}
 
 				if !is_fan_ti {
-					gu_list[v_unid] = yi_ti
+					yi_list[v_unid] = yi_ti
 				}
-
 			}
-
 		}
 
 		for _, yi_ti := range fan_ti_list {
@@ -238,27 +238,8 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 
 			v_unid := ([]rune(yi_ti_str))[0]
 
-			gu_list[v_unid] = yi_ti
+			yi_list[v_unid] = yi_ti
 		}
-	}
-
-	yi_list := map[rune]*html.Node{}
-
-	for uid, gu_ti := range gu_list {
-		yi_list[uid] = gu_ti
-
-		gu := models.VariantGu{
-			Unid: uid,
-		}
-
-		err = InsertOrUpdate(exc.Db, &gu)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	for uid, fan_ti := range fan_list {
-		yi_list[uid] = fan_ti
 	}
 
 	for v_unid, yi_ti := range yi_list {
