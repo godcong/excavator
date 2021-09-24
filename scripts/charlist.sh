@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl https://www.unicode.org/Public/13.0.0/ucd/Unihan.zip -o Unihan.zip
+curl https://www.unicode.org/Public/14.0.0/ucd/Unihan.zip -o Unihan.zip
 
 unzip Unihan.zip
 

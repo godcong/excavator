@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/antchfx/htmlquery"
 	"github.com/godcong/cachenet"
@@ -229,8 +230,14 @@ func parseCharacter(exc *Excavator) (err error) {
 		html_node, e := cachenet.CacheQuery(cachenet.UrlMerge(exc.base_url, c.Url))
 
 		if e != nil {
-			Log.Error(e)
-			continue
+			// Log.Error(e)
+			// continue
+			time.Sleep(630 * time.Second)
+
+			html_node, e = cachenet.CacheQuery(cachenet.UrlMerge(exc.base_url, c.Url))
+			if e != nil {
+				panic(e)
+			}
 		}
 
 		e = getCharacter(exc, c.Unid, html_node)

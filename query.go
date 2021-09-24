@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/antchfx/htmlquery"
 	"github.com/godcong/cachenet"
@@ -88,7 +89,12 @@ func grabHanChengList(exc *Excavator) (err error) {
 
 		html_node, err := cachenet.CacheDataQuery(exc.base_url, dataStr)
 		if err != nil {
-			panic(err)
+			time.Sleep(630 * time.Second)
+
+			html_node, err = cachenet.CacheDataQuery(exc.base_url, dataStr)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		url, err := findHanChengUrl(char, html_node)

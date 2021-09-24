@@ -29,7 +29,7 @@ choco install sqlitestudio -y
 
 由于使用sqlite，请确保PATH中能搜索到gcc
 
-程序运行需要使config.json存储余当前路径。（把数据包放在NVME或者RAMDISK可以明显加速，实测40分钟可以完成）
+程序运行需要使config.json存储于当前路径。（把数据包放在NVME或者RAMDISK可以明显加速，实测40分钟可以完成）
 
 ```bash
 go test -timeout 3600s -run ^TestExcavator_Run$ excavator -v
