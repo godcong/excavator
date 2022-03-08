@@ -9,7 +9,8 @@
 数据包在win10命名为exe可以自解压，linux需要使用带zstd的codec的7zip工具解压。
 
 数据包内容：
-```
+
+```txt
 .
 └── Temp
     ├── GB.txt （Unicode列表）
@@ -47,8 +48,7 @@ In path `strokefix/`, there is another patch tool for regular.
 go test -timeout 30s -run ^TestNumberChar$ excavator/strokefix -v
 ```
 
-
-### this tool used `exc.db` and `ft.db` as sqlite database storage.
+### this tool used `exc.db` and `ft.db` as sqlite database storage
 
 ### if you want to change the database
 

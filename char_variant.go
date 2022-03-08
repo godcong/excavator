@@ -311,7 +311,8 @@ func parseKangXiStroke(unid rune, he_xin_block *html.Node) (kang map[rune]int) {
 				if rune(unid) == kang_xi_stroke_str_ele_ch_rune {
 					is_kangxi = true
 					kang_stroke = int(kang_xi_stroke_str_ele_num_int)
-					continue
+					fan_str_list[kang_xi_stroke_str_ele_ch_rune] = int(kang_xi_stroke_str_ele_num_int)
+					break
 				}
 
 				fan_str_list[kang_xi_stroke_str_ele_ch_rune] = int(kang_xi_stroke_str_ele_num_int)

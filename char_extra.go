@@ -200,9 +200,11 @@ func parseYinYun(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *
 		tang_yins := []*models.TangYin{}
 
 		for _, tang_yin_strs_sub := range tang_yin_strs {
-			tang_yins = append(tang_yins, &models.TangYin{
-				TangYin: tang_yin_strs_sub,
-			})
+			if len(tang_yin_strs_sub) > 0 {
+				tang_yins = append(tang_yins, &models.TangYin{
+					TangYin: tang_yin_strs_sub,
+				})
+			}
 		}
 
 		for _, tang_yins_ele := range tang_yins {
@@ -218,9 +220,11 @@ func parseYinYun(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *
 		guo_yus := []*models.PinYin{}
 
 		for _, guo_yu_strs_sub := range guo_yu_strs {
-			guo_yus = append(guo_yus, &models.PinYin{
-				PinYin: guo_yu_strs_sub,
-			})
+			if len(guo_yu_strs_sub) > 0 {
+				guo_yus = append(guo_yus, &models.PinYin{
+					PinYin: guo_yu_strs_sub,
+				})
+			}
 		}
 
 		for _, guo_yus_ele := range guo_yus {
@@ -289,9 +293,11 @@ func parseYinYun(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *
 		min_nans := []*models.MinNanYin{}
 
 		for _, min_nan_strs_sub := range min_nan_strs {
-			min_nans = append(min_nans, &models.MinNanYin{
-				MinNanYin: min_nan_strs_sub,
-			})
+			if len(min_nan_strs_sub) > 0 {
+				min_nans = append(min_nans, &models.MinNanYin{
+					MinNanYin: min_nan_strs_sub,
+				})
+			}
 		}
 
 		for _, min_nan_ele := range min_nans {
