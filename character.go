@@ -14,7 +14,7 @@ import (
 )
 
 //康熙字典 & 姓名学笔画
-func parseKangXi(exc *Excavator, unid rune, glyph *models.Glyph, html_node *html.Node, stroke_kang map[rune]int) (err error) {
+func parseKangXi(exc *Excavator, unid rune, glyph *models.Glyph, html_node *html.Node, stroke_kang map[rune]int, fan_list map[rune]*html.Node) (err error) {
 	science_stroke := models.ScienceStroke{
 		Unid: unid,
 	}
@@ -45,7 +45,16 @@ func parseKangXi(exc *Excavator, unid rune, glyph *models.Glyph, html_node *html
 			if glyph.Stroke == 0 {
 				panic("非康熙字部首笔画异常")
 			}
-			science_stroke.ScienceStroke = glyph.Stroke
+
+			if len(fan_list) > 1 {
+				panic("有多个繁体字")
+			} else if len(fan_list) == 1 {
+				//康熙笔画列表空，但是有繁体形态。“简”
+				//由“func traditionalChars(exc *Excavator) (err error)”集中处理
+				return nil
+			} else {
+				science_stroke.ScienceStroke = glyph.Stroke
+			}
 		} else {
 			science_stroke.ScienceStroke = glyph.TraditionalTotalStroke
 		}

@@ -76,6 +76,11 @@ func (exc *Excavator) Run() (e error) {
 			return e
 		}
 
+		e = traditionalChars(exc)
+		if e != nil {
+			return e
+		}
+
 		e = simplifyChars(exc)
 		if e != nil {
 			return e
@@ -94,6 +99,11 @@ func (exc *Excavator) Run() (e error) {
 			return e
 		}
 
+		e = traditionalChars(exc)
+		if e != nil {
+			return e
+		}
+
 		e = simplifyChars(exc)
 		if e != nil {
 			return e
@@ -106,7 +116,19 @@ func (exc *Excavator) Run() (e error) {
 			return e
 		}
 
+		e = traditionalChars(exc)
+		if e != nil {
+			return e
+		}
+
 		e = simplifyChars(exc)
+		if e != nil {
+			return e
+		}
+	case config.ActionFill:
+		ResetFate(exc.DbFate)
+
+		e = traditionalChars(exc)
 		if e != nil {
 			return e
 		}
@@ -172,9 +194,13 @@ func getCharacter(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 		parseJiBenVariant(exc, unid, html_node, ji_ben_block)
 	}
 
-	parseVariant(exc, unid, html_node, he_xin_block, ji_ben_block)
-
+	//康熙笔画列表(第一个或无)
 	kang := parseKangXiStroke(unid, he_xin_block)
+
+	//单个字在核心区的繁体字列表(第一个或无)
+	fan_list := map[rune]*html.Node{}
+
+	parseVariant(exc, unid, html_node, he_xin_block, ji_ben_block, fan_list, kang)
 
 	glyph := models.Glyph{
 		Unid: unid,
@@ -182,7 +208,7 @@ func getCharacter(exc *Excavator, unid rune, html_node *html.Node) (err error) {
 
 	parseZiCharacter(exc, &glyph, unid, html_node, he_xin_block, ji_ben_block)
 
-	parseKangXi(exc, unid, &glyph, html_node, kang)
+	parseKangXi(exc, unid, &glyph, html_node, kang, fan_list)
 
 	parseBianMa(exc, unid, html_node)
 

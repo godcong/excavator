@@ -15,6 +15,7 @@ const (
 	ActionSimplify string = "简化"
 	ActionVariant  string = "整理"
 	ActionParse    string = "解析"
+	ActionFill     string = "修复"
 	ActionGrab     string = "获取"
 )
 

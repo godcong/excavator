@@ -124,7 +124,7 @@ func parseJiBenVariant(exc *Excavator, unid rune, html_node *html.Node, ji_ben_b
 }
 
 //简体字，繁体字集 和 异体字集
-func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node) (err error) {
+func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block *html.Node, ji_ben_block *html.Node, fan_list map[rune]*html.Node, stroke_kang map[rune]int) (err error) {
 	jian_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体字：')]/following-sibling::a")
 
 	jian_yi_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '简体字：')]/following-sibling::span[contains(@class, 'b') and contains(text(), '异')]/following-sibling::a")
@@ -184,8 +184,6 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 		}
 	}
 
-	fan_list := map[rune]*html.Node{}
-
 	fan_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体字：')]/following-sibling::a")
 
 	fan_yi_ti_list := htmlquery.Find(he_xin_block, ".//span[contains(@class, 'b') and contains(text(), '繁体字：')]/following-sibling::span[contains(@class, 'b') and contains(text(), '异')]/following-sibling::a")
@@ -225,9 +223,20 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 
 			v_unid := ([]rune(yi_ti_str))[0]
 
-			fan_list[v_unid] = yi_ti
+			yi_list[v_unid] = yi_ti
 		}
 
+		if len(stroke_kang) == 0 {
+			for _, yi_ti := range fan_ti_list {
+				yi_ti_str := strings.TrimSpace(htmlquery.InnerText(yi_ti))
+
+				v_unid := ([]rune(yi_ti_str))[0]
+
+				fan_list[v_unid] = yi_ti
+				//确保只有一个
+				break
+			}
+		}
 	}
 
 	if jian_ti_list == nil && fan_ti_list == nil {
@@ -242,6 +251,7 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 		}
 	}
 
+	//存储异体字表
 	for v_unid, yi_ti := range yi_list {
 		v_uc := models.UnihanChar{
 			Unid:       v_unid,
@@ -267,8 +277,50 @@ func parseVariant(exc *Excavator, unid rune, html_node *html.Node, he_xin_block 
 			Unid:  v_unid,
 			UnidS: unid,
 		}
+		_, err := exc.Db.Get(&v_idr)
+		if err != nil {
+			panic(err)
+		}
 
 		err = InsertOrUpdate(exc.Db, &v_idr)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	//存储繁体字表(第一个或无，供整理时刷新姓名学笔画数用)
+	//见“for _, yi_ti := range fan_ti_list”
+	for f_unid, fan_ti := range fan_list {
+		f_uc := models.UnihanChar{
+			Unid:       f_unid,
+			UnicodeHex: strings.ToUpper(strconv.FormatUint(uint64(f_unid), 16)),
+		}
+
+		err = InsertOrUpdate(exc.Db, &f_uc)
+		if err != nil {
+			panic(err)
+		}
+
+		f_hcc := models.HanChengChar{
+			Unid: f_unid,
+			Url:  htmlquery.SelectAttr(fan_ti, "href"),
+		}
+
+		err = InsertOrUpdate(exc.Db, &f_hcc)
+		if err != nil {
+			panic(err)
+		}
+
+		f_idr := models.TraditionalId{
+			Unid:  f_unid,
+			UnidS: unid,
+		}
+		_, err := exc.Db.Get(&f_idr)
+		if err != nil {
+			panic(err)
+		}
+
+		err = InsertOrUpdate(exc.Db, &f_idr)
 		if err != nil {
 			panic(err)
 		}
@@ -312,6 +364,7 @@ func parseKangXiStroke(unid rune, he_xin_block *html.Node) (kang map[rune]int) {
 					is_kangxi = true
 					kang_stroke = int(kang_xi_stroke_str_ele_num_int)
 					fan_str_list[kang_xi_stroke_str_ele_ch_rune] = int(kang_xi_stroke_str_ele_num_int)
+					//确保只取一个
 					break
 				}
 
@@ -386,6 +439,55 @@ func variantChars(exc *Excavator) (err error) {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	return nil
+}
+
+//整理无繁体笔画和康熙笔画的繁体字对应的简体字表，为其设置繁体笔画数和康熙笔画数
+func traditionalChars(exc *Excavator) (err error) {
+	s_id_adds := []*models.ScienceStroke{}
+	t_id_tmp := new(models.TraditionalId)
+	t_id_rows, err := exc.Db.Rows(t_id_tmp)
+	if err != nil {
+		panic(err)
+	}
+	defer t_id_rows.Close()
+	for t_id_rows.Next() {
+		t_id := models.TraditionalId{}
+
+		err = t_id_rows.Scan(&t_id)
+		if err != nil {
+			panic(err)
+		}
+
+		glyph := models.Glyph{
+			Unid: t_id.Unid,
+		}
+		_, err := exc.Db.Get(&glyph)
+		if err != nil {
+			panic(err)
+		}
+
+		science_stroke_s := models.ScienceStroke{
+			Unid: t_id.UnidS,
+		}
+		has, err := exc.Db.Get(&science_stroke_s)
+		if err != nil {
+			panic(err)
+		}
+
+		//见 func parseKangXi(*Excavator, rune, *models.Glyph, *html.Node, map[rune]int, map[rune]*html.Node) (error)
+		//无康熙列表但是有繁体列表的，在这里设置姓名学笔画数
+		if !has {
+			science_stroke_s.ScienceStroke = glyph.Stroke
+
+			s_id_adds = append(s_id_adds, &science_stroke_s)
+		}
+	}
+
+	for _, s_id_add := range s_id_adds {
+		InsertOrUpdate(exc.Db, s_id_add)
 	}
 
 	return nil

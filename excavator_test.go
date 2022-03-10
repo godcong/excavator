@@ -15,9 +15,10 @@ func TestExcavator_Run(t *testing.T) {
 
 	excH := New()
 
-	//excH.action = config.ActionGrab
+	excH.action = config.ActionGrab
 	//excH.action = config.ActionParse
-	excH.action = config.ActionSimplify
+	//excH.action = config.ActionFill
+	//excH.action = config.ActionSimplify
 
 	e2 := excH.Run()
 	if e2 != nil {
@@ -70,7 +71,8 @@ func TestGetCharacter(t *testing.T) {
 		invalidMap[invalid] = true
 	}
 
-	soList = append(soList, []string{"签"}...)
+	//soList = append(soList, []string{"愿"}...)
+	soList = append(soList, []string{"简"}...)
 
 	invalids := []string{}
 

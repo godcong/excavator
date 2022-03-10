@@ -80,7 +80,9 @@ func ResetExc(engine *xorm.Engine) error {
 	engine.Query("DELETE FROM suo_yin")
 	engine.Query("DELETE FROM tang_yin")
 	engine.Query("DELETE FROM tang_yin_id")
+	engine.Query("DELETE FROM traditional_id")
 	engine.Query("DELETE FROM variant_gu")
+	engine.Query("DELETE FROM variant_gu_id")
 	engine.Query("DELETE FROM variant_id")
 	engine.Query("DELETE FROM xin_hua")
 	engine.Query("DELETE FROM yan_bian")
@@ -88,7 +90,7 @@ func ResetExc(engine *xorm.Engine) error {
 	engine.Query("DELETE FROM yue_yin")
 	engine.Query("DELETE FROM yue_yin_id")
 	engine.Query("DELETE FROM zhu_yin")
-	engine.Query("DELETE FROM zhu_yin")
+	engine.Query("DELETE FROM zhu_yin_id")
 
 	return nil
 }
