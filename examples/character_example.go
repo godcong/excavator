@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"github.com/godcong/excavator"
+	"github.com/godcong/fate"
 )
 
 //ExampleCharacter to add characters
@@ -45,7 +45,13 @@ func ExampleCharacter() {
 	//}
 }
 
-func threadLoop(radical *excavator.Radical, rc *excavator.RadicalCharacter, ch chan<- bool) {
+// RadicalUnion ...
+type RadicalUnion struct {
+	String                *string
+	RadicalCharacterArray []*fate.Character
+}
+
+func threadLoop(radical *[]RadicalUnion, rc *fate.Character, ch chan<- bool) {
 	//c := radical.Character(rc)
 	//if c.Character == "" {
 	//	ch <- false
