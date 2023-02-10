@@ -2,7 +2,7 @@ module github.com/godcong/excavator
 
 require (
 	github.com/PuerkitoBio/goquery v1.5.0
-	github.com/gin-gonic/gin v1.7.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/godcong/fate v0.0.0-20200124191318-b8b115f5d715
 	github.com/godcong/go-trait v0.0.0-20190816072228-f216e906756e
