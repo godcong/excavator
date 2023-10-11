@@ -15,7 +15,7 @@ require (
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/tebeka/selenium v0.9.4
 	github.com/xormsharp/xorm v1.0.0
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.17.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
